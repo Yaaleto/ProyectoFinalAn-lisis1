@@ -12,6 +12,7 @@ Este directorio concentra la documentación base de BOVITRACK V1/MVP.
 - [Functional Requirements](requirements/functional-requirements.md)
 - [Acceptance Criteria](requirements/acceptance-criteria.md)
 - [Traceability](requirements/traceability.md)
+- [DERCAS - Especificación completa](requirements/dercas.md)
 
 ## Arquitectura
 - [Technology Stack](architecture/stack.md)

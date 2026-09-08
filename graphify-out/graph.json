@@ -345,6 +345,13 @@
       "source_location": null
     },
     {
+      "id": "document_docs_requirements_dercas_md",
+      "label": "dercas.md",
+      "file_type": "document",
+      "source_file": "docs/requirements/dercas.md",
+      "source_location": null
+    },
+    {
       "id": "document_docs_requirements_functional_requirements_md",
       "label": "functional-requirements.md",
       "file_type": "document",
@@ -771,6 +778,14 @@
     },
     {
       "source": "concept_docs_requirements",
+      "target": "document_docs_requirements_dercas_md",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/requirements/dercas.md"
+    },
+    {
+      "source": "concept_docs_requirements",
       "target": "document_docs_requirements_functional_requirements_md",
       "relation": "contains",
       "confidence": "EXTRACTED",
@@ -900,6 +915,14 @@
     {
       "source": "document_docs_readme_md",
       "target": "document_docs_requirements_traceability_md",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/README.md"
+    },
+    {
+      "source": "document_docs_readme_md",
+      "target": "document_docs_requirements_dercas_md",
       "relation": "references",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
