@@ -12,11 +12,11 @@ Graphify se instalará a nivel del proyecto para Codex y su salida se generará 
 
 ## Mantenimiento
 
-- Después de cambios en código, ejecutar `graphify update .`.
-- Después de cambios en documentación, regenerar la extracción semántica cuando haya una clave de proveedor configurada.
+- Después de cualquier cambio, ejecutar `python tools/manual_graph_index.py`.
+- El índice de este proyecto es deliberadamente estructural: no analiza contenido con modelos ni requiere API keys.
 - Revisar el grafo antes de responder preguntas sobre la estructura del proyecto; usar los archivos fuente directamente solo cuando el grafo no cubra la pregunta o esté siendo corregido.
 - Mantener actualizados `graphify-out/graph.json` y `graphify-out/GRAPH_REPORT.md` junto con los cambios relevantes del proyecto.
 
 ## Consecuencias
 
-Codex tendrá una guía persistente para consultar el grafo y una configuración local versionable. La extracción AST del código es local; la indexación semántica de documentos, PDFs e imágenes requiere configurar un proveedor LLM.
+Codex tendrá una guía persistente para consultar el grafo y una configuración local versionable. El índice versionado cubre jerarquías y enlaces explícitos; las relaciones semánticas quedan fuera hasta que se solicite expresamente.

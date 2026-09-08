@@ -30,6 +30,13 @@
       "source_location": null
     },
     {
+      "id": "concept_tools",
+      "label": "tools",
+      "file_type": "concept",
+      "source_file": "tools",
+      "source_location": null
+    },
+    {
       "id": "concept_docs_architecture",
       "label": "architecture",
       "file_type": "concept",
@@ -392,6 +399,13 @@
       "file_type": "document",
       "source_file": "README.md",
       "source_location": null
+    },
+    {
+      "id": "concept_tools_manual_graph_index_py",
+      "label": "manual_graph_index.py",
+      "file_type": "concept",
+      "source_file": "tools/manual_graph_index.py",
+      "source_location": null
     }
   ],
   "edges": [
@@ -418,6 +432,14 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs"
+    },
+    {
+      "source": "concept_root",
+      "target": "concept_tools",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tools"
     },
     {
       "source": "concept_docs",
@@ -810,6 +832,14 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "README.md"
+    },
+    {
+      "source": "concept_tools",
+      "target": "concept_tools_manual_graph_index_py",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tools/manual_graph_index.py"
     },
     {
       "source": "document_readme_md",
