@@ -1,0 +1,1075 @@
+{
+  "directed": true,
+  "nodes": [
+    {
+      "id": "concept_root",
+      "label": "ProyectoFinalAn-lisis1",
+      "file_type": "concept",
+      "source_file": ".",
+      "source_location": null
+    },
+    {
+      "id": "concept_root",
+      "label": "ProyectoFinalAn-lisis1",
+      "file_type": "concept",
+      "source_file": ".",
+      "source_location": null
+    },
+    {
+      "id": "concept_codex",
+      "label": ".codex",
+      "file_type": "concept",
+      "source_file": ".codex",
+      "source_location": null
+    },
+    {
+      "id": "concept_docs",
+      "label": "docs",
+      "file_type": "concept",
+      "source_file": "docs",
+      "source_location": null
+    },
+    {
+      "id": "concept_docs_architecture",
+      "label": "architecture",
+      "file_type": "concept",
+      "source_file": "docs/architecture",
+      "source_location": null
+    },
+    {
+      "id": "concept_docs_context",
+      "label": "context",
+      "file_type": "concept",
+      "source_file": "docs/context",
+      "source_location": null
+    },
+    {
+      "id": "concept_docs_design",
+      "label": "design",
+      "file_type": "concept",
+      "source_file": "docs/design",
+      "source_location": null
+    },
+    {
+      "id": "concept_docs_requirements",
+      "label": "requirements",
+      "file_type": "concept",
+      "source_file": "docs/requirements",
+      "source_location": null
+    },
+    {
+      "id": "concept_documentacion_dercas",
+      "label": "dercas",
+      "file_type": "concept",
+      "source_file": "documentacion/dercas",
+      "source_location": null
+    },
+    {
+      "id": "concept_documentacion_diagramas",
+      "label": "diagramas",
+      "file_type": "concept",
+      "source_file": "documentacion/diagramas",
+      "source_location": null
+    },
+    {
+      "id": "concept_codex_skills_graphify",
+      "label": "graphify",
+      "file_type": "concept",
+      "source_file": ".codex/skills/graphify",
+      "source_location": null
+    },
+    {
+      "id": "concept_docs_architecture_decisions",
+      "label": "decisions",
+      "file_type": "concept",
+      "source_file": "docs/architecture/decisions",
+      "source_location": null
+    },
+    {
+      "id": "concept_codex_skills_graphify_references",
+      "label": "references",
+      "file_type": "concept",
+      "source_file": ".codex/skills/graphify/references",
+      "source_location": null
+    },
+    {
+      "id": "concept_codex_hooks_json",
+      "label": "hooks.json",
+      "file_type": "concept",
+      "source_file": ".codex/hooks.json",
+      "source_location": null
+    },
+    {
+      "id": "concept_codex_skills_graphify_graphify_version",
+      "label": ".graphify_version",
+      "file_type": "concept",
+      "source_file": ".codex/skills/graphify/.graphify_version",
+      "source_location": null
+    },
+    {
+      "id": "document_codex_skills_graphify_references_add_watch_md",
+      "label": "add-watch.md",
+      "file_type": "document",
+      "source_file": ".codex/skills/graphify/references/add-watch.md",
+      "source_location": null
+    },
+    {
+      "id": "document_codex_skills_graphify_references_exports_md",
+      "label": "exports.md",
+      "file_type": "document",
+      "source_file": ".codex/skills/graphify/references/exports.md",
+      "source_location": null
+    },
+    {
+      "id": "document_codex_skills_graphify_references_extraction_spec_md",
+      "label": "extraction-spec.md",
+      "file_type": "document",
+      "source_file": ".codex/skills/graphify/references/extraction-spec.md",
+      "source_location": null
+    },
+    {
+      "id": "document_codex_skills_graphify_references_github_and_merge_md",
+      "label": "github-and-merge.md",
+      "file_type": "document",
+      "source_file": ".codex/skills/graphify/references/github-and-merge.md",
+      "source_location": null
+    },
+    {
+      "id": "document_codex_skills_graphify_references_hooks_md",
+      "label": "hooks.md",
+      "file_type": "document",
+      "source_file": ".codex/skills/graphify/references/hooks.md",
+      "source_location": null
+    },
+    {
+      "id": "document_codex_skills_graphify_references_query_md",
+      "label": "query.md",
+      "file_type": "document",
+      "source_file": ".codex/skills/graphify/references/query.md",
+      "source_location": null
+    },
+    {
+      "id": "document_codex_skills_graphify_references_transcribe_md",
+      "label": "transcribe.md",
+      "file_type": "document",
+      "source_file": ".codex/skills/graphify/references/transcribe.md",
+      "source_location": null
+    },
+    {
+      "id": "document_codex_skills_graphify_references_update_md",
+      "label": "update.md",
+      "file_type": "document",
+      "source_file": ".codex/skills/graphify/references/update.md",
+      "source_location": null
+    },
+    {
+      "id": "document_codex_skills_graphify_skill_md",
+      "label": "SKILL.md",
+      "file_type": "document",
+      "source_file": ".codex/skills/graphify/SKILL.md",
+      "source_location": null
+    },
+    {
+      "id": "document_agents_md",
+      "label": "AGENTS.md",
+      "file_type": "document",
+      "source_file": "AGENTS.md",
+      "source_location": null
+    },
+    {
+      "id": "document_docs_architecture_backend_md",
+      "label": "backend.md",
+      "file_type": "document",
+      "source_file": "docs/architecture/backend.md",
+      "source_location": null
+    },
+    {
+      "id": "document_docs_architecture_data_model_md",
+      "label": "data-model.md",
+      "file_type": "document",
+      "source_file": "docs/architecture/data-model.md",
+      "source_location": null
+    },
+    {
+      "id": "document_docs_architecture_decisions_adr_001_server_rendered_ui_md",
+      "label": "ADR-001-server-rendered-ui.md",
+      "file_type": "document",
+      "source_file": "docs/architecture/decisions/ADR-001-server-rendered-ui.md",
+      "source_location": null
+    },
+    {
+      "id": "document_docs_architecture_decisions_adr_002_tailwind_md",
+      "label": "ADR-002-tailwind.md",
+      "file_type": "document",
+      "source_file": "docs/architecture/decisions/ADR-002-tailwind.md",
+      "source_location": null
+    },
+    {
+      "id": "document_docs_architecture_decisions_adr_003_symfony_ux_md",
+      "label": "ADR-003-symfony-ux.md",
+      "file_type": "document",
+      "source_file": "docs/architecture/decisions/ADR-003-symfony-ux.md",
+      "source_location": null
+    },
+    {
+      "id": "document_docs_architecture_decisions_adr_004_fluent_design_system_md",
+      "label": "ADR-004-fluent-design-system.md",
+      "file_type": "document",
+      "source_file": "docs/architecture/decisions/ADR-004-fluent-design-system.md",
+      "source_location": null
+    },
+    {
+      "id": "document_docs_architecture_decisions_adr_005_graphify_knowledge_graph_md",
+      "label": "ADR-005-graphify-knowledge-graph.md",
+      "file_type": "document",
+      "source_file": "docs/architecture/decisions/ADR-005-graphify-knowledge-graph.md",
+      "source_location": null
+    },
+    {
+      "id": "document_docs_architecture_frontend_md",
+      "label": "frontend.md",
+      "file_type": "document",
+      "source_file": "docs/architecture/frontend.md",
+      "source_location": null
+    },
+    {
+      "id": "document_docs_architecture_stack_md",
+      "label": "stack.md",
+      "file_type": "document",
+      "source_file": "docs/architecture/stack.md",
+      "source_location": null
+    },
+    {
+      "id": "document_docs_context_domain_rules_md",
+      "label": "domain-rules.md",
+      "file_type": "document",
+      "source_file": "docs/context/domain-rules.md",
+      "source_location": null
+    },
+    {
+      "id": "document_docs_context_project_overview_md",
+      "label": "project-overview.md",
+      "file_type": "document",
+      "source_file": "docs/context/project-overview.md",
+      "source_location": null
+    },
+    {
+      "id": "document_docs_context_scope_md",
+      "label": "scope.md",
+      "file_type": "document",
+      "source_file": "docs/context/scope.md",
+      "source_location": null
+    },
+    {
+      "id": "document_docs_context_terminology_md",
+      "label": "terminology.md",
+      "file_type": "document",
+      "source_file": "docs/context/terminology.md",
+      "source_location": null
+    },
+    {
+      "id": "document_docs_design_accessibility_md",
+      "label": "accessibility.md",
+      "file_type": "document",
+      "source_file": "docs/design/accessibility.md",
+      "source_location": null
+    },
+    {
+      "id": "document_docs_design_components_md",
+      "label": "components.md",
+      "file_type": "document",
+      "source_file": "docs/design/components.md",
+      "source_location": null
+    },
+    {
+      "id": "document_docs_design_design_system_md",
+      "label": "design-system.md",
+      "file_type": "document",
+      "source_file": "docs/design/design-system.md",
+      "source_location": null
+    },
+    {
+      "id": "document_docs_design_layouts_md",
+      "label": "layouts.md",
+      "file_type": "document",
+      "source_file": "docs/design/layouts.md",
+      "source_location": null
+    },
+    {
+      "id": "document_docs_design_readme_md",
+      "label": "README.md",
+      "file_type": "document",
+      "source_file": "docs/design/README.md",
+      "source_location": null
+    },
+    {
+      "id": "document_docs_design_responsive_md",
+      "label": "responsive.md",
+      "file_type": "document",
+      "source_file": "docs/design/responsive.md",
+      "source_location": null
+    },
+    {
+      "id": "document_docs_design_screens_md",
+      "label": "screens.md",
+      "file_type": "document",
+      "source_file": "docs/design/screens.md",
+      "source_location": null
+    },
+    {
+      "id": "document_docs_design_tokens_md",
+      "label": "tokens.md",
+      "file_type": "document",
+      "source_file": "docs/design/tokens.md",
+      "source_location": null
+    },
+    {
+      "id": "document_docs_readme_md",
+      "label": "README.md",
+      "file_type": "document",
+      "source_file": "docs/README.md",
+      "source_location": null
+    },
+    {
+      "id": "document_docs_requirements_acceptance_criteria_md",
+      "label": "acceptance-criteria.md",
+      "file_type": "document",
+      "source_file": "docs/requirements/acceptance-criteria.md",
+      "source_location": null
+    },
+    {
+      "id": "document_docs_requirements_functional_requirements_md",
+      "label": "functional-requirements.md",
+      "file_type": "document",
+      "source_file": "docs/requirements/functional-requirements.md",
+      "source_location": null
+    },
+    {
+      "id": "document_docs_requirements_traceability_md",
+      "label": "traceability.md",
+      "file_type": "document",
+      "source_file": "docs/requirements/traceability.md",
+      "source_location": null
+    },
+    {
+      "id": "paper_documentacion_dercas_documento_de_especificaci_n_de_requerimientos_dercas_pdf",
+      "label": "Documento de Especificación de Requerimientos - DERCAS.pdf",
+      "file_type": "paper",
+      "source_file": "documentacion/dercas/Documento de Especificación de Requerimientos - DERCAS.pdf",
+      "source_location": null
+    },
+    {
+      "id": "paper_documentacion_dercas_proyectoganaderia_pdf",
+      "label": "ProyectoGanaderia.pdf",
+      "file_type": "paper",
+      "source_file": "documentacion/dercas/ProyectoGanaderia.pdf",
+      "source_location": null
+    },
+    {
+      "id": "image_documentacion_diagramas_diagrama_0_png",
+      "label": "Diagrama 0.png",
+      "file_type": "image",
+      "source_file": "documentacion/diagramas/Diagrama 0.png",
+      "source_location": null
+    },
+    {
+      "id": "image_documentacion_diagramas_diagrama_de_contexto_png",
+      "label": "Diagrama de contexto.png",
+      "file_type": "image",
+      "source_file": "documentacion/diagramas/Diagrama de contexto.png",
+      "source_location": null
+    },
+    {
+      "id": "image_documentacion_diagramas_diagrama_hijo_p2_png",
+      "label": "Diagrama hijo P2.png",
+      "file_type": "image",
+      "source_file": "documentacion/diagramas/Diagrama hijo P2.png",
+      "source_location": null
+    },
+    {
+      "id": "document_readme_md",
+      "label": "README.md",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": null
+    }
+  ],
+  "edges": [
+    {
+      "source": "concept_root",
+      "target": "concept_root",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "."
+    },
+    {
+      "source": "concept_root",
+      "target": "concept_codex",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".codex"
+    },
+    {
+      "source": "concept_root",
+      "target": "concept_docs",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs"
+    },
+    {
+      "source": "concept_docs",
+      "target": "concept_docs_architecture",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/architecture"
+    },
+    {
+      "source": "concept_docs",
+      "target": "concept_docs_context",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/context"
+    },
+    {
+      "source": "concept_docs",
+      "target": "concept_docs_design",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/design"
+    },
+    {
+      "source": "concept_docs",
+      "target": "concept_docs_requirements",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/requirements"
+    },
+    {
+      "source": "concept_docs_architecture",
+      "target": "concept_docs_architecture_decisions",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/architecture/decisions"
+    },
+    {
+      "source": "concept_codex_skills_graphify",
+      "target": "concept_codex_skills_graphify_references",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".codex/skills/graphify/references"
+    },
+    {
+      "source": "concept_codex",
+      "target": "concept_codex_hooks_json",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".codex/hooks.json"
+    },
+    {
+      "source": "concept_codex_skills_graphify",
+      "target": "concept_codex_skills_graphify_graphify_version",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".codex/skills/graphify/.graphify_version"
+    },
+    {
+      "source": "concept_codex_skills_graphify_references",
+      "target": "document_codex_skills_graphify_references_add_watch_md",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".codex/skills/graphify/references/add-watch.md"
+    },
+    {
+      "source": "concept_codex_skills_graphify_references",
+      "target": "document_codex_skills_graphify_references_exports_md",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".codex/skills/graphify/references/exports.md"
+    },
+    {
+      "source": "concept_codex_skills_graphify_references",
+      "target": "document_codex_skills_graphify_references_extraction_spec_md",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".codex/skills/graphify/references/extraction-spec.md"
+    },
+    {
+      "source": "concept_codex_skills_graphify_references",
+      "target": "document_codex_skills_graphify_references_github_and_merge_md",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".codex/skills/graphify/references/github-and-merge.md"
+    },
+    {
+      "source": "concept_codex_skills_graphify_references",
+      "target": "document_codex_skills_graphify_references_hooks_md",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".codex/skills/graphify/references/hooks.md"
+    },
+    {
+      "source": "concept_codex_skills_graphify_references",
+      "target": "document_codex_skills_graphify_references_query_md",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".codex/skills/graphify/references/query.md"
+    },
+    {
+      "source": "concept_codex_skills_graphify_references",
+      "target": "document_codex_skills_graphify_references_transcribe_md",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".codex/skills/graphify/references/transcribe.md"
+    },
+    {
+      "source": "concept_codex_skills_graphify_references",
+      "target": "document_codex_skills_graphify_references_update_md",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".codex/skills/graphify/references/update.md"
+    },
+    {
+      "source": "concept_codex_skills_graphify",
+      "target": "document_codex_skills_graphify_skill_md",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".codex/skills/graphify/SKILL.md"
+    },
+    {
+      "source": "concept_root",
+      "target": "document_agents_md",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "AGENTS.md"
+    },
+    {
+      "source": "concept_docs_architecture",
+      "target": "document_docs_architecture_backend_md",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/architecture/backend.md"
+    },
+    {
+      "source": "concept_docs_architecture",
+      "target": "document_docs_architecture_data_model_md",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/architecture/data-model.md"
+    },
+    {
+      "source": "concept_docs_architecture_decisions",
+      "target": "document_docs_architecture_decisions_adr_001_server_rendered_ui_md",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/architecture/decisions/ADR-001-server-rendered-ui.md"
+    },
+    {
+      "source": "concept_docs_architecture_decisions",
+      "target": "document_docs_architecture_decisions_adr_002_tailwind_md",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/architecture/decisions/ADR-002-tailwind.md"
+    },
+    {
+      "source": "concept_docs_architecture_decisions",
+      "target": "document_docs_architecture_decisions_adr_003_symfony_ux_md",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/architecture/decisions/ADR-003-symfony-ux.md"
+    },
+    {
+      "source": "concept_docs_architecture_decisions",
+      "target": "document_docs_architecture_decisions_adr_004_fluent_design_system_md",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/architecture/decisions/ADR-004-fluent-design-system.md"
+    },
+    {
+      "source": "concept_docs_architecture_decisions",
+      "target": "document_docs_architecture_decisions_adr_005_graphify_knowledge_graph_md",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/architecture/decisions/ADR-005-graphify-knowledge-graph.md"
+    },
+    {
+      "source": "concept_docs_architecture",
+      "target": "document_docs_architecture_frontend_md",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/architecture/frontend.md"
+    },
+    {
+      "source": "concept_docs_architecture",
+      "target": "document_docs_architecture_stack_md",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/architecture/stack.md"
+    },
+    {
+      "source": "concept_docs_context",
+      "target": "document_docs_context_domain_rules_md",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/context/domain-rules.md"
+    },
+    {
+      "source": "concept_docs_context",
+      "target": "document_docs_context_project_overview_md",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/context/project-overview.md"
+    },
+    {
+      "source": "concept_docs_context",
+      "target": "document_docs_context_scope_md",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/context/scope.md"
+    },
+    {
+      "source": "concept_docs_context",
+      "target": "document_docs_context_terminology_md",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/context/terminology.md"
+    },
+    {
+      "source": "concept_docs_design",
+      "target": "document_docs_design_accessibility_md",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/design/accessibility.md"
+    },
+    {
+      "source": "concept_docs_design",
+      "target": "document_docs_design_components_md",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/design/components.md"
+    },
+    {
+      "source": "concept_docs_design",
+      "target": "document_docs_design_design_system_md",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/design/design-system.md"
+    },
+    {
+      "source": "concept_docs_design",
+      "target": "document_docs_design_layouts_md",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/design/layouts.md"
+    },
+    {
+      "source": "concept_docs_design",
+      "target": "document_docs_design_readme_md",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/design/README.md"
+    },
+    {
+      "source": "concept_docs_design",
+      "target": "document_docs_design_responsive_md",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/design/responsive.md"
+    },
+    {
+      "source": "concept_docs_design",
+      "target": "document_docs_design_screens_md",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/design/screens.md"
+    },
+    {
+      "source": "concept_docs_design",
+      "target": "document_docs_design_tokens_md",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/design/tokens.md"
+    },
+    {
+      "source": "concept_docs",
+      "target": "document_docs_readme_md",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/README.md"
+    },
+    {
+      "source": "concept_docs_requirements",
+      "target": "document_docs_requirements_acceptance_criteria_md",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/requirements/acceptance-criteria.md"
+    },
+    {
+      "source": "concept_docs_requirements",
+      "target": "document_docs_requirements_functional_requirements_md",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/requirements/functional-requirements.md"
+    },
+    {
+      "source": "concept_docs_requirements",
+      "target": "document_docs_requirements_traceability_md",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/requirements/traceability.md"
+    },
+    {
+      "source": "concept_documentacion_dercas",
+      "target": "paper_documentacion_dercas_documento_de_especificaci_n_de_requerimientos_dercas_pdf",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "documentacion/dercas/Documento de Especificación de Requerimientos - DERCAS.pdf"
+    },
+    {
+      "source": "concept_documentacion_dercas",
+      "target": "paper_documentacion_dercas_proyectoganaderia_pdf",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "documentacion/dercas/ProyectoGanaderia.pdf"
+    },
+    {
+      "source": "concept_documentacion_diagramas",
+      "target": "image_documentacion_diagramas_diagrama_0_png",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "documentacion/diagramas/Diagrama 0.png"
+    },
+    {
+      "source": "concept_documentacion_diagramas",
+      "target": "image_documentacion_diagramas_diagrama_de_contexto_png",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "documentacion/diagramas/Diagrama de contexto.png"
+    },
+    {
+      "source": "concept_documentacion_diagramas",
+      "target": "image_documentacion_diagramas_diagrama_hijo_p2_png",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "documentacion/diagramas/Diagrama hijo P2.png"
+    },
+    {
+      "source": "concept_root",
+      "target": "document_readme_md",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md"
+    },
+    {
+      "source": "document_readme_md",
+      "target": "document_docs_readme_md",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md"
+    },
+    {
+      "source": "document_docs_readme_md",
+      "target": "document_docs_context_project_overview_md",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/README.md"
+    },
+    {
+      "source": "document_docs_readme_md",
+      "target": "document_docs_context_scope_md",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/README.md"
+    },
+    {
+      "source": "document_docs_readme_md",
+      "target": "document_docs_context_domain_rules_md",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/README.md"
+    },
+    {
+      "source": "document_docs_readme_md",
+      "target": "document_docs_context_terminology_md",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/README.md"
+    },
+    {
+      "source": "document_docs_readme_md",
+      "target": "document_docs_requirements_functional_requirements_md",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/README.md"
+    },
+    {
+      "source": "document_docs_readme_md",
+      "target": "document_docs_requirements_acceptance_criteria_md",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/README.md"
+    },
+    {
+      "source": "document_docs_readme_md",
+      "target": "document_docs_requirements_traceability_md",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/README.md"
+    },
+    {
+      "source": "document_docs_readme_md",
+      "target": "document_docs_architecture_stack_md",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/README.md"
+    },
+    {
+      "source": "document_docs_readme_md",
+      "target": "document_docs_architecture_frontend_md",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/README.md"
+    },
+    {
+      "source": "document_docs_readme_md",
+      "target": "document_docs_architecture_backend_md",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/README.md"
+    },
+    {
+      "source": "document_docs_readme_md",
+      "target": "document_docs_architecture_data_model_md",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/README.md"
+    },
+    {
+      "source": "document_docs_readme_md",
+      "target": "document_docs_architecture_decisions_adr_001_server_rendered_ui_md",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/README.md"
+    },
+    {
+      "source": "document_docs_readme_md",
+      "target": "document_docs_architecture_decisions_adr_002_tailwind_md",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/README.md"
+    },
+    {
+      "source": "document_docs_readme_md",
+      "target": "document_docs_architecture_decisions_adr_003_symfony_ux_md",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/README.md"
+    },
+    {
+      "source": "document_docs_readme_md",
+      "target": "document_docs_architecture_decisions_adr_004_fluent_design_system_md",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/README.md"
+    },
+    {
+      "source": "document_docs_readme_md",
+      "target": "document_docs_architecture_decisions_adr_005_graphify_knowledge_graph_md",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/README.md"
+    },
+    {
+      "source": "document_docs_readme_md",
+      "target": "document_docs_design_readme_md",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/README.md"
+    },
+    {
+      "source": "document_docs_readme_md",
+      "target": "document_docs_design_design_system_md",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/README.md"
+    },
+    {
+      "source": "document_docs_readme_md",
+      "target": "document_docs_design_tokens_md",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/README.md"
+    },
+    {
+      "source": "document_docs_readme_md",
+      "target": "document_docs_design_components_md",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/README.md"
+    },
+    {
+      "source": "document_docs_readme_md",
+      "target": "document_docs_design_layouts_md",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/README.md"
+    },
+    {
+      "source": "document_docs_readme_md",
+      "target": "document_docs_design_screens_md",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/README.md"
+    },
+    {
+      "source": "document_docs_readme_md",
+      "target": "document_docs_design_responsive_md",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/README.md"
+    },
+    {
+      "source": "document_docs_readme_md",
+      "target": "document_docs_design_accessibility_md",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/README.md"
+    },
+    {
+      "source": "document_docs_design_readme_md",
+      "target": "document_docs_design_design_system_md",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/design/README.md"
+    },
+    {
+      "source": "document_docs_design_readme_md",
+      "target": "document_docs_design_tokens_md",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/design/README.md"
+    },
+    {
+      "source": "document_docs_design_readme_md",
+      "target": "document_docs_design_components_md",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/design/README.md"
+    },
+    {
+      "source": "document_docs_design_readme_md",
+      "target": "document_docs_design_layouts_md",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/design/README.md"
+    },
+    {
+      "source": "document_docs_design_readme_md",
+      "target": "document_docs_design_screens_md",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/design/README.md"
+    },
+    {
+      "source": "document_docs_design_readme_md",
+      "target": "document_docs_design_responsive_md",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/design/README.md"
+    },
+    {
+      "source": "document_docs_design_readme_md",
+      "target": "document_docs_design_accessibility_md",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/design/README.md"
+    }
+  ],
+  "hyperedges": [],
+  "input_tokens": 0,
+  "output_tokens": 0,
+  "index_mode": "manual-structural"
+}
