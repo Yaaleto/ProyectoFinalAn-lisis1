@@ -331,6 +331,13 @@
       "source_location": null
     },
     {
+      "id": "document_docs_plan_fases_md",
+      "label": "plan-fases.md",
+      "file_type": "document",
+      "source_file": "docs/plan-fases.md",
+      "source_location": null
+    },
+    {
       "id": "document_docs_readme_md",
       "label": "README.md",
       "file_type": "document",
@@ -762,6 +769,14 @@
     },
     {
       "source": "concept_docs",
+      "target": "document_docs_plan_fases_md",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/plan-fases.md"
+    },
+    {
+      "source": "concept_docs",
       "target": "document_docs_readme_md",
       "relation": "contains",
       "confidence": "EXTRACTED",
@@ -863,6 +878,14 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "README.md"
+    },
+    {
+      "source": "document_docs_readme_md",
+      "target": "document_docs_plan_fases_md",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/README.md"
     },
     {
       "source": "document_docs_readme_md",

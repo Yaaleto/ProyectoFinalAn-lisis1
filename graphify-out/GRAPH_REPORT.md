@@ -2,5 +2,5 @@
 
 Índice estructural sin análisis semántico ni modelo.
 
-- Nodos: 59
-- Relaciones explícitas: 88
+- Nodos: 60
+- Relaciones explícitas: 90

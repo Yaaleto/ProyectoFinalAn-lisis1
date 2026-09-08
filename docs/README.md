@@ -2,6 +2,9 @@
 
 Este directorio concentra la documentación base de BOVITRACK V1/MVP.
 
+## Plan de trabajo
+- [Plan de trabajo por fases](plan-fases.md)
+
 ## Contexto
 - [Project Overview](context/project-overview.md)
 - [Scope](context/scope.md)
