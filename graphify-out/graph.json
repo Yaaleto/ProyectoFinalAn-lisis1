@@ -275,13 +275,6 @@
       "source_location": null
     },
     {
-      "id": "concept_env_dev",
-      "label": ".env.dev",
-      "file_type": "concept",
-      "source_file": ".env.dev",
-      "source_location": null
-    },
-    {
       "id": "concept_gitignore",
       "label": ".gitignore",
       "file_type": "concept",
@@ -1024,14 +1017,6 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": ".env"
-    },
-    {
-      "source": "concept_root",
-      "target": "concept_env_dev",
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": ".env.dev"
     },
     {
       "source": "concept_root",
