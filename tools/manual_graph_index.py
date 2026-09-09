@@ -7,7 +7,14 @@ import re
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "graphify-out"
-IGNORED = {".git", "graphify-out"}
+IGNORED = {".git", "graphify-out", "node_modules", "var", "vendor"}
+
+
+def is_ignored(path: Path) -> bool:
+    parts = path.relative_to(ROOT).parts
+    return any(part in IGNORED for part in parts) or (
+        path.name.startswith(".env.") and (path.name.endswith(".local") or path.name.endswith(".local.php"))
+    )
 
 
 def slug(value: str) -> str:
@@ -18,7 +25,7 @@ def main() -> None:
     OUT.mkdir(exist_ok=True)
     files = [
         path for path in ROOT.rglob("*")
-        if path.is_file() and not any(part in IGNORED for part in path.relative_to(ROOT).parts)
+        if path.is_file() and not is_ignored(path)
     ]
     nodes, edges, ids = [], [], {}
 
