@@ -1,0 +1,13 @@
+{% props label, icon, href = null, active = false %}
+
+{% if href %}
+    <a class="app-nav-link" href="{{ href }}"{% if active %} aria-current="page"{% endif %}>
+        <twig:Icon name="{{ icon }}" className="size-5" />
+        <span>{{ label }}</span>
+    </a>
+{% else %}
+    <span class="app-nav-link cursor-default opacity-65" aria-disabled="true">
+        <twig:Icon name="{{ icon }}" className="size-5" />
+        <span>{{ label }}</span>
+    </span>
+{% endif %}

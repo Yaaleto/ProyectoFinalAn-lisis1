@@ -1,0 +1,13 @@
+{
+  "name": "bovitrack",
+  "private": true,
+  "scripts": {
+    "build:css": "tailwindcss -i ./assets/styles/tailwind.css -o ./assets/styles/app.css --minify",
+    "watch:css": "tailwindcss -i ./assets/styles/tailwind.css -o ./assets/styles/app.css --watch"
+  },
+  "devDependencies": {
+    "@fluentui/svg-icons": "^1.1.339",
+    "@tailwindcss/cli": "^4.1.13",
+    "tailwindcss": "^4.1.13"
+  }
+}

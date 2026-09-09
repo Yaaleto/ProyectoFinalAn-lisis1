@@ -11,6 +11,7 @@ Requisitos:
 - PHP 8.2 o superior con `pdo_mysql` habilitado.
 - Composer.
 - MySQL 8.
+- Node.js 20 o superior y npm para compilar los estilos.
 
 Para comprobar el controlador de MySQL:
 
@@ -24,9 +25,13 @@ Instalación y ejecución:
 
 ```bash
 composer install
+npm install
+npm run build:css
 php bin/console doctrine:migrations:migrate --no-interaction
 php -S 127.0.0.1:8000 -t public
 ```
+
+Durante el trabajo visual, `npm run watch:css` recompila Tailwind al cambiar plantillas o componentes. El CSS generado se guarda en `assets/styles/app.css` y AssetMapper lo entrega junto con Symfony UX.
 
 La configuración compartida está en `.env`. Las credenciales y secretos locales deben definirse en `.env.local`, que está excluido de Git.
 
