@@ -23,6 +23,20 @@
       "source_location": null
     },
     {
+      "id": "concept_bin",
+      "label": "bin",
+      "file_type": "concept",
+      "source_file": "bin",
+      "source_location": null
+    },
+    {
+      "id": "concept_config",
+      "label": "config",
+      "file_type": "concept",
+      "source_file": "config",
+      "source_location": null
+    },
+    {
       "id": "concept_docs",
       "label": "docs",
       "file_type": "concept",
@@ -30,10 +44,52 @@
       "source_location": null
     },
     {
+      "id": "concept_migrations",
+      "label": "migrations",
+      "file_type": "concept",
+      "source_file": "migrations",
+      "source_location": null
+    },
+    {
+      "id": "concept_public",
+      "label": "public",
+      "file_type": "concept",
+      "source_file": "public",
+      "source_location": null
+    },
+    {
+      "id": "concept_src",
+      "label": "src",
+      "file_type": "concept",
+      "source_file": "src",
+      "source_location": null
+    },
+    {
+      "id": "concept_templates",
+      "label": "templates",
+      "file_type": "concept",
+      "source_file": "templates",
+      "source_location": null
+    },
+    {
       "id": "concept_tools",
       "label": "tools",
       "file_type": "concept",
       "source_file": "tools",
+      "source_location": null
+    },
+    {
+      "id": "concept_config_packages",
+      "label": "packages",
+      "file_type": "concept",
+      "source_file": "config/packages",
+      "source_location": null
+    },
+    {
+      "id": "concept_config_routes",
+      "label": "routes",
+      "file_type": "concept",
+      "source_file": "config/routes",
       "source_location": null
     },
     {
@@ -76,6 +132,34 @@
       "label": "diagramas",
       "file_type": "concept",
       "source_file": "documentacion/diagramas",
+      "source_location": null
+    },
+    {
+      "id": "concept_src_controller",
+      "label": "Controller",
+      "file_type": "concept",
+      "source_file": "src/Controller",
+      "source_location": null
+    },
+    {
+      "id": "concept_src_entity",
+      "label": "Entity",
+      "file_type": "concept",
+      "source_file": "src/Entity",
+      "source_location": null
+    },
+    {
+      "id": "concept_src_repository",
+      "label": "Repository",
+      "file_type": "concept",
+      "source_file": "src/Repository",
+      "source_location": null
+    },
+    {
+      "id": "concept_templates_health",
+      "label": "health",
+      "file_type": "concept",
+      "source_file": "templates/health",
       "source_location": null
     },
     {
@@ -177,10 +261,171 @@
       "source_location": null
     },
     {
+      "id": "concept_editorconfig",
+      "label": ".editorconfig",
+      "file_type": "concept",
+      "source_file": ".editorconfig",
+      "source_location": null
+    },
+    {
+      "id": "concept_env",
+      "label": ".env",
+      "file_type": "concept",
+      "source_file": ".env",
+      "source_location": null
+    },
+    {
+      "id": "concept_env_dev",
+      "label": ".env.dev",
+      "file_type": "concept",
+      "source_file": ".env.dev",
+      "source_location": null
+    },
+    {
+      "id": "concept_gitignore",
+      "label": ".gitignore",
+      "file_type": "concept",
+      "source_file": ".gitignore",
+      "source_location": null
+    },
+    {
       "id": "document_agents_md",
       "label": "AGENTS.md",
       "file_type": "document",
       "source_file": "AGENTS.md",
+      "source_location": null
+    },
+    {
+      "id": "concept_bin_console",
+      "label": "console",
+      "file_type": "concept",
+      "source_file": "bin/console",
+      "source_location": null
+    },
+    {
+      "id": "concept_composer_json",
+      "label": "composer.json",
+      "file_type": "concept",
+      "source_file": "composer.json",
+      "source_location": null
+    },
+    {
+      "id": "concept_composer_lock",
+      "label": "composer.lock",
+      "file_type": "concept",
+      "source_file": "composer.lock",
+      "source_location": null
+    },
+    {
+      "id": "concept_config_bundles_php",
+      "label": "bundles.php",
+      "file_type": "concept",
+      "source_file": "config/bundles.php",
+      "source_location": null
+    },
+    {
+      "id": "concept_config_packages_cache_yaml",
+      "label": "cache.yaml",
+      "file_type": "concept",
+      "source_file": "config/packages/cache.yaml",
+      "source_location": null
+    },
+    {
+      "id": "concept_config_packages_csrf_yaml",
+      "label": "csrf.yaml",
+      "file_type": "concept",
+      "source_file": "config/packages/csrf.yaml",
+      "source_location": null
+    },
+    {
+      "id": "concept_config_packages_doctrine_yaml",
+      "label": "doctrine.yaml",
+      "file_type": "concept",
+      "source_file": "config/packages/doctrine.yaml",
+      "source_location": null
+    },
+    {
+      "id": "concept_config_packages_doctrine_migrations_yaml",
+      "label": "doctrine_migrations.yaml",
+      "file_type": "concept",
+      "source_file": "config/packages/doctrine_migrations.yaml",
+      "source_location": null
+    },
+    {
+      "id": "concept_config_packages_framework_yaml",
+      "label": "framework.yaml",
+      "file_type": "concept",
+      "source_file": "config/packages/framework.yaml",
+      "source_location": null
+    },
+    {
+      "id": "concept_config_packages_property_info_yaml",
+      "label": "property_info.yaml",
+      "file_type": "concept",
+      "source_file": "config/packages/property_info.yaml",
+      "source_location": null
+    },
+    {
+      "id": "concept_config_packages_routing_yaml",
+      "label": "routing.yaml",
+      "file_type": "concept",
+      "source_file": "config/packages/routing.yaml",
+      "source_location": null
+    },
+    {
+      "id": "concept_config_packages_security_yaml",
+      "label": "security.yaml",
+      "file_type": "concept",
+      "source_file": "config/packages/security.yaml",
+      "source_location": null
+    },
+    {
+      "id": "concept_config_packages_twig_yaml",
+      "label": "twig.yaml",
+      "file_type": "concept",
+      "source_file": "config/packages/twig.yaml",
+      "source_location": null
+    },
+    {
+      "id": "concept_config_preload_php",
+      "label": "preload.php",
+      "file_type": "concept",
+      "source_file": "config/preload.php",
+      "source_location": null
+    },
+    {
+      "id": "concept_config_reference_php",
+      "label": "reference.php",
+      "file_type": "concept",
+      "source_file": "config/reference.php",
+      "source_location": null
+    },
+    {
+      "id": "concept_config_routes_yaml",
+      "label": "routes.yaml",
+      "file_type": "concept",
+      "source_file": "config/routes.yaml",
+      "source_location": null
+    },
+    {
+      "id": "concept_config_routes_framework_yaml",
+      "label": "framework.yaml",
+      "file_type": "concept",
+      "source_file": "config/routes/framework.yaml",
+      "source_location": null
+    },
+    {
+      "id": "concept_config_routes_security_yaml",
+      "label": "security.yaml",
+      "file_type": "concept",
+      "source_file": "config/routes/security.yaml",
+      "source_location": null
+    },
+    {
+      "id": "concept_config_services_yaml",
+      "label": "services.yaml",
+      "file_type": "concept",
+      "source_file": "config/services.yaml",
       "source_location": null
     },
     {
@@ -408,10 +653,87 @@
       "source_location": null
     },
     {
+      "id": "concept_migrations_gitignore",
+      "label": ".gitignore",
+      "file_type": "concept",
+      "source_file": "migrations/.gitignore",
+      "source_location": null
+    },
+    {
+      "id": "concept_migrations_version20260909215455_php",
+      "label": "Version20260909215455.php",
+      "file_type": "concept",
+      "source_file": "migrations/Version20260909215455.php",
+      "source_location": null
+    },
+    {
+      "id": "concept_public_index_php",
+      "label": "index.php",
+      "file_type": "concept",
+      "source_file": "public/index.php",
+      "source_location": null
+    },
+    {
       "id": "document_readme_md",
       "label": "README.md",
       "file_type": "document",
       "source_file": "README.md",
+      "source_location": null
+    },
+    {
+      "id": "concept_src_controller_gitignore",
+      "label": ".gitignore",
+      "file_type": "concept",
+      "source_file": "src/Controller/.gitignore",
+      "source_location": null
+    },
+    {
+      "id": "concept_src_controller_healthcontroller_php",
+      "label": "HealthController.php",
+      "file_type": "concept",
+      "source_file": "src/Controller/HealthController.php",
+      "source_location": null
+    },
+    {
+      "id": "concept_src_entity_gitignore",
+      "label": ".gitignore",
+      "file_type": "concept",
+      "source_file": "src/Entity/.gitignore",
+      "source_location": null
+    },
+    {
+      "id": "concept_src_kernel_php",
+      "label": "Kernel.php",
+      "file_type": "concept",
+      "source_file": "src/Kernel.php",
+      "source_location": null
+    },
+    {
+      "id": "concept_src_repository_gitignore",
+      "label": ".gitignore",
+      "file_type": "concept",
+      "source_file": "src/Repository/.gitignore",
+      "source_location": null
+    },
+    {
+      "id": "concept_symfony_lock",
+      "label": "symfony.lock",
+      "file_type": "concept",
+      "source_file": "symfony.lock",
+      "source_location": null
+    },
+    {
+      "id": "concept_templates_base_html_twig",
+      "label": "base.html.twig",
+      "file_type": "concept",
+      "source_file": "templates/base.html.twig",
+      "source_location": null
+    },
+    {
+      "id": "concept_templates_health_index_html_twig",
+      "label": "index.html.twig",
+      "file_type": "concept",
+      "source_file": "templates/health/index.html.twig",
       "source_location": null
     },
     {
@@ -441,6 +763,22 @@
     },
     {
       "source": "concept_root",
+      "target": "concept_bin",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "bin"
+    },
+    {
+      "source": "concept_root",
+      "target": "concept_config",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "config"
+    },
+    {
+      "source": "concept_root",
       "target": "concept_docs",
       "relation": "contains",
       "confidence": "EXTRACTED",
@@ -449,11 +787,59 @@
     },
     {
       "source": "concept_root",
+      "target": "concept_migrations",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "migrations"
+    },
+    {
+      "source": "concept_root",
+      "target": "concept_public",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "public"
+    },
+    {
+      "source": "concept_root",
+      "target": "concept_src",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src"
+    },
+    {
+      "source": "concept_root",
+      "target": "concept_templates",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "templates"
+    },
+    {
+      "source": "concept_root",
       "target": "concept_tools",
       "relation": "contains",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tools"
+    },
+    {
+      "source": "concept_config",
+      "target": "concept_config_packages",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "config/packages"
+    },
+    {
+      "source": "concept_config",
+      "target": "concept_config_routes",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "config/routes"
     },
     {
       "source": "concept_docs",
@@ -486,6 +872,38 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/requirements"
+    },
+    {
+      "source": "concept_src",
+      "target": "concept_src_controller",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/Controller"
+    },
+    {
+      "source": "concept_src",
+      "target": "concept_src_entity",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/Entity"
+    },
+    {
+      "source": "concept_src",
+      "target": "concept_src_repository",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/Repository"
+    },
+    {
+      "source": "concept_templates",
+      "target": "concept_templates_health",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "templates/health"
     },
     {
       "source": "concept_docs_architecture",
@@ -593,11 +1011,195 @@
     },
     {
       "source": "concept_root",
+      "target": "concept_editorconfig",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".editorconfig"
+    },
+    {
+      "source": "concept_root",
+      "target": "concept_env",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".env"
+    },
+    {
+      "source": "concept_root",
+      "target": "concept_env_dev",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".env.dev"
+    },
+    {
+      "source": "concept_root",
+      "target": "concept_gitignore",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".gitignore"
+    },
+    {
+      "source": "concept_root",
       "target": "document_agents_md",
       "relation": "contains",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "AGENTS.md"
+    },
+    {
+      "source": "concept_bin",
+      "target": "concept_bin_console",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "bin/console"
+    },
+    {
+      "source": "concept_root",
+      "target": "concept_composer_json",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "composer.json"
+    },
+    {
+      "source": "concept_root",
+      "target": "concept_composer_lock",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "composer.lock"
+    },
+    {
+      "source": "concept_config",
+      "target": "concept_config_bundles_php",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "config/bundles.php"
+    },
+    {
+      "source": "concept_config_packages",
+      "target": "concept_config_packages_cache_yaml",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "config/packages/cache.yaml"
+    },
+    {
+      "source": "concept_config_packages",
+      "target": "concept_config_packages_csrf_yaml",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "config/packages/csrf.yaml"
+    },
+    {
+      "source": "concept_config_packages",
+      "target": "concept_config_packages_doctrine_yaml",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "config/packages/doctrine.yaml"
+    },
+    {
+      "source": "concept_config_packages",
+      "target": "concept_config_packages_doctrine_migrations_yaml",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "config/packages/doctrine_migrations.yaml"
+    },
+    {
+      "source": "concept_config_packages",
+      "target": "concept_config_packages_framework_yaml",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "config/packages/framework.yaml"
+    },
+    {
+      "source": "concept_config_packages",
+      "target": "concept_config_packages_property_info_yaml",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "config/packages/property_info.yaml"
+    },
+    {
+      "source": "concept_config_packages",
+      "target": "concept_config_packages_routing_yaml",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "config/packages/routing.yaml"
+    },
+    {
+      "source": "concept_config_packages",
+      "target": "concept_config_packages_security_yaml",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "config/packages/security.yaml"
+    },
+    {
+      "source": "concept_config_packages",
+      "target": "concept_config_packages_twig_yaml",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "config/packages/twig.yaml"
+    },
+    {
+      "source": "concept_config",
+      "target": "concept_config_preload_php",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "config/preload.php"
+    },
+    {
+      "source": "concept_config",
+      "target": "concept_config_reference_php",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "config/reference.php"
+    },
+    {
+      "source": "concept_config",
+      "target": "concept_config_routes_yaml",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "config/routes.yaml"
+    },
+    {
+      "source": "concept_config_routes",
+      "target": "concept_config_routes_framework_yaml",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "config/routes/framework.yaml"
+    },
+    {
+      "source": "concept_config_routes",
+      "target": "concept_config_routes_security_yaml",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "config/routes/security.yaml"
+    },
+    {
+      "source": "concept_config",
+      "target": "concept_config_services_yaml",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "config/services.yaml"
     },
     {
       "source": "concept_docs_architecture",
@@ -856,12 +1458,100 @@
       "source_file": "documentacion/diagramas/Diagrama hijo P2.png"
     },
     {
+      "source": "concept_migrations",
+      "target": "concept_migrations_gitignore",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "migrations/.gitignore"
+    },
+    {
+      "source": "concept_migrations",
+      "target": "concept_migrations_version20260909215455_php",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "migrations/Version20260909215455.php"
+    },
+    {
+      "source": "concept_public",
+      "target": "concept_public_index_php",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "public/index.php"
+    },
+    {
       "source": "concept_root",
       "target": "document_readme_md",
       "relation": "contains",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "README.md"
+    },
+    {
+      "source": "concept_src_controller",
+      "target": "concept_src_controller_gitignore",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/Controller/.gitignore"
+    },
+    {
+      "source": "concept_src_controller",
+      "target": "concept_src_controller_healthcontroller_php",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/Controller/HealthController.php"
+    },
+    {
+      "source": "concept_src_entity",
+      "target": "concept_src_entity_gitignore",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/Entity/.gitignore"
+    },
+    {
+      "source": "concept_src",
+      "target": "concept_src_kernel_php",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/Kernel.php"
+    },
+    {
+      "source": "concept_src_repository",
+      "target": "concept_src_repository_gitignore",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/Repository/.gitignore"
+    },
+    {
+      "source": "concept_root",
+      "target": "concept_symfony_lock",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "symfony.lock"
+    },
+    {
+      "source": "concept_templates",
+      "target": "concept_templates_base_html_twig",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "templates/base.html.twig"
+    },
+    {
+      "source": "concept_templates_health",
+      "target": "concept_templates_health_index_html_twig",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "templates/health/index.html.twig"
     },
     {
       "source": "concept_tools",

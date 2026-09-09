@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}BOVITRACK{% endblock %}
+
+{% block body %}
+    <main>
+        <h1>BOVITRACK</h1>
+        <p>Symfony is running.</p>
+        <p>MySQL connection: {{ databaseConnected ? 'OK' : 'Unavailable' }}</p>
+    </main>
+{% endblock %}
