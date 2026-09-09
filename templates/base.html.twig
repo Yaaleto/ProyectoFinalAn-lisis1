@@ -1,23 +1,68 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
     <head>
         <meta charset="UTF-8">
-        <title>{% block title %}Welcome!{% endblock %}</title>
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
-        {% block stylesheets %}
-        {% endblock %}
-
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#2514eb">
+        <title>{% block title %}BOVITRACK{% endblock %}</title>
+        {% block stylesheets %}{% endblock %}
         {% block javascripts %}
+            {% block importmap %}{{ importmap('app') }}{% endblock %}
         {% endblock %}
-
-        {% set frankenphp_hot_reload = app.request.server.get('FRANKENPHP_HOT_RELOAD') %}
-        {% if frankenphp_hot_reload %}
-        <meta name="frankenphp-hot-reload:url" content="{{ frankenphp_hot_reload }}">
-        <script src="https://cdn.jsdelivr.net/npm/idiomorph"></script>
-        <script src="https://cdn.jsdelivr.net/npm/frankenphp-hot-reload/+esm" type="module"></script>
-        {% endif %}
     </head>
-    <body>
-        {% block body %}{% endblock %}
+    <body class="min-h-screen" data-controller="navigation">
+        <a class="sr-only z-50 bg-surface px-4 py-3 focus:not-sr-only focus:fixed focus:left-4 focus:top-4" href="#main-content">Saltar al contenido principal</a>
+
+        <header class="sticky top-0 z-30 flex h-16 items-center border-b border-surface-muted bg-surface px-4 shadow-sm lg:px-6">
+            <button class="mr-3 inline-flex size-11 items-center justify-center rounded-md text-ink hover:bg-surface-muted lg:hidden"
+                    type="button" aria-label="Abrir navegación" aria-controls="primary-navigation" aria-expanded="false"
+                    data-navigation-target="openButton" data-action="navigation#open">
+                <twig:Icon name="navigation" />
+            </button>
+            <a class="text-lg font-semibold tracking-tight text-brand" href="{{ path('app_health') }}">BOVITRACK</a>
+            <div class="ml-auto flex items-center gap-3">
+                <div class="hidden text-right sm:block">
+                    <p class="text-sm font-medium">Finca local</p>
+                    <p class="text-xs text-ink-muted">Administrador</p>
+                </div>
+                <span class="inline-flex size-10 items-center justify-center rounded-full bg-surface-muted text-ink" aria-hidden="true">
+                    <twig:Icon name="person" className="size-5" />
+                </span>
+            </div>
+        </header>
+
+        <div class="fixed inset-0 z-30 hidden bg-ink/40 lg:hidden" data-navigation-target="backdrop"
+             data-action="click->navigation#close" aria-hidden="true"></div>
+
+        <div class="mx-auto flex min-h-[calc(100vh-4rem)] max-w-screen-2xl">
+            <aside id="primary-navigation"
+                   class="fixed inset-y-0 left-0 z-40 hidden w-72 overflow-y-auto border-r border-surface-muted bg-surface p-4 shadow-surface lg:sticky lg:top-16 lg:block lg:h-[calc(100vh-4rem)] lg:w-64 lg:shadow-none"
+                   data-navigation-target="drawer" aria-label="Navegación principal">
+                <div class="mb-5 flex items-center justify-between lg:hidden">
+                    <span class="font-semibold text-brand">BOVITRACK</span>
+                    <button class="inline-flex size-11 items-center justify-center rounded-md hover:bg-surface-muted"
+                            type="button" aria-label="Cerrar navegación" data-action="navigation#close">
+                        <twig:Icon name="dismiss" />
+                    </button>
+                </div>
+                <nav>
+                    <ul class="space-y-1" role="list">
+                        <li><twig:NavItem label="Dashboard" icon="home" href="{{ path('app_health') }}" active /></li>
+                        <li><twig:NavItem label="Animales" icon="database" /></li>
+                        <li><twig:NavItem label="Fincas" icon="building" /></li>
+                        <li><twig:NavItem label="Pesajes" icon="ruler" /></li>
+                        <li><twig:NavItem label="Vacunaciones" icon="syringe" /></li>
+                        <li><twig:NavItem label="Reproducción" icon="calendar" /></li>
+                        <li><twig:NavItem label="Leche" icon="drop" /></li>
+                        <li><twig:NavItem label="Usuarios" icon="people" /></li>
+                        <li><twig:NavItem label="Catálogos" icon="settings" /></li>
+                    </ul>
+                </nav>
+            </aside>
+
+            <main id="main-content" class="min-w-0 flex-1 p-4 sm:p-6 lg:p-8" tabindex="-1">
+                {% block body %}{% endblock %}
+            </main>
+        </div>
     </body>
 </html>

@@ -23,6 +23,13 @@
       "source_location": null
     },
     {
+      "id": "concept_assets",
+      "label": "assets",
+      "file_type": "concept",
+      "source_file": "assets",
+      "source_location": null
+    },
+    {
       "id": "concept_bin",
       "label": "bin",
       "file_type": "concept",
@@ -76,6 +83,20 @@
       "label": "tools",
       "file_type": "concept",
       "source_file": "tools",
+      "source_location": null
+    },
+    {
+      "id": "concept_assets_controllers",
+      "label": "controllers",
+      "file_type": "concept",
+      "source_file": "assets/controllers",
+      "source_location": null
+    },
+    {
+      "id": "concept_assets_styles",
+      "label": "styles",
+      "file_type": "concept",
+      "source_file": "assets/styles",
       "source_location": null
     },
     {
@@ -153,6 +174,13 @@
       "label": "Repository",
       "file_type": "concept",
       "source_file": "src/Repository",
+      "source_location": null
+    },
+    {
+      "id": "concept_templates_components",
+      "label": "components",
+      "file_type": "concept",
+      "source_file": "templates/components",
       "source_location": null
     },
     {
@@ -289,6 +317,55 @@
       "source_location": null
     },
     {
+      "id": "concept_assets_app_js",
+      "label": "app.js",
+      "file_type": "concept",
+      "source_file": "assets/app.js",
+      "source_location": null
+    },
+    {
+      "id": "concept_assets_controllers_json",
+      "label": "controllers.json",
+      "file_type": "concept",
+      "source_file": "assets/controllers.json",
+      "source_location": null
+    },
+    {
+      "id": "concept_assets_controllers_csrf_protection_controller_js",
+      "label": "csrf_protection_controller.js",
+      "file_type": "concept",
+      "source_file": "assets/controllers/csrf_protection_controller.js",
+      "source_location": null
+    },
+    {
+      "id": "concept_assets_controllers_navigation_controller_js",
+      "label": "navigation_controller.js",
+      "file_type": "concept",
+      "source_file": "assets/controllers/navigation_controller.js",
+      "source_location": null
+    },
+    {
+      "id": "concept_assets_stimulus_bootstrap_js",
+      "label": "stimulus_bootstrap.js",
+      "file_type": "concept",
+      "source_file": "assets/stimulus_bootstrap.js",
+      "source_location": null
+    },
+    {
+      "id": "concept_assets_styles_app_css",
+      "label": "app.css",
+      "file_type": "concept",
+      "source_file": "assets/styles/app.css",
+      "source_location": null
+    },
+    {
+      "id": "concept_assets_styles_tailwind_css",
+      "label": "tailwind.css",
+      "file_type": "concept",
+      "source_file": "assets/styles/tailwind.css",
+      "source_location": null
+    },
+    {
       "id": "concept_bin_console",
       "label": "console",
       "file_type": "concept",
@@ -314,6 +391,13 @@
       "label": "bundles.php",
       "file_type": "concept",
       "source_file": "config/bundles.php",
+      "source_location": null
+    },
+    {
+      "id": "concept_config_packages_asset_mapper_yaml",
+      "label": "asset_mapper.yaml",
+      "file_type": "concept",
+      "source_file": "config/packages/asset_mapper.yaml",
       "source_location": null
     },
     {
@@ -377,6 +461,20 @@
       "label": "twig.yaml",
       "file_type": "concept",
       "source_file": "config/packages/twig.yaml",
+      "source_location": null
+    },
+    {
+      "id": "concept_config_packages_twig_component_yaml",
+      "label": "twig_component.yaml",
+      "file_type": "concept",
+      "source_file": "config/packages/twig_component.yaml",
+      "source_location": null
+    },
+    {
+      "id": "concept_config_packages_ux_turbo_yaml",
+      "label": "ux_turbo.yaml",
+      "file_type": "concept",
+      "source_file": "config/packages/ux_turbo.yaml",
       "source_location": null
     },
     {
@@ -646,6 +744,13 @@
       "source_location": null
     },
     {
+      "id": "concept_importmap_php",
+      "label": "importmap.php",
+      "file_type": "concept",
+      "source_file": "importmap.php",
+      "source_location": null
+    },
+    {
       "id": "concept_migrations_gitignore",
       "label": ".gitignore",
       "file_type": "concept",
@@ -657,6 +762,20 @@
       "label": "Version20260909215455.php",
       "file_type": "concept",
       "source_file": "migrations/Version20260909215455.php",
+      "source_location": null
+    },
+    {
+      "id": "concept_package_lock_json",
+      "label": "package-lock.json",
+      "file_type": "concept",
+      "source_file": "package-lock.json",
+      "source_location": null
+    },
+    {
+      "id": "concept_package_json",
+      "label": "package.json",
+      "file_type": "concept",
+      "source_file": "package.json",
       "source_location": null
     },
     {
@@ -723,6 +842,20 @@
       "source_location": null
     },
     {
+      "id": "concept_templates_components_icon_html_twig",
+      "label": "Icon.html.twig",
+      "file_type": "concept",
+      "source_file": "templates/components/Icon.html.twig",
+      "source_location": null
+    },
+    {
+      "id": "concept_templates_components_navitem_html_twig",
+      "label": "NavItem.html.twig",
+      "file_type": "concept",
+      "source_file": "templates/components/NavItem.html.twig",
+      "source_location": null
+    },
+    {
       "id": "concept_templates_health_index_html_twig",
       "label": "index.html.twig",
       "file_type": "concept",
@@ -753,6 +886,14 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": ".codex"
+    },
+    {
+      "source": "concept_root",
+      "target": "concept_assets",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "assets"
     },
     {
       "source": "concept_root",
@@ -817,6 +958,22 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tools"
+    },
+    {
+      "source": "concept_assets",
+      "target": "concept_assets_controllers",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "assets/controllers"
+    },
+    {
+      "source": "concept_assets",
+      "target": "concept_assets_styles",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "assets/styles"
     },
     {
       "source": "concept_config",
@@ -889,6 +1046,14 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/Repository"
+    },
+    {
+      "source": "concept_templates",
+      "target": "concept_templates_components",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "templates/components"
     },
     {
       "source": "concept_templates",
@@ -1035,6 +1200,62 @@
       "source_file": "AGENTS.md"
     },
     {
+      "source": "concept_assets",
+      "target": "concept_assets_app_js",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "assets/app.js"
+    },
+    {
+      "source": "concept_assets",
+      "target": "concept_assets_controllers_json",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "assets/controllers.json"
+    },
+    {
+      "source": "concept_assets_controllers",
+      "target": "concept_assets_controllers_csrf_protection_controller_js",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "assets/controllers/csrf_protection_controller.js"
+    },
+    {
+      "source": "concept_assets_controllers",
+      "target": "concept_assets_controllers_navigation_controller_js",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "assets/controllers/navigation_controller.js"
+    },
+    {
+      "source": "concept_assets",
+      "target": "concept_assets_stimulus_bootstrap_js",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "assets/stimulus_bootstrap.js"
+    },
+    {
+      "source": "concept_assets_styles",
+      "target": "concept_assets_styles_app_css",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "assets/styles/app.css"
+    },
+    {
+      "source": "concept_assets_styles",
+      "target": "concept_assets_styles_tailwind_css",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "assets/styles/tailwind.css"
+    },
+    {
       "source": "concept_bin",
       "target": "concept_bin_console",
       "relation": "contains",
@@ -1065,6 +1286,14 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "config/bundles.php"
+    },
+    {
+      "source": "concept_config_packages",
+      "target": "concept_config_packages_asset_mapper_yaml",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "config/packages/asset_mapper.yaml"
     },
     {
       "source": "concept_config_packages",
@@ -1137,6 +1366,22 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "config/packages/twig.yaml"
+    },
+    {
+      "source": "concept_config_packages",
+      "target": "concept_config_packages_twig_component_yaml",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "config/packages/twig_component.yaml"
+    },
+    {
+      "source": "concept_config_packages",
+      "target": "concept_config_packages_ux_turbo_yaml",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "config/packages/ux_turbo.yaml"
     },
     {
       "source": "concept_config",
@@ -1443,6 +1688,14 @@
       "source_file": "documentacion/diagramas/Diagrama hijo P2.png"
     },
     {
+      "source": "concept_root",
+      "target": "concept_importmap_php",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "importmap.php"
+    },
+    {
       "source": "concept_migrations",
       "target": "concept_migrations_gitignore",
       "relation": "contains",
@@ -1457,6 +1710,22 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "migrations/Version20260909215455.php"
+    },
+    {
+      "source": "concept_root",
+      "target": "concept_package_lock_json",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "package-lock.json"
+    },
+    {
+      "source": "concept_root",
+      "target": "concept_package_json",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "package.json"
     },
     {
       "source": "concept_public",
@@ -1529,6 +1798,22 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "templates/base.html.twig"
+    },
+    {
+      "source": "concept_templates_components",
+      "target": "concept_templates_components_icon_html_twig",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "templates/components/Icon.html.twig"
+    },
+    {
+      "source": "concept_templates_components",
+      "target": "concept_templates_components_navitem_html_twig",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "templates/components/NavItem.html.twig"
     },
     {
       "source": "concept_templates_health",
