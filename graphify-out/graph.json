@@ -79,6 +79,13 @@
       "source_location": null
     },
     {
+      "id": "concept_tests",
+      "label": "tests",
+      "file_type": "concept",
+      "source_file": "tests",
+      "source_location": null
+    },
+    {
       "id": "concept_tools",
       "label": "tools",
       "file_type": "concept",
@@ -132,6 +139,13 @@
       "label": "design",
       "file_type": "concept",
       "source_file": "docs/design",
+      "source_location": null
+    },
+    {
+      "id": "concept_docs_quality",
+      "label": "quality",
+      "file_type": "concept",
+      "source_file": "docs/quality",
       "source_location": null
     },
     {
@@ -202,6 +216,20 @@
       "label": "decisions",
       "file_type": "concept",
       "source_file": "docs/architecture/decisions",
+      "source_location": null
+    },
+    {
+      "id": "concept_src_entity_concerns",
+      "label": "Concerns",
+      "file_type": "concept",
+      "source_file": "src/Entity/Concerns",
+      "source_location": null
+    },
+    {
+      "id": "concept_tests_unit_entity",
+      "label": "Entity",
+      "file_type": "concept",
+      "source_file": "tests/Unit/Entity",
       "source_location": null
     },
     {
@@ -307,6 +335,13 @@
       "label": ".gitignore",
       "file_type": "concept",
       "source_file": ".gitignore",
+      "source_location": null
+    },
+    {
+      "id": "concept_phpunit_result_cache",
+      "label": ".phpunit.result.cache",
+      "file_type": "concept",
+      "source_file": ".phpunit.result.cache",
       "source_location": null
     },
     {
@@ -475,6 +510,13 @@
       "label": "ux_turbo.yaml",
       "file_type": "concept",
       "source_file": "config/packages/ux_turbo.yaml",
+      "source_location": null
+    },
+    {
+      "id": "concept_config_packages_validator_yaml",
+      "label": "validator.yaml",
+      "file_type": "concept",
+      "source_file": "config/packages/validator.yaml",
       "source_location": null
     },
     {
@@ -674,6 +716,13 @@
       "source_location": null
     },
     {
+      "id": "document_docs_quality_testing_md",
+      "label": "testing.md",
+      "file_type": "document",
+      "source_file": "docs/quality/testing.md",
+      "source_location": null
+    },
+    {
       "id": "document_docs_readme_md",
       "label": "README.md",
       "file_type": "document",
@@ -765,6 +814,20 @@
       "source_location": null
     },
     {
+      "id": "concept_migrations_version20260910063849_php",
+      "label": "Version20260910063849.php",
+      "file_type": "concept",
+      "source_file": "migrations/Version20260910063849.php",
+      "source_location": null
+    },
+    {
+      "id": "concept_migrations_version20260910064129_php",
+      "label": "Version20260910064129.php",
+      "file_type": "concept",
+      "source_file": "migrations/Version20260910064129.php",
+      "source_location": null
+    },
+    {
       "id": "concept_package_lock_json",
       "label": "package-lock.json",
       "file_type": "concept",
@@ -776,6 +839,13 @@
       "label": "package.json",
       "file_type": "concept",
       "source_file": "package.json",
+      "source_location": null
+    },
+    {
+      "id": "concept_phpunit_xml_dist",
+      "label": "phpunit.xml.dist",
+      "file_type": "concept",
+      "source_file": "phpunit.xml.dist",
       "source_location": null
     },
     {
@@ -811,6 +881,34 @@
       "label": ".gitignore",
       "file_type": "concept",
       "source_file": "src/Entity/.gitignore",
+      "source_location": null
+    },
+    {
+      "id": "concept_src_entity_concerns_auditable_php",
+      "label": "Auditable.php",
+      "file_type": "concept",
+      "source_file": "src/Entity/Concerns/Auditable.php",
+      "source_location": null
+    },
+    {
+      "id": "concept_src_entity_finca_php",
+      "label": "Finca.php",
+      "file_type": "concept",
+      "source_file": "src/Entity/Finca.php",
+      "source_location": null
+    },
+    {
+      "id": "concept_src_entity_organizacionganadera_php",
+      "label": "OrganizacionGanadera.php",
+      "file_type": "concept",
+      "source_file": "src/Entity/OrganizacionGanadera.php",
+      "source_location": null
+    },
+    {
+      "id": "concept_src_entity_usuario_php",
+      "label": "Usuario.php",
+      "file_type": "concept",
+      "source_file": "src/Entity/Usuario.php",
       "source_location": null
     },
     {
@@ -860,6 +958,20 @@
       "label": "index.html.twig",
       "file_type": "concept",
       "source_file": "templates/health/index.html.twig",
+      "source_location": null
+    },
+    {
+      "id": "concept_tests_bootstrap_php",
+      "label": "bootstrap.php",
+      "file_type": "concept",
+      "source_file": "tests/bootstrap.php",
+      "source_location": null
+    },
+    {
+      "id": "concept_tests_unit_entity_tenantmodeltest_php",
+      "label": "TenantModelTest.php",
+      "file_type": "concept",
+      "source_file": "tests/Unit/Entity/TenantModelTest.php",
       "source_location": null
     },
     {
@@ -953,6 +1065,14 @@
     },
     {
       "source": "concept_root",
+      "target": "concept_tests",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tests"
+    },
+    {
+      "source": "concept_root",
       "target": "concept_tools",
       "relation": "contains",
       "confidence": "EXTRACTED",
@@ -1017,6 +1137,14 @@
     },
     {
       "source": "concept_docs",
+      "target": "concept_docs_quality",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/quality"
+    },
+    {
+      "source": "concept_docs",
       "target": "concept_docs_requirements",
       "relation": "contains",
       "confidence": "EXTRACTED",
@@ -1070,6 +1198,14 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/architecture/decisions"
+    },
+    {
+      "source": "concept_src_entity",
+      "target": "concept_src_entity_concerns",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/Entity/Concerns"
     },
     {
       "source": "concept_codex_skills_graphify",
@@ -1190,6 +1326,14 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": ".gitignore"
+    },
+    {
+      "source": "concept_root",
+      "target": "concept_phpunit_result_cache",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".phpunit.result.cache"
     },
     {
       "source": "concept_root",
@@ -1382,6 +1526,14 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "config/packages/ux_turbo.yaml"
+    },
+    {
+      "source": "concept_config_packages",
+      "target": "concept_config_packages_validator_yaml",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "config/packages/validator.yaml"
     },
     {
       "source": "concept_config",
@@ -1608,6 +1760,14 @@
       "source_file": "docs/plan-fases.md"
     },
     {
+      "source": "concept_docs_quality",
+      "target": "document_docs_quality_testing_md",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/quality/testing.md"
+    },
+    {
       "source": "concept_docs",
       "target": "document_docs_readme_md",
       "relation": "contains",
@@ -1712,6 +1872,22 @@
       "source_file": "migrations/Version20260909215455.php"
     },
     {
+      "source": "concept_migrations",
+      "target": "concept_migrations_version20260910063849_php",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "migrations/Version20260910063849.php"
+    },
+    {
+      "source": "concept_migrations",
+      "target": "concept_migrations_version20260910064129_php",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "migrations/Version20260910064129.php"
+    },
+    {
       "source": "concept_root",
       "target": "concept_package_lock_json",
       "relation": "contains",
@@ -1726,6 +1902,14 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "package.json"
+    },
+    {
+      "source": "concept_root",
+      "target": "concept_phpunit_xml_dist",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "phpunit.xml.dist"
     },
     {
       "source": "concept_public",
@@ -1766,6 +1950,38 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/Entity/.gitignore"
+    },
+    {
+      "source": "concept_src_entity_concerns",
+      "target": "concept_src_entity_concerns_auditable_php",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/Entity/Concerns/Auditable.php"
+    },
+    {
+      "source": "concept_src_entity",
+      "target": "concept_src_entity_finca_php",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/Entity/Finca.php"
+    },
+    {
+      "source": "concept_src_entity",
+      "target": "concept_src_entity_organizacionganadera_php",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/Entity/OrganizacionGanadera.php"
+    },
+    {
+      "source": "concept_src_entity",
+      "target": "concept_src_entity_usuario_php",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/Entity/Usuario.php"
     },
     {
       "source": "concept_src",
@@ -1824,6 +2040,22 @@
       "source_file": "templates/health/index.html.twig"
     },
     {
+      "source": "concept_tests",
+      "target": "concept_tests_bootstrap_php",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tests/bootstrap.php"
+    },
+    {
+      "source": "concept_tests_unit_entity",
+      "target": "concept_tests_unit_entity_tenantmodeltest_php",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tests/Unit/Entity/TenantModelTest.php"
+    },
+    {
       "source": "concept_tools",
       "target": "concept_tools_manual_graph_index_py",
       "relation": "contains",
@@ -1842,6 +2074,14 @@
     {
       "source": "document_docs_readme_md",
       "target": "document_docs_plan_fases_md",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/README.md"
+    },
+    {
+      "source": "document_docs_readme_md",
+      "target": "document_docs_quality_testing_md",
       "relation": "references",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,

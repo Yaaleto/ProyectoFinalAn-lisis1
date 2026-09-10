@@ -108,6 +108,8 @@ Toda iteración debe responder:
 5. ¿Qué prueba confirma que el incremento funciona?
 6. ¿Qué funcionalidades anteriores deben seguir funcionando?
 
+Las pruebas unitarias son obligatorias para toda lógica de dominio, validación o regla de negocio nueva. Un incremento no se considera terminado hasta que sus pruebas unitarias pasan y las pruebas existentes siguen pasando.
+
 Si una tarea no produce valor demostrable por sí sola, debe:
 - formar parte explícita de un incremento que sí lo haga, o
 - considerarse una tarea técnica habilitadora con alcance corto y justificado.
