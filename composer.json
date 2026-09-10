@@ -81,6 +81,7 @@
         }
     },
     "require-dev": {
+        "symfony/browser-kit": "7.4.*",
         "symfony/phpunit-bridge": "^8.1"
     }
 }

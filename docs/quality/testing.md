@@ -17,3 +17,5 @@ vendor/bin/simple-phpunit
 - regresión de la regla cuando se corrija un defecto.
 
 Las pruebas de integración de base de datos complementan las unitarias cuando una restricción, relación o migración de Doctrine deba comprobarse contra MySQL.
+
+Las pruebas funcionales usan automáticamente la base `bovitrack_test`, separada de la base local de desarrollo. Configura una conexión local equivalente en `.env.test.local` (archivo ignorado) para que PHPUnit pueda acceder a ella. La configuración de Doctrine añade el sufijo `_test` al nombre de la base.
