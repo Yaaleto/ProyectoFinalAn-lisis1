@@ -8,13 +8,15 @@ use App\Entity\Concerns\Auditable;
 use DomainException;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'usuario')]
 #[ORM\HasLifecycleCallbacks]
 #[UniqueEntity(fields: ['email'], message: 'El correo electrónico ya está en uso.')]
-class Usuario
+class Usuario implements UserInterface, PasswordAuthenticatedUserInterface
 {
     use Auditable;
 
@@ -53,6 +55,9 @@ class Usuario
     #[ORM\Column(length: 20)]
     #[Assert\Choice(choices: [self::ROL_ADMINISTRADOR, self::ROL_ENCARGADO])]
     private string $rol;
+
+    #[ORM\Column(options: ['default' => true])]
+    private bool $activo = true;
 
     public function __construct(string $nombre, string $email, string $contrasenaHash, string $rol)
     {
@@ -116,6 +121,21 @@ class Usuario
         return $this->email;
     }
 
+    public function getUserIdentifier(): string
+    {
+        return $this->email;
+    }
+
+    /** @return list<string> */
+    public function getRoles(): array
+    {
+        return match ($this->rol) {
+            self::ROL_ADMINISTRADOR => ['ROLE_ADMINISTRADOR'],
+            self::ROL_ENCARGADO => ['ROLE_ENCARGADO'],
+            default => [],
+        };
+    }
+
     public function setEmail(string $email): static
     {
         $this->email = $email;
@@ -124,6 +144,11 @@ class Usuario
     }
 
     public function getContrasenaHash(): string
+    {
+        return $this->contrasenaHash;
+    }
+
+    public function getPassword(): string
     {
         return $this->contrasenaHash;
     }
@@ -145,5 +170,22 @@ class Usuario
         $this->rol = $rol;
 
         return $this;
+    }
+
+    public function isActivo(): bool
+    {
+        return $this->activo;
+    }
+
+    public function setActivo(bool $activo): static
+    {
+        $this->activo = $activo;
+
+        return $this;
+    }
+
+    #[\Deprecated]
+    public function eraseCredentials(): void
+    {
     }
 }

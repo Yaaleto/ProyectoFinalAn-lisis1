@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#2514eb">
+        <title>Iniciar sesión · BOVITRACK</title>
+        {{ importmap('app') }}
+    </head>
+    <body class="min-h-screen bg-canvas px-4 py-10 text-ink sm:flex sm:items-center sm:justify-center">
+        <main class="mx-auto w-full max-w-md rounded-lg border border-surface-muted bg-surface p-6 shadow-surface sm:p-8">
+            <div class="mb-8">
+                <p class="text-sm font-semibold text-brand">BOVITRACK</p>
+                <h1 class="mt-2 text-2xl font-semibold tracking-tight">Iniciar sesión</h1>
+                <p class="mt-2 text-sm text-ink-muted">Accede a la información autorizada de tu organización.</p>
+            </div>
+
+            {% if error %}
+                <div class="mb-5 rounded-md border border-danger/30 bg-danger/10 p-3 text-sm text-danger" role="alert">
+                    {{ error.messageKey == 'Esta cuenta está inactiva.' ? error.messageKey : 'El correo o la contraseña no son correctos.' }}
+                </div>
+            {% endif %}
+
+            <form method="post" action="{{ path('app_login') }}" class="space-y-5">
+                <div>
+                    <label class="mb-2 block text-sm font-semibold" for="email">Correo electrónico</label>
+                    <input class="w-full rounded-md border border-surface-muted bg-surface px-3 py-2.5 text-sm shadow-sm" id="email" name="_username" type="email" value="{{ lastUsername }}" autocomplete="email" required autofocus>
+                </div>
+                <div>
+                    <label class="mb-2 block text-sm font-semibold" for="password">Contraseña</label>
+                    <input class="w-full rounded-md border border-surface-muted bg-surface px-3 py-2.5 text-sm shadow-sm" id="password" name="_password" type="password" autocomplete="current-password" minlength="8" required>
+                </div>
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+                <button class="w-full rounded-md bg-brand px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-hover" type="submit">Entrar</button>
+            </form>
+        </main>
+    </body>
+</html>

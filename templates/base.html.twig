@@ -22,12 +22,16 @@
             <a class="text-lg font-semibold tracking-tight text-brand" href="{{ path('app_health') }}">BOVITRACK</a>
             <div class="ml-auto flex items-center gap-3">
                 <div class="hidden text-right sm:block">
-                    <p class="text-sm font-medium">Finca local</p>
-                    <p class="text-xs text-ink-muted">Administrador</p>
+                    <p class="text-sm font-medium">{{ app.user.organizacion.nombre }}</p>
+                    <p class="text-xs text-ink-muted">{{ app.user.rol == 'ADMINISTRADOR' ? 'Administrador' : 'Encargado de finca' }}</p>
                 </div>
                 <span class="inline-flex size-10 items-center justify-center rounded-full bg-surface-muted text-ink" aria-hidden="true">
                     <twig:Icon name="person" className="size-5" />
                 </span>
+                <form method="post" action="{{ path('app_logout') }}">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('logout') }}">
+                    <button class="rounded-md px-3 py-2 text-sm font-medium text-ink-muted hover:bg-surface-muted hover:text-ink" type="submit">Cerrar sesión</button>
+                </form>
             </div>
         </header>
 

@@ -25,3 +25,4 @@ src/
 - Evitar lógica extensa en controladores.
 - Aplicar restricciones de organización/finca en backend.
 - Validaciones críticas nunca dependen solo del frontend.
+- Las contraseñas se validan y se hashean mediante `UsuarioPasswordManager` antes de persistirse.

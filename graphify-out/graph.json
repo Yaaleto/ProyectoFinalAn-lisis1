@@ -191,6 +191,20 @@
       "source_location": null
     },
     {
+      "id": "concept_src_security",
+      "label": "Security",
+      "file_type": "concept",
+      "source_file": "src/Security",
+      "source_location": null
+    },
+    {
+      "id": "concept_templates_auth",
+      "label": "auth",
+      "file_type": "concept",
+      "source_file": "templates/auth",
+      "source_location": null
+    },
+    {
       "id": "concept_templates_components",
       "label": "components",
       "file_type": "concept",
@@ -205,10 +219,24 @@
       "source_location": null
     },
     {
+      "id": "concept_tests_functional",
+      "label": "Functional",
+      "file_type": "concept",
+      "source_file": "tests/Functional",
+      "source_location": null
+    },
+    {
       "id": "concept_codex_skills_graphify",
       "label": "graphify",
       "file_type": "concept",
       "source_file": ".codex/skills/graphify",
+      "source_location": null
+    },
+    {
+      "id": "concept_config_packages_test",
+      "label": "test",
+      "file_type": "concept",
+      "source_file": "config/packages/test",
       "source_location": null
     },
     {
@@ -230,6 +258,13 @@
       "label": "Entity",
       "file_type": "concept",
       "source_file": "tests/Unit/Entity",
+      "source_location": null
+    },
+    {
+      "id": "concept_tests_unit_security",
+      "label": "Security",
+      "file_type": "concept",
+      "source_file": "tests/Unit/Security",
       "source_location": null
     },
     {
@@ -489,6 +524,13 @@
       "label": "security.yaml",
       "file_type": "concept",
       "source_file": "config/packages/security.yaml",
+      "source_location": null
+    },
+    {
+      "id": "concept_config_packages_test_doctrine_yaml",
+      "label": "doctrine.yaml",
+      "file_type": "concept",
+      "source_file": "config/packages/test/doctrine.yaml",
       "source_location": null
     },
     {
@@ -828,6 +870,13 @@
       "source_location": null
     },
     {
+      "id": "concept_migrations_version20260910150115_php",
+      "label": "Version20260910150115.php",
+      "file_type": "concept",
+      "source_file": "migrations/Version20260910150115.php",
+      "source_location": null
+    },
+    {
       "id": "concept_package_lock_json",
       "label": "package-lock.json",
       "file_type": "concept",
@@ -867,6 +916,13 @@
       "label": ".gitignore",
       "file_type": "concept",
       "source_file": "src/Controller/.gitignore",
+      "source_location": null
+    },
+    {
+      "id": "concept_src_controller_authenticationcontroller_php",
+      "label": "AuthenticationController.php",
+      "file_type": "concept",
+      "source_file": "src/Controller/AuthenticationController.php",
       "source_location": null
     },
     {
@@ -926,10 +982,31 @@
       "source_location": null
     },
     {
+      "id": "concept_src_security_userchecker_php",
+      "label": "UserChecker.php",
+      "file_type": "concept",
+      "source_file": "src/Security/UserChecker.php",
+      "source_location": null
+    },
+    {
+      "id": "concept_src_security_usuariopasswordmanager_php",
+      "label": "UsuarioPasswordManager.php",
+      "file_type": "concept",
+      "source_file": "src/Security/UsuarioPasswordManager.php",
+      "source_location": null
+    },
+    {
       "id": "concept_symfony_lock",
       "label": "symfony.lock",
       "file_type": "concept",
       "source_file": "symfony.lock",
+      "source_location": null
+    },
+    {
+      "id": "concept_templates_auth_login_html_twig",
+      "label": "login.html.twig",
+      "file_type": "concept",
+      "source_file": "templates/auth/login.html.twig",
       "source_location": null
     },
     {
@@ -968,10 +1045,31 @@
       "source_location": null
     },
     {
+      "id": "concept_tests_functional_authenticationtest_php",
+      "label": "AuthenticationTest.php",
+      "file_type": "concept",
+      "source_file": "tests/Functional/AuthenticationTest.php",
+      "source_location": null
+    },
+    {
       "id": "concept_tests_unit_entity_tenantmodeltest_php",
       "label": "TenantModelTest.php",
       "file_type": "concept",
       "source_file": "tests/Unit/Entity/TenantModelTest.php",
+      "source_location": null
+    },
+    {
+      "id": "concept_tests_unit_security_usercheckertest_php",
+      "label": "UserCheckerTest.php",
+      "file_type": "concept",
+      "source_file": "tests/Unit/Security/UserCheckerTest.php",
+      "source_location": null
+    },
+    {
+      "id": "concept_tests_unit_security_usuariopasswordmanagertest_php",
+      "label": "UsuarioPasswordManagerTest.php",
+      "file_type": "concept",
+      "source_file": "tests/Unit/Security/UsuarioPasswordManagerTest.php",
       "source_location": null
     },
     {
@@ -1176,6 +1274,22 @@
       "source_file": "src/Repository"
     },
     {
+      "source": "concept_src",
+      "target": "concept_src_security",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/Security"
+    },
+    {
+      "source": "concept_templates",
+      "target": "concept_templates_auth",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "templates/auth"
+    },
+    {
       "source": "concept_templates",
       "target": "concept_templates_components",
       "relation": "contains",
@@ -1190,6 +1304,22 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "templates/health"
+    },
+    {
+      "source": "concept_tests",
+      "target": "concept_tests_functional",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tests/Functional"
+    },
+    {
+      "source": "concept_config_packages",
+      "target": "concept_config_packages_test",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "config/packages/test"
     },
     {
       "source": "concept_docs_architecture",
@@ -1502,6 +1632,14 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "config/packages/security.yaml"
+    },
+    {
+      "source": "concept_config_packages_test",
+      "target": "concept_config_packages_test_doctrine_yaml",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "config/packages/test/doctrine.yaml"
     },
     {
       "source": "concept_config_packages",
@@ -1888,6 +2026,14 @@
       "source_file": "migrations/Version20260910064129.php"
     },
     {
+      "source": "concept_migrations",
+      "target": "concept_migrations_version20260910150115_php",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "migrations/Version20260910150115.php"
+    },
+    {
       "source": "concept_root",
       "target": "concept_package_lock_json",
       "relation": "contains",
@@ -1934,6 +2080,14 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/Controller/.gitignore"
+    },
+    {
+      "source": "concept_src_controller",
+      "target": "concept_src_controller_authenticationcontroller_php",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/Controller/AuthenticationController.php"
     },
     {
       "source": "concept_src_controller",
@@ -2000,12 +2154,36 @@
       "source_file": "src/Repository/.gitignore"
     },
     {
+      "source": "concept_src_security",
+      "target": "concept_src_security_userchecker_php",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/Security/UserChecker.php"
+    },
+    {
+      "source": "concept_src_security",
+      "target": "concept_src_security_usuariopasswordmanager_php",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/Security/UsuarioPasswordManager.php"
+    },
+    {
       "source": "concept_root",
       "target": "concept_symfony_lock",
       "relation": "contains",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "symfony.lock"
+    },
+    {
+      "source": "concept_templates_auth",
+      "target": "concept_templates_auth_login_html_twig",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "templates/auth/login.html.twig"
     },
     {
       "source": "concept_templates",
@@ -2048,12 +2226,36 @@
       "source_file": "tests/bootstrap.php"
     },
     {
+      "source": "concept_tests_functional",
+      "target": "concept_tests_functional_authenticationtest_php",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tests/Functional/AuthenticationTest.php"
+    },
+    {
       "source": "concept_tests_unit_entity",
       "target": "concept_tests_unit_entity_tenantmodeltest_php",
       "relation": "contains",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tests/Unit/Entity/TenantModelTest.php"
+    },
+    {
+      "source": "concept_tests_unit_security",
+      "target": "concept_tests_unit_security_usercheckertest_php",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tests/Unit/Security/UserCheckerTest.php"
+    },
+    {
+      "source": "concept_tests_unit_security",
+      "target": "concept_tests_unit_security_usuariopasswordmanagertest_php",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tests/Unit/Security/UsuarioPasswordManagerTest.php"
     },
     {
       "source": "concept_tools",
