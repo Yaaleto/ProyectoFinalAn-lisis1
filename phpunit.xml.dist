@@ -2,6 +2,8 @@
 <phpunit bootstrap="tests/bootstrap.php" colors="true">
     <php>
         <server name="APP_ENV" value="test" force="true" />
+        <server name="DEFAULT_URI" value="http://localhost" />
+        <server name="KERNEL_CLASS" value="App\Kernel" />
     </php>
     <testsuites>
         <testsuite name="BOVITRACK">
