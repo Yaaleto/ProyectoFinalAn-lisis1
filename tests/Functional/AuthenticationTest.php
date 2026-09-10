@@ -6,6 +6,7 @@ namespace App\Tests\Functional;
 
 use App\Entity\OrganizacionGanadera;
 use App\Entity\Usuario;
+use App\Security\UsuarioPasswordManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -94,8 +95,8 @@ final class AuthenticationTest extends WebTestCase
         $user = (new Usuario('Usuario de prueba', $email, '', $rol))
             ->setOrganizacion($organization)
             ->setActivo($activo);
-        $passwordHasher = $client->getContainer()->get(UserPasswordHasherInterface::class);
-        $user->setContrasenaHash($passwordHasher->hashPassword($user, 'correct-password'));
+        $passwordManager = new UsuarioPasswordManager($client->getContainer()->get(UserPasswordHasherInterface::class));
+        $passwordManager->setPassword($user, 'correct-password');
 
         $entityManager->persist($organization);
         $entityManager->persist($user);
