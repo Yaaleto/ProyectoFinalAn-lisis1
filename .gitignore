@@ -15,3 +15,4 @@
 ###< symfony/asset-mapper ###
 
 /node_modules/
+/.phpunit.result.cache
