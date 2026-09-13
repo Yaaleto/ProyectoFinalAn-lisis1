@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ finca.nombre }} · BOVITRACK{% endblock %}
+
+{% block body %}
+    <div class="mx-auto max-w-5xl">
+        <p class="text-sm font-semibold text-brand">Finca autorizada</p>
+        <h1 class="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">{{ finca.nombre }}</h1>
+        <p class="mt-2 text-sm text-ink-muted">Código: {{ finca.codigo }}</p>
+    </div>
+{% endblock %}
