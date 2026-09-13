@@ -212,6 +212,13 @@
       "source_location": null
     },
     {
+      "id": "concept_templates_farm",
+      "label": "farm",
+      "file_type": "concept",
+      "source_file": "templates/farm",
+      "source_location": null
+    },
+    {
       "id": "concept_templates_health",
       "label": "health",
       "file_type": "concept",
@@ -251,6 +258,13 @@
       "label": "Concerns",
       "file_type": "concept",
       "source_file": "src/Entity/Concerns",
+      "source_location": null
+    },
+    {
+      "id": "concept_src_security_voter",
+      "label": "Voter",
+      "file_type": "concept",
+      "source_file": "src/Security/Voter",
       "source_location": null
     },
     {
@@ -926,6 +940,13 @@
       "source_location": null
     },
     {
+      "id": "concept_src_controller_fincaaccesscontroller_php",
+      "label": "FincaAccessController.php",
+      "file_type": "concept",
+      "source_file": "src/Controller/FincaAccessController.php",
+      "source_location": null
+    },
+    {
       "id": "concept_src_controller_healthcontroller_php",
       "label": "HealthController.php",
       "file_type": "concept",
@@ -982,6 +1003,20 @@
       "source_location": null
     },
     {
+      "id": "concept_src_repository_fincarepository_php",
+      "label": "FincaRepository.php",
+      "file_type": "concept",
+      "source_file": "src/Repository/FincaRepository.php",
+      "source_location": null
+    },
+    {
+      "id": "concept_src_security_fincaaccess_php",
+      "label": "FincaAccess.php",
+      "file_type": "concept",
+      "source_file": "src/Security/FincaAccess.php",
+      "source_location": null
+    },
+    {
       "id": "concept_src_security_userchecker_php",
       "label": "UserChecker.php",
       "file_type": "concept",
@@ -993,6 +1028,13 @@
       "label": "UsuarioPasswordManager.php",
       "file_type": "concept",
       "source_file": "src/Security/UsuarioPasswordManager.php",
+      "source_location": null
+    },
+    {
+      "id": "concept_src_security_voter_fincavoter_php",
+      "label": "FincaVoter.php",
+      "file_type": "concept",
+      "source_file": "src/Security/Voter/FincaVoter.php",
       "source_location": null
     },
     {
@@ -1031,6 +1073,13 @@
       "source_location": null
     },
     {
+      "id": "concept_templates_farm_show_html_twig",
+      "label": "show.html.twig",
+      "file_type": "concept",
+      "source_file": "templates/farm/show.html.twig",
+      "source_location": null
+    },
+    {
       "id": "concept_templates_health_index_html_twig",
       "label": "index.html.twig",
       "file_type": "concept",
@@ -1052,10 +1101,24 @@
       "source_location": null
     },
     {
+      "id": "concept_tests_functional_fincaauthorizationtest_php",
+      "label": "FincaAuthorizationTest.php",
+      "file_type": "concept",
+      "source_file": "tests/Functional/FincaAuthorizationTest.php",
+      "source_location": null
+    },
+    {
       "id": "concept_tests_unit_entity_tenantmodeltest_php",
       "label": "TenantModelTest.php",
       "file_type": "concept",
       "source_file": "tests/Unit/Entity/TenantModelTest.php",
+      "source_location": null
+    },
+    {
+      "id": "concept_tests_unit_security_fincaaccesstest_php",
+      "label": "FincaAccessTest.php",
+      "file_type": "concept",
+      "source_file": "tests/Unit/Security/FincaAccessTest.php",
       "source_location": null
     },
     {
@@ -1299,6 +1362,14 @@
     },
     {
       "source": "concept_templates",
+      "target": "concept_templates_farm",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "templates/farm"
+    },
+    {
+      "source": "concept_templates",
       "target": "concept_templates_health",
       "relation": "contains",
       "confidence": "EXTRACTED",
@@ -1336,6 +1407,14 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/Entity/Concerns"
+    },
+    {
+      "source": "concept_src_security",
+      "target": "concept_src_security_voter",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/Security/Voter"
     },
     {
       "source": "concept_codex_skills_graphify",
@@ -2091,6 +2170,14 @@
     },
     {
       "source": "concept_src_controller",
+      "target": "concept_src_controller_fincaaccesscontroller_php",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/Controller/FincaAccessController.php"
+    },
+    {
+      "source": "concept_src_controller",
       "target": "concept_src_controller_healthcontroller_php",
       "relation": "contains",
       "confidence": "EXTRACTED",
@@ -2154,6 +2241,22 @@
       "source_file": "src/Repository/.gitignore"
     },
     {
+      "source": "concept_src_repository",
+      "target": "concept_src_repository_fincarepository_php",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/Repository/FincaRepository.php"
+    },
+    {
+      "source": "concept_src_security",
+      "target": "concept_src_security_fincaaccess_php",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/Security/FincaAccess.php"
+    },
+    {
       "source": "concept_src_security",
       "target": "concept_src_security_userchecker_php",
       "relation": "contains",
@@ -2168,6 +2271,14 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/Security/UsuarioPasswordManager.php"
+    },
+    {
+      "source": "concept_src_security_voter",
+      "target": "concept_src_security_voter_fincavoter_php",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/Security/Voter/FincaVoter.php"
     },
     {
       "source": "concept_root",
@@ -2210,6 +2321,14 @@
       "source_file": "templates/components/NavItem.html.twig"
     },
     {
+      "source": "concept_templates_farm",
+      "target": "concept_templates_farm_show_html_twig",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "templates/farm/show.html.twig"
+    },
+    {
       "source": "concept_templates_health",
       "target": "concept_templates_health_index_html_twig",
       "relation": "contains",
@@ -2234,12 +2353,28 @@
       "source_file": "tests/Functional/AuthenticationTest.php"
     },
     {
+      "source": "concept_tests_functional",
+      "target": "concept_tests_functional_fincaauthorizationtest_php",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tests/Functional/FincaAuthorizationTest.php"
+    },
+    {
       "source": "concept_tests_unit_entity",
       "target": "concept_tests_unit_entity_tenantmodeltest_php",
       "relation": "contains",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tests/Unit/Entity/TenantModelTest.php"
+    },
+    {
+      "source": "concept_tests_unit_security",
+      "target": "concept_tests_unit_security_fincaaccesstest_php",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tests/Unit/Security/FincaAccessTest.php"
     },
     {
       "source": "concept_tests_unit_security",
