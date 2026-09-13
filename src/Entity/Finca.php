@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use App\Entity\Concerns\Auditable;
+use App\Repository\FincaRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: FincaRepository::class)]
 #[ORM\Table(name: 'finca')]
 #[ORM\UniqueConstraint(name: 'uniq_finca_organizacion_codigo', columns: ['organizacion_id', 'codigo'])]
 #[ORM\HasLifecycleCallbacks]
