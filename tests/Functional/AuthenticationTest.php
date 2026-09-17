@@ -52,6 +52,30 @@ final class AuthenticationTest extends WebTestCase
         self::assertStringContainsString('minlength="8"', (string) $client->getResponse()->getContent());
     }
 
+    public function testLoginPageIsNeverCached(): void
+    {
+        $client = static::createClient();
+
+        $client->request('GET', '/login');
+
+        self::assertStringContainsString('no-store', (string) $client->getResponse()->headers->get('Cache-Control'));
+    }
+
+    public function testExpiredLoginFormIsNotReportedAsWrongCredentials(): void
+    {
+        $client = static::createClient();
+
+        $client->request('POST', '/login', [
+            '_username' => 'encargado.demo@bovitrack.local',
+            '_password' => 'BoviTrackDemo2026!',
+            '_csrf_token' => 'expired-token',
+        ]);
+        $client->followRedirect();
+
+        self::assertStringContainsString('La sesión del formulario expiró.', (string) $client->getResponse()->getContent());
+        self::assertStringNotContainsString('El correo o la contraseña no son correctos.', (string) $client->getResponse()->getContent());
+    }
+
     public function testInactiveAccountCannotSignIn(): void
     {
         $client = static::createClient();
@@ -78,6 +102,23 @@ final class AuthenticationTest extends WebTestCase
         $client->followRedirect();
         self::assertResponseIsSuccessful();
         self::assertStringContainsString('Iniciar sesión', (string) $client->getResponse()->getContent());
+    }
+
+    public function testUserCanSignInAgainAfterLogout(): void
+    {
+        $client = static::createClient();
+        $email = 'relogin-auth@example.com';
+        $this->createUser($client, $email, Usuario::ROL_ADMINISTRADOR);
+        $this->signIn($client, $email);
+        $client->followRedirect();
+
+        $token = $client->getCrawler()->filterXPath('//form[@action="/logout"]//input[@name="_csrf_token"]')->attr('value');
+        $client->request('POST', '/logout', ['_csrf_token' => $token]);
+        $client->followRedirect();
+
+        $this->signIn($client, $email);
+
+        self::assertResponseRedirects('/');
     }
 
     private function createUser($client, string $email, string $rol, bool $activo = true): void
