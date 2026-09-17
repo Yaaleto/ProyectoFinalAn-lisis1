@@ -118,6 +118,22 @@ Si una tarea no produce valor demostrable por sí sola, debe:
 
 La Fase 1 debe ejecutarse como una sucesión de incrementos funcionales:
 
+### Paso previo obligatorio — Línea base completa de base de datos
+**Valor aportado:** todas las verticales del MVP comparten un esquema estable,
+versionado y probado antes de continuar con las issues funcionales.
+
+Incluye:
+- diagrama entidad-relación y diccionario de restricciones;
+- entidades Doctrine de todo el MVP;
+- migraciones reproducibles para desarrollo y pruebas;
+- validación de mapeo y de sincronización del esquema;
+- pruebas unitarias de reglas de dominio;
+- pruebas de integración contra `bovitrack_test` para relaciones, unicidad y persistencia.
+
+Este paso es una tarea técnica habilitadora de alcance cerrado. No incluye
+controladores ni pantallas; las issues funcionales posteriores solo conectan la
+estructura aprobada y agregan la lógica específica que les corresponda.
+
 ### Incremento 1 — Aplicación ejecutable
 **Valor aportado:** existe una aplicación Symfony operativa, conectada a MySQL y preparada para evolucionar.
 
