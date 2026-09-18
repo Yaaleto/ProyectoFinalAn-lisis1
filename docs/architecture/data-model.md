@@ -3,6 +3,8 @@
 Este documento es la línea base de persistencia de BOVITRACK V1. El esquema se
 implementa antes de continuar con las verticales funcionales para que cada issue
 posterior conecte formularios, permisos y consultas sobre una estructura estable.
+El detalle de columnas, tipos, nulabilidad y restricciones se encuentra en el
+[diccionario de datos](data-dictionary.md).
 
 ## Diagrama entidad-relación
 
