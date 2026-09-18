@@ -56,9 +56,14 @@ final class AuthenticationTest extends WebTestCase
     {
         $client = static::createClient();
 
-        $client->request('GET', '/login');
+        $crawler = $client->request('GET', '/login');
 
         self::assertStringContainsString('no-store', (string) $client->getResponse()->headers->get('Cache-Control'));
+        self::assertGreaterThan(
+            24,
+            \strlen($crawler->filterXPath('//input[@name="_csrf_token"]')->attr('value')),
+            'El formulario de acceso debe usar un token CSRF real asociado a la sesión.',
+        );
     }
 
     public function testExpiredLoginFormIsNotReportedAsWrongCredentials(): void
@@ -117,6 +122,23 @@ final class AuthenticationTest extends WebTestCase
         $client->followRedirect();
 
         $this->signIn($client, $email);
+
+        self::assertResponseRedirects('/');
+    }
+
+    public function testDifferentUserCanSignInAfterLogout(): void
+    {
+        $client = static::createClient();
+        $this->createUser($client, 'admin-switch-auth@example.com', Usuario::ROL_ADMINISTRADOR);
+        $this->createUser($client, 'manager-switch-auth@example.com', Usuario::ROL_ENCARGADO);
+        $this->signIn($client, 'admin-switch-auth@example.com');
+        $client->followRedirect();
+
+        $token = $client->getCrawler()->filterXPath('//form[@action="/logout"]//input[@name="_csrf_token"]')->attr('value');
+        $client->request('POST', '/logout', ['_csrf_token' => $token]);
+        $client->followRedirect();
+
+        $this->signIn($client, 'manager-switch-auth@example.com');
 
         self::assertResponseRedirects('/');
     }
