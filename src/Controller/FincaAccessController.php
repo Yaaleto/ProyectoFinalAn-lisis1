@@ -21,11 +21,23 @@ final class FincaAccessController extends AbstractController
     #[Route('/farms', name: 'app_farm_index', methods: ['GET'])]
     public function index(FincaRepository $fincaRepository): Response
     {
+        $usuario = $this->getUser();
+        \assert($usuario instanceof Usuario);
+
+        if (Usuario::ROL_ENCARGADO === $usuario->getRol()) {
+            $fincaActiva = $usuario->getFincaActiva();
+            if (null === $fincaActiva) {
+                $this->addFlash('warning', 'Tu cuenta todavía no tiene una finca asignada.');
+
+                return $this->redirectToRoute('app_health');
+            }
+
+            return $this->redirectToRoute('app_farm_show', ['finca' => $fincaActiva->getId()]);
+        }
+
         if ($redirect = $this->redirectWhenCannotAdminister()) {
             return $redirect;
         }
-        $usuario = $this->getUser();
-        \assert($usuario instanceof Usuario);
 
         $fincas = $fincaRepository->createAuthorizedQueryBuilder($usuario)
             ->orderBy('finca.nombre')
