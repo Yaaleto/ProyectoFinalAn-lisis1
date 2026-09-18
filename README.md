@@ -10,7 +10,7 @@ Requisitos:
 
 - PHP 8.2 o superior con `pdo_mysql` habilitado.
 - Composer.
-- MySQL 8.
+- Docker Desktop con Docker Compose.
 - Node.js 20 o superior y npm para compilar los estilos.
 
 Para comprobar el controlador de MySQL:
@@ -27,7 +27,10 @@ Instalación y ejecución:
 composer install
 npm install
 npm run build:css
+docker compose up -d --wait
 php bin/console doctrine:migrations:migrate --no-interaction
+php bin/console doctrine:migrations:migrate --env=test --no-interaction
+php bin/console app:seed-demo
 php -S 127.0.0.1:8000 -t public
 ```
 
@@ -35,14 +38,35 @@ Durante el trabajo visual, `npm run watch:css` recompila Tailwind al cambiar pla
 
 La configuración compartida está en `.env`. Las credenciales y secretos locales deben definirse en `.env.local`, que está excluido de Git.
 
-Configuración local verificada para el desarrollo actual:
+Configuración de desarrollo reproducible:
 
-- Contenedor MySQL: `holayahir`.
+- Servicio Compose: `database`.
+- Contenedor MySQL: `bovitrack-mysql`.
 - Servidor: `127.0.0.1:3306`.
-- Versión: MySQL 8.0.33.
-- Base de datos: `bovitrack`.
-- Usuario de aplicación: `bovitrack`, restringido a la red local de Docker.
-- Contraseña y `APP_SECRET`: almacenados únicamente en `.env.local`.
+- Versión: MySQL 8.4 LTS.
+- Bases de datos: `bovitrack` y `bovitrack_test`.
+- Usuario de desarrollo: `bovitrack`.
+- Datos persistentes: volumen Docker `bovitrack_mysql_data`.
+
+`docker compose down` detiene el entorno sin borrar datos. Usa
+`docker compose down -v` únicamente cuando quieras eliminar también las bases
+de datos del entorno Docker.
+
+Para ejecutar todas las pruebas:
+
+```bash
+docker compose up -d --wait
+php bin/console doctrine:migrations:migrate --env=test --no-interaction
+vendor/bin/simple-phpunit
+```
+
+Credenciales locales creadas por `php bin/console app:seed-demo`:
+
+- Administrador: `admin.demo@bovitrack.local`
+- Encargado: `encargado.demo@bovitrack.local`
+- Contraseña para ambas cuentas: `BoviTrackDemo2026!`
+
+El comando puede ejecutarse varias veces: actualiza los datos demo sin duplicarlos.
 
 Abrir `http://127.0.0.1:8000/` para comprobar que Symfony funciona y que MySQL responde.
 
