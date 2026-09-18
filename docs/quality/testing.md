@@ -7,6 +7,8 @@ Cada cambio que incorpore lógica de dominio, validaciones, persistencia o regla
 ## Ejecución local
 
 ```bash
+docker compose up -d --wait
+php bin/console doctrine:migrations:migrate --env=test --no-interaction
 vendor/bin/simple-phpunit
 ```
 
@@ -48,4 +50,6 @@ Las pruebas de integración de base de datos complementan las unitarias cuando u
 
 Las reglas de autorización deben verificarse además con pruebas funcionales: una solicitud autorizada, una denegación por finca no asignada y una denegación por organización ajena. Las consultas con alcance de organización o finca también deben comprobar que no devuelvan registros no autorizados.
 
-Las pruebas funcionales usan automáticamente la base `bovitrack_test`, separada de la base local de desarrollo. Configura una conexión local equivalente en `.env.test.local` (archivo ignorado) para que PHPUnit pueda acceder a ella. La configuración de Doctrine añade el sufijo `_test` al nombre de la base.
+Las pruebas funcionales usan automáticamente la base `bovitrack_test`, separada
+de la base de desarrollo. Docker Compose crea ambas bases y la configuración de
+Doctrine añade el sufijo `_test` al nombre configurado.
