@@ -48,6 +48,12 @@ Tecnologías previstas:
 
 # Metodología de desarrollo
 
+## Gestión de ramas y commits
+
+- Cada issue se desarrolla en una rama basada en `dev`, con un nombre relacionado con la issue.
+- Cada commit debe indicar al final la issue que se está trabajando. Por ejemplo: `feat(users): asignar finca activa (#13)`.
+- Antes de integrar una rama en `dev`, se verifican sus pruebas. El merge y el cierre de la issue se realizan únicamente después de la aprobación del usuario.
+
 BOVITRACK se desarrollará mediante una **metodología incremental**.
 
 Esto significa que el trabajo no debe organizarse como una secuencia de capas incompletas —por ejemplo, terminar primero toda la base de datos, después todos los controladores y al final toda la interfaz—. Cada iteración debe entregar una porción funcional del sistema que pueda ejecutarse, probarse y demostrarse.
