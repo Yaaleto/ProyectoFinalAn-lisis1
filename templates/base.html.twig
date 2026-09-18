@@ -53,12 +53,12 @@
                     <ul class="space-y-1" role="list">
                         <li><twig:NavItem label="Dashboard" icon="home" href="{{ path('app_health') }}" active="{{ app.current_route == 'app_health' }}" /></li>
                         <li><twig:NavItem label="Animales" icon="database" /></li>
-                        <li><twig:NavItem label="Fincas" icon="building" href="{{ is_granted('ROLE_ADMINISTRADOR') ? path('app_farm_index') : null }}" active="{{ app.current_route starts with 'app_farm_' }}" /></li>
+                        <li><twig:NavItem label="Fincas" icon="building" href="{{ path('app_farm_index') }}" active="{{ app.current_route starts with 'app_farm_' }}" /></li>
                         <li><twig:NavItem label="Pesajes" icon="ruler" /></li>
                         <li><twig:NavItem label="Vacunaciones" icon="syringe" /></li>
                         <li><twig:NavItem label="Reproducción" icon="calendar" /></li>
                         <li><twig:NavItem label="Leche" icon="drop" /></li>
-                        <li><twig:NavItem label="Usuarios" icon="people" /></li>
+                        <li><twig:NavItem label="Usuarios" icon="people" href="{{ is_granted('ROLE_ADMINISTRADOR') ? path('app_user_index') : null }}" active="{{ app.current_route starts with 'app_user_' }}" /></li>
                         <li><twig:NavItem label="Catálogos" icon="settings" /></li>
                     </ul>
                 </nav>

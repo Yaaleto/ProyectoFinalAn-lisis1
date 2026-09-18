@@ -141,13 +141,13 @@ final class FarmAdministrationTest extends WebTestCase
         self::assertResponseStatusCodeSame(403);
     }
 
-    public function testFarmManagerCannotAccessAnyAdministrationScreen(): void
+    public function testFarmManagerCannotAccessWriteAdministrationScreens(): void
     {
         $client = static::createClient();
         $fixture = $this->createFixture($client);
         $client->loginUser($fixture['encargado']);
 
-        foreach (['/farms', '/farms/new', sprintf('/farms/%d/edit', $fixture['finca']->getId())] as $path) {
+        foreach (['/farms/new', sprintf('/farms/%d/edit', $fixture['finca']->getId())] as $path) {
             $client->request('GET', $path);
             self::assertResponseRedirects('/', null, $path);
             $client->followRedirect();
