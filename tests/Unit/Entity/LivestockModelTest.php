@@ -86,6 +86,35 @@ final class LivestockModelTest extends TestCase
         new Pesaje($animal, new DateTimeImmutable('2026-06-02'), '300');
     }
 
+    public function testOperationalRecordAllowsBirthAndExitDates(): void
+    {
+        $animal = $this->animal()->setFechaNacimiento(new DateTimeImmutable('2026-01-10'));
+        $onBirth = new Pesaje($animal, new DateTimeImmutable('2026-01-10'), '35.50');
+        $animal->registrarSalida(Animal::ESTADO_VENDIDO, new DateTimeImmutable('2026-06-01'));
+        $onExit = new Pesaje($animal, new DateTimeImmutable('2026-06-01'), '300.00');
+
+        self::assertSame('2026-01-10', $onBirth->getFecha()->format('Y-m-d'));
+        self::assertSame('2026-06-01', $onExit->getFecha()->format('Y-m-d'));
+    }
+
+    public function testParentMustBelongToTheSameOrganization(): void
+    {
+        [$organizacion, $finca] = $this->tenant();
+        $cria = new Animal($organizacion, $finca, 'CRIA', Animal::SEXO_HEMBRA, Animal::ORIGEN_NACIDO_EN_FINCA);
+        $otraOrganizacion = new OrganizacionGanadera('Otra organización', 'OTRA');
+        $padreAjeno = new Animal(
+            $otraOrganizacion,
+            (new Finca('Finca ajena', 'AJENA'))->setOrganizacion($otraOrganizacion),
+            'PADRE-AJENO',
+            Animal::SEXO_MACHO,
+            Animal::ORIGEN_EXTERNO,
+        );
+
+        $this->expectException(DomainException::class);
+
+        $cria->setPadre($padreAjeno);
+    }
+
     public function testVaccinationRejectsInactiveVaccine(): void
     {
         $animal = $this->animal();
@@ -141,6 +170,13 @@ final class LivestockModelTest extends TestCase
         $evening = new ProduccionLeche($animal, new DateTimeImmutable('2026-09-17 17:00:00'), '7.25');
 
         self::assertSame('15.75', number_format((float) $morning->getCantidadLitros() + (float) $evening->getCantidadLitros(), 2, '.', ''));
+    }
+
+    public function testMilkProductionRequiresAFemaleProducer(): void
+    {
+        $this->expectException(DomainException::class);
+
+        new ProduccionLeche($this->animal(Animal::SEXO_HEMBRA), new DateTimeImmutable('2026-09-17 06:00:00'), '8.50');
     }
 
     /** @return iterable<string, array{string}> */
