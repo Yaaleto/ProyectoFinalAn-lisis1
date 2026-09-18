@@ -5,14 +5,16 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use App\Entity\Concerns\Auditable;
+use App\Repository\UsuarioRepository;
 use DomainException;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: UsuarioRepository::class)]
 #[ORM\Table(name: 'usuario')]
 #[ORM\HasLifecycleCallbacks]
 #[UniqueEntity(fields: ['email'], message: 'El correo electrónico ya está en uso.')]
@@ -49,7 +51,6 @@ class Usuario implements UserInterface, PasswordAuthenticatedUserInterface
     private string $email;
 
     #[ORM\Column(length: 255)]
-    #[Assert\NotBlank]
     private string $contrasenaHash;
 
     #[ORM\Column(length: 20)]
@@ -182,6 +183,17 @@ class Usuario implements UserInterface, PasswordAuthenticatedUserInterface
         $this->activo = $activo;
 
         return $this;
+    }
+
+    #[Assert\Callback]
+    public function validateActiveFarm(ExecutionContextInterface $context): void
+    {
+        if (self::ROL_ENCARGADO === $this->rol && null === $this->fincaActiva) {
+            $context
+                ->buildViolation('Selecciona una finca activa para el encargado.')
+                ->atPath('fincaActiva')
+                ->addViolation();
+        }
     }
 
     #[\Deprecated]
