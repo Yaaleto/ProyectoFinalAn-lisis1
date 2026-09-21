@@ -21,22 +21,26 @@ final class RazaController extends AbstractController
     #[Route('/breeds', name: 'app_breed_index', methods: ['GET'])]
     public function index(RazaRepository $razaRepository): Response
     {
-        if ($redirect = $this->redirectWhenCannotAdminister()) {
-            return $redirect;
-        }
-
-        $administrador = $this->getAdministrator();
-        $organizacion = $administrador->getOrganizacion();
+        $usuario = $this->getCatalogUser();
+        $organizacion = $usuario->getOrganizacion();
         if (null === $organizacion) {
             throw $this->createAccessDeniedException();
         }
 
-        $razas = $razaRepository->createOrganizationQueryBuilder($organizacion)
+        $canManage = $this->isGranted('ROLE_ADMINISTRADOR');
+        if (!$canManage && !$this->isGranted('ROLE_ENCARGADO')) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $queryBuilder = $canManage
+            ? $razaRepository->createOrganizationQueryBuilder($organizacion)
+            : $razaRepository->createActiveOrganizationQueryBuilder($organizacion);
+        $razas = $queryBuilder
             ->orderBy('raza.nombre')
             ->getQuery()
             ->getResult();
 
-        return $this->render('breed/index.html.twig', ['razas' => $razas]);
+        return $this->render('breed/index.html.twig', compact('razas', 'canManage'));
     }
 
     #[Route('/breeds/new', name: 'app_breed_new', methods: ['GET', 'POST'])]
@@ -107,7 +111,42 @@ final class RazaController extends AbstractController
         ]);
     }
 
+    #[Route('/breeds/{raza}/toggle-status', name: 'app_breed_toggle_status', methods: ['POST'], requirements: ['raza' => '\\d+'])]
+    public function toggleStatus(
+        Raza $raza,
+        Request $request,
+        EntityManagerInterface $entityManager,
+        FincaAccess $fincaAccess,
+    ): Response {
+        if ($redirect = $this->redirectWhenCannotAdminister()) {
+            return $redirect;
+        }
+
+        $administrador = $this->getAdministrator();
+        if (!$fincaAccess->canAccessOrganization($administrador, $raza->getOrganizacion())) {
+            throw $this->createAccessDeniedException();
+        }
+        if (!$this->isCsrfTokenValid('toggle-breed-'.$raza->getId(), (string) $request->request->get('_token'))) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $raza->setActiva(!$raza->isActiva())
+            ->setActualizadoPor($administrador);
+        $entityManager->flush();
+        $this->addFlash('success', $raza->isActiva() ? 'La raza fue activada correctamente.' : 'La raza fue desactivada correctamente.');
+
+        return $this->redirectToRoute('app_breed_index');
+    }
+
     private function getAdministrator(): Usuario
+    {
+        $usuario = $this->getUser();
+        \assert($usuario instanceof Usuario);
+
+        return $usuario;
+    }
+
+    private function getCatalogUser(): Usuario
     {
         $usuario = $this->getUser();
         \assert($usuario instanceof Usuario);

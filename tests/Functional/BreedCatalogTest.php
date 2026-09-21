@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Functional;
 
 use App\Entity\OrganizacionGanadera;
+use App\Entity\Finca;
 use App\Entity\Raza;
 use App\Entity\Usuario;
 use Doctrine\ORM\EntityManagerInterface;
@@ -102,24 +103,67 @@ final class BreedCatalogTest extends WebTestCase
         self::assertResponseStatusCodeSame(403);
     }
 
-    /** @return array{organizacion: OrganizacionGanadera, administrador: Usuario, raza: Raza, razaAjena: Raza} */
+    public function testAdministratorCanDeactivateAndReactivateABreed(): void
+    {
+        $client = static::createClient();
+        $fixture = $this->createFixture($client);
+        $client->loginUser($fixture['administrador']);
+
+        $crawler = $client->request('GET', '/breeds');
+        $client->submit($crawler->selectButton('Desactivar')->form());
+
+        self::assertResponseRedirects('/breeds');
+        $this->entityManager($client)->clear();
+        self::assertFalse($this->entityManager($client)->find(Raza::class, $fixture['raza']->getId())?->isActiva());
+
+        $crawler = $client->request('GET', '/breeds');
+        $client->submit($crawler->selectButton('Activar')->form());
+
+        $this->entityManager($client)->clear();
+        self::assertTrue($this->entityManager($client)->find(Raza::class, $fixture['raza']->getId())?->isActiva());
+    }
+
+    public function testFarmManagerSeesOnlyActiveBreedsAndCannotManageThem(): void
+    {
+        $client = static::createClient();
+        $fixture = $this->createFixture($client);
+        $fixture['raza']->setActiva(false);
+        $this->entityManager($client)->flush();
+        $client->loginUser($fixture['encargado']);
+
+        $client->request('GET', '/breeds');
+
+        self::assertResponseIsSuccessful();
+        self::assertStringContainsString($fixture['razaAjena']->getNombre(), (string) $client->getResponse()->getContent());
+        self::assertStringNotContainsString($fixture['raza']->getNombre(), (string) $client->getResponse()->getContent());
+        self::assertStringNotContainsString('Nueva raza', (string) $client->getResponse()->getContent());
+
+        $client->request('GET', '/breeds/new');
+        self::assertResponseRedirects('/');
+    }
+
+    /** @return array{organizacion: OrganizacionGanadera, administrador: Usuario, encargado: Usuario, raza: Raza, razaAjena: Raza} */
     private function createFixture(KernelBrowser $client): array
     {
         $entityManager = $this->entityManager($client);
         $suffix = strtoupper(bin2hex(random_bytes(4)));
         $organizacion = new OrganizacionGanadera('Organización '.$suffix, 'ORG-'.$suffix);
         $otraOrganizacion = new OrganizacionGanadera('Otra organización '.$suffix, 'OTRA-'.$suffix);
+        $finca = (new Finca('Finca '.$suffix, 'FIN-'.$suffix))->setOrganizacion($otraOrganizacion);
         $administrador = (new Usuario('Administrador', 'admin-'.$suffix.'@example.com', 'hash', Usuario::ROL_ADMINISTRADOR))
             ->setOrganizacion($organizacion);
+        $encargado = (new Usuario('Encargado', 'manager-'.$suffix.'@example.com', 'hash', Usuario::ROL_ENCARGADO))
+            ->setOrganizacion($otraOrganizacion)
+            ->setFincaActiva($finca);
         $raza = new Raza($organizacion, 'Raza propia '.$suffix);
         $razaAjena = new Raza($otraOrganizacion, 'Raza ajena '.$suffix);
 
-        foreach ([$organizacion, $otraOrganizacion, $administrador, $raza, $razaAjena] as $entity) {
+        foreach ([$organizacion, $otraOrganizacion, $finca, $administrador, $encargado, $raza, $razaAjena] as $entity) {
             $entityManager->persist($entity);
         }
         $entityManager->flush();
 
-        return compact('organizacion', 'administrador', 'raza', 'razaAjena');
+        return compact('organizacion', 'administrador', 'encargado', 'raza', 'razaAjena');
     }
 
     private function entityManager(KernelBrowser $client): EntityManagerInterface

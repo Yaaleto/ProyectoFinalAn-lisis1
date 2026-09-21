@@ -10,7 +10,9 @@
                 <h1 class="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">Razas</h1>
                 <p class="mt-2 text-sm text-ink-muted">Razas registradas en {{ app.user.organizacion.nombre }}.</p>
             </div>
-            <a class="inline-flex min-h-11 items-center justify-center rounded-md bg-brand px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-hover" href="{{ path('app_breed_new') }}">Nueva raza</a>
+            {% if canManage %}
+                <a class="inline-flex min-h-11 items-center justify-center rounded-md bg-brand px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-hover" href="{{ path('app_breed_new') }}">Nueva raza</a>
+            {% endif %}
         </div>
 
         <div class="overflow-hidden rounded-lg border border-surface-muted bg-surface shadow-sm">
@@ -25,16 +27,26 @@
                         <thead class="bg-surface-muted text-ink-muted">
                             <tr>
                                 <th class="px-4 py-3 font-semibold" scope="col">Nombre</th>
-                                <th class="px-4 py-3 text-right font-semibold" scope="col">Acciones</th>
+                                {% if canManage %}
+                                    <th class="px-4 py-3 font-semibold" scope="col">Estado</th>
+                                    <th class="px-4 py-3 text-right font-semibold" scope="col">Acciones</th>
+                                {% endif %}
                             </tr>
                         </thead>
                         <tbody>
                             {% for raza in razas %}
                                 <tr class="border-t border-surface-muted">
                                     <td class="px-4 py-3 font-medium">{{ raza.nombre }}</td>
-                                    <td class="px-4 py-3 text-right">
-                                        <a class="font-semibold text-brand hover:underline" href="{{ path('app_breed_edit', {raza: raza.id}) }}">Editar</a>
-                                    </td>
+                                    {% if canManage %}
+                                        <td class="px-4 py-3 text-ink-muted">{{ raza.activa ? 'Activa' : 'Inactiva' }}</td>
+                                        <td class="px-4 py-3 text-right">
+                                            <a class="mr-4 font-semibold text-brand hover:underline" href="{{ path('app_breed_edit', {raza: raza.id}) }}">Editar</a>
+                                            <form class="inline" method="post" action="{{ path('app_breed_toggle_status', {raza: raza.id}) }}">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('toggle-breed-' ~ raza.id) }}">
+                                                <button class="font-semibold text-brand hover:underline" type="submit">{{ raza.activa ? 'Desactivar' : 'Activar' }}</button>
+                                            </form>
+                                        </td>
+                                    {% endif %}
                                 </tr>
                             {% endfor %}
                         </tbody>
