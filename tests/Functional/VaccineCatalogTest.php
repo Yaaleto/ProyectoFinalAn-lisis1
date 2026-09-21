@@ -27,6 +27,21 @@ final class VaccineCatalogTest extends WebTestCase
         self::assertStringNotContainsString($fixture['vacunaAjena']->getNombre(), (string) $client->getResponse()->getContent());
     }
 
+    public function testCatalogNavigationGroupsBreedAndVaccineLinks(): void
+    {
+        $client = static::createClient();
+        $fixture = $this->createFixture($client);
+        $client->loginUser($fixture['administrador']);
+
+        $client->request('GET', '/vaccines');
+
+        $content = (string) $client->getResponse()->getContent();
+        self::assertStringContainsString('<details open>', $content);
+        self::assertStringContainsString('>Catálogos</span>', $content);
+        self::assertStringContainsString('href="/breeds"', $content);
+        self::assertStringContainsString('href="/vaccines"', $content);
+    }
+
     public function testAdministratorCreatesVaccineInsideItsOrganizationWithAuditData(): void
     {
         $client = static::createClient();
