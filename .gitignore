@@ -16,3 +16,9 @@
 
 /node_modules/
 /.phpunit.result.cache
+
+# Configuración local de agentes e índice generado del proyecto.
+/AGENTS.md
+/.agents/
+/.codex/
+/graphify-out/

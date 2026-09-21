@@ -50,7 +50,7 @@ Tecnologías previstas:
 
 ## Gestión de ramas y commits
 
-- Cada issue se desarrolla en una rama basada en `dev`, con un nombre relacionado con la issue.
+- Cada issue se desarrolla en una rama basada en `dev`, con el nombre `issue-<numero>-<descripcion-corta>`; no usar el prefijo `codex/`.
 - Cada commit debe indicar al final la issue que se está trabajando. Por ejemplo: `feat(users): asignar finca activa (#13)`.
 - Antes de integrar una rama en `dev`, se verifican sus pruebas. El merge y el cierre de la issue se realizan únicamente después de la aprobación del usuario.
 
