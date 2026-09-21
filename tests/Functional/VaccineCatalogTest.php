@@ -38,6 +38,7 @@ final class VaccineCatalogTest extends WebTestCase
         $content = (string) $client->getResponse()->getContent();
         self::assertStringContainsString('<details open>', $content);
         self::assertStringContainsString('>Catálogos</span>', $content);
+        self::assertStringContainsString('class="ml-auto size-4 shrink-0 fill-current"', $content);
         self::assertStringContainsString('href="/breeds"', $content);
         self::assertStringContainsString('href="/vaccines"', $content);
     }
