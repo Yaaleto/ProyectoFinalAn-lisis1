@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: \App\Repository\VacunaRepository::class)]
 #[ORM\Table(name: 'vacuna')]
 #[ORM\UniqueConstraint(name: 'uniq_vacuna_organizacion_nombre', columns: ['organizacion_id', 'nombre'])]
 #[ORM\HasLifecycleCallbacks]
