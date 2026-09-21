@@ -10,6 +10,7 @@ use App\Entity\MontaReproductiva;
 use App\Entity\OrganizacionGanadera;
 use App\Entity\Pesaje;
 use App\Entity\ProduccionLeche;
+use App\Entity\Raza;
 use App\Entity\Vacuna;
 use App\Entity\Vacunacion;
 use DateTimeImmutable;
@@ -122,6 +123,16 @@ final class LivestockModelTest extends TestCase
         $this->expectException(DomainException::class);
 
         new Vacunacion($animal, $vacuna, new DateTimeImmutable('2026-09-17'), '5 ml');
+    }
+
+    public function testAnimalRejectsInactiveBreed(): void
+    {
+        $animal = $this->animal();
+        $raza = (new Raza($animal->getOrganizacion(), 'Brahman'))->setActiva(false);
+
+        $this->expectException(DomainException::class);
+
+        $animal->setRaza($raza);
     }
 
     public function testVaccinationRejectsForeignVaccine(): void

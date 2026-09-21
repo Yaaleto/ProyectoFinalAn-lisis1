@@ -16,3 +16,10 @@
 
 /node_modules/
 /.phpunit.result.cache
+
+# Archivos locales y generados del proyecto.
+/AGENTS.md
+/.agents/
+/.codex/
+/graphify-out/
+/docs/

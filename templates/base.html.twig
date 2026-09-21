@@ -59,7 +59,7 @@
                         <li><twig:NavItem label="Reproducción" icon="calendar" /></li>
                         <li><twig:NavItem label="Leche" icon="drop" /></li>
                         <li><twig:NavItem label="Usuarios" icon="people" href="{{ is_granted('ROLE_ADMINISTRADOR') ? path('app_user_index') : null }}" active="{{ app.current_route starts with 'app_user_' }}" /></li>
-                        <li><twig:NavItem label="Catálogos" icon="settings" /></li>
+                        <li><twig:NavItem label="Catálogos" icon="settings" href="{{ path('app_breed_index') }}" active="{{ app.current_route starts with 'app_breed_' }}" /></li>
                     </ul>
                 </nav>
             </aside>
