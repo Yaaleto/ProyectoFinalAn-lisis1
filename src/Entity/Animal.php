@@ -59,6 +59,8 @@ class Animal
     private ?self $madre = null;
 
     #[ORM\Column(length: 36, unique: true)]
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 36)]
     private string $codigoInterno;
 
     #[ORM\Column(length: 50, nullable: true)]
@@ -98,6 +100,10 @@ class Animal
 
     public function __construct(OrganizacionGanadera $organizacion, Finca $finca, string $codigoInterno, string $sexo, string $origen)
     {
+        $codigoInterno = trim($codigoInterno);
+        if ('' === $codigoInterno || strlen($codigoInterno) > 36) {
+            throw new DomainException('El código interno del animal no es válido.');
+        }
         if ($finca->getOrganizacion() !== $organizacion) {
             throw new DomainException('La finca debe pertenecer a la organización del animal.');
         }
@@ -170,7 +176,18 @@ class Animal
 
     public function setArete(?string $arete): static { $this->arete = $arete; return $this; }
     public function setNombre(?string $nombre): static { $this->nombre = $nombre; return $this; }
-    public function setFechaNacimiento(?DateTimeImmutable $fecha): static { $this->fechaNacimiento = $fecha; return $this; }
+    public function setFechaNacimiento(?DateTimeImmutable $fecha): static
+    {
+        if (null !== $fecha && $fecha > new DateTimeImmutable('today')) {
+            throw new DomainException('La fecha de nacimiento no puede estar en el futuro.');
+        }
+        if (null !== $fecha && null !== $this->fechaSalida && $fecha > $this->fechaSalida) {
+            throw new DomainException('La fecha de nacimiento no puede ser posterior a la salida.');
+        }
+        $this->fechaNacimiento = $fecha;
+
+        return $this;
+    }
 
     public function setPesoNacimientoKg(?string $peso): static
     {
@@ -196,6 +213,9 @@ class Animal
     {
         if (!in_array($estado, [self::ESTADO_VENDIDO, self::ESTADO_FALLECIDO, self::ESTADO_EGRESADO], true)) {
             throw new DomainException('El estado de salida no es válido.');
+        }
+        if ($fecha > new DateTimeImmutable('today')) {
+            throw new DomainException('La fecha de salida no puede estar en el futuro.');
         }
         if (null !== $this->fechaNacimiento && $fecha < $this->fechaNacimiento) {
             throw new DomainException('La salida no puede preceder al nacimiento.');
