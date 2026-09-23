@@ -80,6 +80,21 @@ final class DatabaseSchemaTest extends KernelTestCase
         self::assertNotNull($segundo->getId());
     }
 
+    public function testDatabaseRejectsDuplicateInternalAnimalCodeGlobally(): void
+    {
+        [$primero] = $this->persistAnimal('CODIGO-GLOBAL');
+        $suffix = strtoupper(bin2hex(random_bytes(4)));
+        $organizacion = new OrganizacionGanadera('Otra organización '.$suffix, 'OTRA-'.$suffix);
+        $finca = (new Finca('Otra finca '.$suffix, 'OTRA-FIN-'.$suffix))->setOrganizacion($organizacion);
+        $segundo = new Animal($organizacion, $finca, $primero->getCodigoInterno(), Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO);
+        foreach ([$organizacion, $finca, $segundo] as $entity) {
+            $this->entityManager->persist($entity);
+        }
+
+        $this->expectException(UniqueConstraintViolationException::class);
+        $this->entityManager->flush();
+    }
+
     public function testDatabaseRejectsDuplicateEarringInsideOneOrganization(): void
     {
         $suffix = strtoupper(bin2hex(random_bytes(4)));
