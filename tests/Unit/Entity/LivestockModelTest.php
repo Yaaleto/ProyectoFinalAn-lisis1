@@ -19,6 +19,31 @@ use PHPUnit\Framework\TestCase;
 
 final class LivestockModelTest extends TestCase
 {
+    public function testAnimalRejectsBlankInternalCode(): void
+    {
+        [$organizacion, $finca] = $this->tenant();
+        $this->expectException(DomainException::class);
+
+        new Animal($organizacion, $finca, '  ', Animal::SEXO_HEMBRA, Animal::ORIGEN_EXTERNO);
+    }
+
+    public function testAnimalRejectsInternalCodeLongerThanStorageLimit(): void
+    {
+        [$organizacion, $finca] = $this->tenant();
+        $this->expectException(DomainException::class);
+
+        new Animal($organizacion, $finca, str_repeat('A', 37), Animal::SEXO_HEMBRA, Animal::ORIGEN_EXTERNO);
+    }
+
+    /** @dataProvider invalidClassifications */
+    public function testAnimalRejectsInvalidClassifications(string $sexo, string $origen): void
+    {
+        [$organizacion, $finca] = $this->tenant();
+        $this->expectException(DomainException::class);
+
+        new Animal($organizacion, $finca, 'AN-1', $sexo, $origen);
+    }
+
     public function testAnimalAcceptsAValidFemaleMilkProducer(): void
     {
         $animal = $this->animal(Animal::SEXO_HEMBRA);
@@ -96,6 +121,28 @@ final class LivestockModelTest extends TestCase
 
         self::assertSame('2026-01-10', $onBirth->getFecha()->format('Y-m-d'));
         self::assertSame('2026-06-01', $onExit->getFecha()->format('Y-m-d'));
+    }
+
+    public function testAnimalRejectsFutureBirthDate(): void
+    {
+        $this->expectException(DomainException::class);
+
+        $this->animal()->setFechaNacimiento(new DateTimeImmutable('tomorrow'));
+    }
+
+    public function testAnimalRejectsBirthAfterRegisteredExit(): void
+    {
+        $animal = $this->animal()->registrarSalida(Animal::ESTADO_VENDIDO, new DateTimeImmutable('yesterday'));
+        $this->expectException(DomainException::class);
+
+        $animal->setFechaNacimiento(new DateTimeImmutable('today'));
+    }
+
+    public function testAnimalRejectsFutureExitDate(): void
+    {
+        $this->expectException(DomainException::class);
+
+        $this->animal()->registrarSalida(Animal::ESTADO_EGRESADO, new DateTimeImmutable('tomorrow'));
     }
 
     public function testParentMustBelongToTheSameOrganization(): void
@@ -196,6 +243,13 @@ final class LivestockModelTest extends TestCase
         yield 'zero' => ['0'];
         yield 'negative' => ['-0.01'];
         yield 'not numeric' => ['invalid'];
+    }
+
+    /** @return iterable<string, array{string, string}> */
+    public static function invalidClassifications(): iterable
+    {
+        yield 'sex' => ['DESCONOCIDO', Animal::ORIGEN_EXTERNO];
+        yield 'origin' => [Animal::SEXO_HEMBRA, 'DESCONOCIDO'];
     }
 
     private function animal(string $sexo = Animal::SEXO_HEMBRA): Animal
