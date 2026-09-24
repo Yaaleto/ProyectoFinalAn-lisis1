@@ -90,7 +90,7 @@ final class AnimalController extends AbstractController
                 $animal = (new Animal(
                     $organizacion,
                     $data['finca'],
-                    (string) $data['codigoInterno'],
+                    $this->generateInternalCode(),
                     (string) $data['sexo'],
                     (string) $data['origen'],
                 ))
@@ -125,6 +125,11 @@ final class AnimalController extends AbstractController
         }
 
         return $this->render('animal/form.html.twig', ['form' => $form]);
+    }
+
+    private function generateInternalCode(): string
+    {
+        return 'AN-'.strtoupper(bin2hex(random_bytes(16)));
     }
 
     private function optionalString(mixed $value): ?string
