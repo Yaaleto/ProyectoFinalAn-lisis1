@@ -28,7 +28,52 @@ final class AnimalModuleTest extends WebTestCase
         self::assertStringNotContainsString($fixture['animalAjeno']->getCodigoInterno(), (string) $client->getResponse()->getContent());
     }
 
-    /** @return array{administrador: Usuario, animal: Animal, animalAjeno: Animal} */
+    public function testAdministratorCanRegisterAnimalFromTheInterface(): void
+    {
+        $client = static::createClient();
+        $fixture = $this->createFixture($client);
+        $client->loginUser($fixture['administrador']);
+        $codigo = 'NEW-'.strtoupper(bin2hex(random_bytes(3)));
+
+        $crawler = $client->request('GET', '/animals/new');
+        $client->submit($crawler->selectButton('Registrar animal')->form([
+            'animal[codigoInterno]' => $codigo,
+            'animal[arete]' => 'GT-'.$codigo,
+            'animal[nombre]' => 'Luna',
+            'animal[finca]' => (string) $fixture['finca']->getId(),
+            'animal[sexo]' => Animal::SEXO_HEMBRA,
+            'animal[fechaNacimiento]' => '2026-01-15',
+            'animal[pesoNacimientoKg]' => '35.50',
+            'animal[origen]' => Animal::ORIGEN_NACIDO_EN_FINCA,
+            'animal[productoraLeche]' => '1',
+        ]));
+
+        self::assertResponseRedirects('/animals');
+        $animal = $this->entityManager($client)->getRepository(Animal::class)->findOneBy(['codigoInterno' => $codigo]);
+        self::assertInstanceOf(Animal::class, $animal);
+        self::assertSame($fixture['organizacion']->getId(), $animal->getOrganizacion()->getId());
+        self::assertSame($fixture['finca']->getId(), $animal->getFinca()->getId());
+        self::assertTrue($animal->isProductoraLeche());
+    }
+
+    public function testDuplicateInternalCodeIsRejectedFromTheInterface(): void
+    {
+        $client = static::createClient();
+        $fixture = $this->createFixture($client);
+        $client->loginUser($fixture['administrador']);
+
+        $crawler = $client->request('GET', '/animals/new');
+        $client->submit($crawler->selectButton('Registrar animal')->form([
+            'animal[codigoInterno]' => $fixture['animal']->getCodigoInterno(),
+            'animal[finca]' => (string) $fixture['finca']->getId(),
+            'animal[sexo]' => Animal::SEXO_MACHO,
+            'animal[origen]' => Animal::ORIGEN_EXTERNO,
+        ]));
+
+        self::assertStringContainsString('El código interno ya existe.', (string) $client->getResponse()->getContent());
+    }
+
+    /** @return array{organizacion: OrganizacionGanadera, finca: Finca, administrador: Usuario, animal: Animal, animalAjeno: Animal} */
     private function createFixture(KernelBrowser $client): array
     {
         $entityManager = $client->getContainer()->get(EntityManagerInterface::class);
@@ -47,6 +92,11 @@ final class AnimalModuleTest extends WebTestCase
         }
         $entityManager->flush();
 
-        return compact('administrador', 'animal', 'animalAjeno');
+        return compact('organizacion', 'finca', 'administrador', 'animal', 'animalAjeno');
+    }
+
+    private function entityManager(KernelBrowser $client): EntityManagerInterface
+    {
+        return $client->getContainer()->get(EntityManagerInterface::class);
     }
 }
