@@ -29,12 +29,6 @@ final class AnimalType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('codigoInterno', TextType::class, [
-                'label' => 'Código interno',
-                'constraints' => [new Assert\NotBlank(), new Assert\Length(max: 36)],
-                'help' => 'Debe ser único en todo el sistema.',
-                'attr' => ['autocomplete' => 'off'],
-            ])
             ->add('arete', TextType::class, [
                 'label' => 'Arete',
                 'required' => false,

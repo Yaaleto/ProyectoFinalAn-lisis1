@@ -60,6 +60,15 @@ final class LivestockModelTest extends TestCase
         $this->animal(Animal::SEXO_MACHO)->setProductoraLeche(true);
     }
 
+    public function testMilkProducerCannotBeChangedToMale(): void
+    {
+        $this->expectException(DomainException::class);
+
+        $this->animal(Animal::SEXO_HEMBRA)
+            ->setProductoraLeche(true)
+            ->setSexo(Animal::SEXO_MACHO);
+    }
+
     public function testAnimalRejectsAFarmFromAnotherOrganization(): void
     {
         $organizacion = new OrganizacionGanadera('Norte', 'NORTE');
