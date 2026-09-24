@@ -24,8 +24,8 @@
                     <table class="w-full text-left text-sm">
                         <thead class="bg-surface-muted text-ink-muted">
                             <tr>
-                                <th class="px-4 py-3 font-semibold" scope="col">Código</th>
-                                <th class="px-4 py-3 font-semibold" scope="col">Nombre / arete</th>
+                                <th class="px-4 py-3 font-semibold" scope="col">Arete</th>
+                                <th class="px-4 py-3 font-semibold" scope="col">Nombre</th>
                                 <th class="px-4 py-3 font-semibold" scope="col">Finca</th>
                                 <th class="px-4 py-3 font-semibold" scope="col">Raza</th>
                                 <th class="px-4 py-3 font-semibold" scope="col">Sexo</th>
@@ -36,8 +36,8 @@
                         <tbody>
                             {% for animal in animales %}
                                 <tr class="border-t border-surface-muted">
-                                    <td class="px-4 py-3 font-medium">{{ animal.codigoInterno }}</td>
-                                    <td class="px-4 py-3 text-ink-muted">{{ animal.nombre ?: animal.arete ?: 'Sin identificar' }}</td>
+                                    <td class="px-4 py-3 font-medium">{{ animal.arete ?: 'Sin arete' }}</td>
+                                    <td class="px-4 py-3 text-ink-muted">{{ animal.nombre ?: 'Sin nombre' }}</td>
                                     <td class="px-4 py-3 text-ink-muted">{{ animal.finca.nombre }}</td>
                                     <td class="px-4 py-3 text-ink-muted">{{ animal.raza ? animal.raza.nombre : 'Sin raza' }}</td>
                                     <td class="px-4 py-3 text-ink-muted">{{ animal.sexo == 'HEMBRA' ? 'Hembra' : 'Macho' }}</td>

@@ -40,7 +40,8 @@ final class AnimalController extends AbstractController
             ->leftJoin('animal.raza', 'raza')
             ->andWhere('animal.organizacion = :organizacion')
             ->setParameter('organizacion', $organizacion)
-            ->orderBy('animal.codigoInterno');
+            ->orderBy('animal.arete')
+            ->addOrderBy('animal.nombre');
 
         if (Usuario::ROL_ENCARGADO === $usuario->getRol()) {
             $fincaActiva = $usuario->getFincaActiva();
@@ -169,7 +170,7 @@ final class AnimalController extends AbstractController
 
     private function generateInternalCode(): string
     {
-        return 'AN-'.strtoupper(bin2hex(random_bytes(16)));
+        return 'AN-'.strtoupper(bin2hex(random_bytes(6)));
     }
 
     /** @param array<string, mixed> $data */

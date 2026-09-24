@@ -24,8 +24,9 @@ final class AnimalModuleTest extends WebTestCase
 
         self::assertResponseIsSuccessful();
         self::assertCount(1, $crawler->filterXPath('//a[@href="/animals" and @aria-current="page"]'));
-        self::assertStringContainsString($fixture['animal']->getCodigoInterno(), (string) $client->getResponse()->getContent());
-        self::assertStringNotContainsString($fixture['animalAjeno']->getCodigoInterno(), (string) $client->getResponse()->getContent());
+        self::assertStringContainsString((string) $fixture['animal']->getArete(), (string) $client->getResponse()->getContent());
+        self::assertStringNotContainsString($fixture['animal']->getCodigoInterno(), (string) $client->getResponse()->getContent());
+        self::assertStringNotContainsString((string) $fixture['animalAjeno']->getArete(), (string) $client->getResponse()->getContent());
     }
 
     public function testAdministratorCanRegisterAnimalFromTheInterface(): void
@@ -51,7 +52,7 @@ final class AnimalModuleTest extends WebTestCase
         self::assertResponseRedirects('/animals');
         $animal = $this->entityManager($client)->getRepository(Animal::class)->findOneBy(['arete' => $arete]);
         self::assertInstanceOf(Animal::class, $animal);
-        self::assertMatchesRegularExpression('/^AN-[A-F0-9]{32}$/', $animal->getCodigoInterno());
+        self::assertMatchesRegularExpression('/^AN-[A-F0-9]{12}$/', $animal->getCodigoInterno());
         self::assertSame($fixture['organizacion']->getId(), $animal->getOrganizacion()->getId());
         self::assertSame($fixture['finca']->getId(), $animal->getFinca()->getId());
         self::assertTrue($animal->isProductoraLeche());
@@ -83,7 +84,7 @@ final class AnimalModuleTest extends WebTestCase
         $codigoInterno = $fixture['animal']->getCodigoInterno();
 
         $crawler = $client->request('GET', sprintf('/animals/%d/edit', $animalId));
-        self::assertStringContainsString($codigoInterno, (string) $client->getResponse()->getContent());
+        self::assertStringNotContainsString($codigoInterno, (string) $client->getResponse()->getContent());
         $client->submit($crawler->selectButton('Guardar cambios')->form([
             'animal[arete]' => 'EDIT-'.$fixture['suffix'],
             'animal[nombre]' => 'Luna editada',
@@ -178,7 +179,8 @@ final class AnimalModuleTest extends WebTestCase
         $animal = (new Animal($organizacion, $finca, 'AN-'.$suffix, Animal::SEXO_HEMBRA, Animal::ORIGEN_EXTERNO))
             ->setArete('GT-'.$suffix);
         $animalOtraFinca = new Animal($organizacion, $fincaAlterna, 'ALT-'.$suffix, Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO);
-        $animalAjeno = new Animal($otraOrganizacion, $fincaAjena, 'AJ-'.$suffix, Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO);
+        $animalAjeno = (new Animal($otraOrganizacion, $fincaAjena, 'AJ-'.$suffix, Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO))
+            ->setArete('AJENO-'.$suffix);
 
         foreach ([$organizacion, $otraOrganizacion, $finca, $fincaAlterna, $fincaAjena, $administrador, $encargado, $animal, $animalOtraFinca, $animalAjeno] as $entity) {
             $entityManager->persist($entity);
