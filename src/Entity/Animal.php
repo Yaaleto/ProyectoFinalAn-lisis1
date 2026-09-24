@@ -176,6 +176,19 @@ class Animal
 
     public function setArete(?string $arete): static { $this->arete = $arete; return $this; }
     public function setNombre(?string $nombre): static { $this->nombre = $nombre; return $this; }
+    public function setSexo(string $sexo): static
+    {
+        if (!in_array($sexo, [self::SEXO_HEMBRA, self::SEXO_MACHO], true)) {
+            throw new DomainException('El sexo del animal no es válido.');
+        }
+        if (self::SEXO_MACHO === $sexo && $this->productoraLeche) {
+            throw new DomainException('Una productora de leche no puede cambiarse a macho.');
+        }
+        $this->sexo = $sexo;
+
+        return $this;
+    }
+
     public function setFechaNacimiento(?DateTimeImmutable $fecha): static
     {
         if (null !== $fecha && $fecha > new DateTimeImmutable('today')) {
@@ -199,6 +212,16 @@ class Animal
     }
 
     public function setProcedencia(?string $procedencia): static { $this->procedencia = $procedencia; return $this; }
+
+    public function setOrigen(string $origen): static
+    {
+        if (!in_array($origen, [self::ORIGEN_NACIDO_EN_FINCA, self::ORIGEN_EXTERNO], true)) {
+            throw new DomainException('El origen del animal no es válido.');
+        }
+        $this->origen = $origen;
+
+        return $this;
+    }
 
     public function setProductoraLeche(bool $productora): static
     {
