@@ -9,10 +9,12 @@ use App\Entity\Finca;
 use App\Entity\Raza;
 use App\Entity\Usuario;
 use App\Form\AnimalType;
+use App\Security\FincaAccess;
 use Doctrine\ORM\EntityManagerInterface;
 use DomainException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormError;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -87,32 +89,17 @@ final class AnimalController extends AbstractController
             \assert(null === $data['raza'] || $data['raza'] instanceof Raza);
 
             try {
-                $animal = (new Animal(
+                $animal = new Animal(
                     $organizacion,
                     $data['finca'],
                     $this->generateInternalCode(),
                     (string) $data['sexo'],
                     (string) $data['origen'],
-                ))
-                    ->setArete($this->optionalString($data['arete']))
-                    ->setNombre($this->optionalString($data['nombre']))
-                    ->setRaza($data['raza'])
-                    ->setFechaNacimiento($data['fechaNacimiento'])
-                    ->setPesoNacimientoKg($data['pesoNacimientoKg'])
-                    ->setProcedencia($this->optionalString($data['procedencia']))
-                    ->setProductoraLeche((bool) $data['productoraLeche'])
-                    ->setCreadoPor($usuario)
-                    ->setActualizadoPor($usuario);
+                );
+                $this->applyFormData($animal, $data);
+                $animal->setCreadoPor($usuario)->setActualizadoPor($usuario);
 
-                $violations = $validator->validate($animal);
-                foreach ($violations as $violation) {
-                    $field = $form->has($violation->getPropertyPath())
-                        ? $form->get($violation->getPropertyPath())
-                        : $form;
-                    $field->addError(new FormError((string) $violation->getMessage()));
-                }
-
-                if (0 === count($violations)) {
+                if (!$this->addValidationErrors($form, $animal, $validator)) {
                     $entityManager->persist($animal);
                     $entityManager->flush();
                     $this->addFlash('success', 'El animal fue registrado correctamente.');
@@ -124,12 +111,115 @@ final class AnimalController extends AbstractController
             }
         }
 
-        return $this->render('animal/form.html.twig', ['form' => $form]);
+        return $this->render('animal/form.html.twig', [
+            'form' => $form,
+            'animal' => null,
+            'page_title' => 'Registrar animal',
+            'submit_label' => 'Registrar animal',
+        ]);
+    }
+
+    #[Route('/animals/{animal}/edit', name: 'app_animal_edit', methods: ['GET', 'POST'], requirements: ['animal' => '\\d+'])]
+    public function edit(
+        Animal $animal,
+        Request $request,
+        EntityManagerInterface $entityManager,
+        ValidatorInterface $validator,
+        FincaAccess $fincaAccess,
+    ): Response {
+        $usuario = $this->getUser();
+        \assert($usuario instanceof Usuario);
+
+        if (!$fincaAccess->canView($usuario, $animal->getFinca())) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $form = $this->createForm(AnimalType::class, $this->formData($animal), [
+            'organization' => $animal->getOrganizacion(),
+            'user' => $usuario,
+        ]);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $data = $form->getData();
+            \assert(is_array($data));
+
+            try {
+                $this->applyFormData($animal, $data);
+                $animal->setActualizadoPor($usuario);
+
+                if (!$this->addValidationErrors($form, $animal, $validator)) {
+                    $entityManager->flush();
+                    $this->addFlash('success', 'El animal fue actualizado correctamente.');
+
+                    return $this->redirectToRoute('app_animal_index');
+                }
+            } catch (DomainException $exception) {
+                $form->addError(new FormError($exception->getMessage()));
+            }
+        }
+
+        return $this->render('animal/form.html.twig', [
+            'form' => $form,
+            'animal' => $animal,
+            'page_title' => 'Editar animal',
+            'submit_label' => 'Guardar cambios',
+        ]);
     }
 
     private function generateInternalCode(): string
     {
         return 'AN-'.strtoupper(bin2hex(random_bytes(16)));
+    }
+
+    /** @param array<string, mixed> $data */
+    private function applyFormData(Animal $animal, array $data): void
+    {
+        \assert($data['finca'] instanceof Finca);
+        \assert(null === $data['raza'] || $data['raza'] instanceof Raza);
+
+        $animal
+            ->setProductoraLeche(false)
+            ->setFinca($data['finca'])
+            ->setSexo((string) $data['sexo'])
+            ->setOrigen((string) $data['origen'])
+            ->setArete($this->optionalString($data['arete']))
+            ->setNombre($this->optionalString($data['nombre']))
+            ->setRaza($data['raza'])
+            ->setFechaNacimiento($data['fechaNacimiento'])
+            ->setPesoNacimientoKg($data['pesoNacimientoKg'])
+            ->setProcedencia($this->optionalString($data['procedencia']))
+            ->setProductoraLeche((bool) $data['productoraLeche']);
+    }
+
+    /** @return array<string, mixed> */
+    private function formData(Animal $animal): array
+    {
+        return [
+            'arete' => $animal->getArete(),
+            'nombre' => $animal->getNombre(),
+            'finca' => $animal->getFinca(),
+            'raza' => $animal->getRaza(),
+            'sexo' => $animal->getSexo(),
+            'fechaNacimiento' => $animal->getFechaNacimiento(),
+            'pesoNacimientoKg' => $animal->getPesoNacimientoKg(),
+            'origen' => $animal->getOrigen(),
+            'procedencia' => $animal->getProcedencia(),
+            'productoraLeche' => $animal->isProductoraLeche(),
+        ];
+    }
+
+    private function addValidationErrors(FormInterface $form, Animal $animal, ValidatorInterface $validator): bool
+    {
+        $violations = $validator->validate($animal);
+        foreach ($violations as $violation) {
+            $field = $form->has($violation->getPropertyPath())
+                ? $form->get($violation->getPropertyPath())
+                : $form;
+            $field->addError(new FormError((string) $violation->getMessage()));
+        }
+
+        return count($violations) > 0;
     }
 
     private function optionalString(mixed $value): ?string

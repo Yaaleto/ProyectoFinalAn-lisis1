@@ -30,6 +30,7 @@
                                 <th class="px-4 py-3 font-semibold" scope="col">Raza</th>
                                 <th class="px-4 py-3 font-semibold" scope="col">Sexo</th>
                                 <th class="px-4 py-3 font-semibold" scope="col">Estado</th>
+                                <th class="px-4 py-3 text-right font-semibold" scope="col">Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -41,6 +42,9 @@
                                     <td class="px-4 py-3 text-ink-muted">{{ animal.raza ? animal.raza.nombre : 'Sin raza' }}</td>
                                     <td class="px-4 py-3 text-ink-muted">{{ animal.sexo == 'HEMBRA' ? 'Hembra' : 'Macho' }}</td>
                                     <td class="px-4 py-3 text-ink-muted">{{ animal.estado|lower|capitalize }}</td>
+                                    <td class="px-4 py-3 text-right">
+                                        <a class="font-semibold text-brand hover:underline" href="{{ path('app_animal_edit', {animal: animal.id}) }}">Editar</a>
+                                    </td>
                                 </tr>
                             {% endfor %}
                         </tbody>
