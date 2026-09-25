@@ -120,6 +120,19 @@ final class AnimalController extends AbstractController
         ]);
     }
 
+    #[Route('/animals/{animal}', name: 'app_animal_show', methods: ['GET'], requirements: ['animal' => '\\d+'])]
+    public function show(Animal $animal, FincaAccess $fincaAccess): Response
+    {
+        $usuario = $this->getUser();
+        \assert($usuario instanceof Usuario);
+
+        if (!$fincaAccess->canView($usuario, $animal->getFinca())) {
+            throw $this->createAccessDeniedException();
+        }
+
+        return $this->render('animal/show.html.twig', ['animal' => $animal]);
+    }
+
     #[Route('/animals/{animal}/edit', name: 'app_animal_edit', methods: ['GET', 'POST'], requirements: ['animal' => '\\d+'])]
     public function edit(
         Animal $animal,

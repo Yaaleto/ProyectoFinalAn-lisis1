@@ -3,33 +3,69 @@
 {% block title %}{{ page_title }} · BOVITRACK{% endblock %}
 
 {% block body %}
-    <div class="mx-auto max-w-2xl">
+    <div class="mx-auto max-w-5xl">
         <a class="text-sm font-semibold text-brand hover:underline" href="{{ path('app_animal_index') }}">← Volver a animales</a>
         <h1 class="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">{{ page_title }}</h1>
         <p class="mt-2 text-sm text-ink-muted">Los datos quedarán asociados a {{ app.user.organizacion.nombre }}.</p>
+        <p class="mt-2 text-xs text-ink-muted">Los campos marcados con * son obligatorios.</p>
 
-        {{ form_start(form, {attr: {class: 'mt-6 space-y-5 rounded-lg border border-surface-muted bg-surface p-6 shadow-sm'}}) }}
+        {{ form_start(form, {attr: {class: 'mt-6'}}) }}
             {{ form_errors(form) }}
 
-            {% for field in [form.arete, form.nombre, form.finca, form.raza, form.sexo, form.fechaNacimiento, form.pesoNacimientoKg, form.origen, form.procedencia] %}
-                <div>
-                    {{ form_label(field, null, {label_attr: {class: 'mb-2 block text-sm font-semibold'}}) }}
-                    {{ form_widget(field, {attr: {class: 'min-h-11 w-full rounded-md border border-surface-muted bg-surface px-3 py-2 text-ink'}}) }}
-                    {{ form_help(field, {help_attr: {class: 'mt-1 text-xs text-ink-muted'}}) }}
-                    {{ form_errors(field) }}
-                </div>
-            {% endfor %}
+            <div class="space-y-5">
+                <section class="rounded-lg border border-surface-muted bg-surface p-5 shadow-sm" aria-labelledby="animal-identification-heading">
+                    <div class="mb-5">
+                        <h2 class="text-lg font-semibold" id="animal-identification-heading">Identificación</h2>
+                        <p class="mt-1 text-sm text-ink-muted">Datos principales y ubicación del animal.</p>
+                    </div>
+                    <div class="space-y-5">
+                        {% for row in [[form.arete, form.nombre], [form.finca, form.raza], [form.sexo]] %}
+                            <div class="flex flex-col gap-4 sm:flex-row">
+                                {% for field in row %}
+                                    <div class="min-w-0 flex-1">
+                                        {{ form_label(field, field.vars.label ~ (field.vars.required ? ' *' : ''), {label_attr: {class: 'mb-2 block text-sm font-semibold'}}) }}
+                                        {{ form_widget(field, {attr: {class: 'min-h-11 w-full rounded-md border border-surface-muted bg-surface px-3 py-2 text-ink'}}) }}
+                                        {{ form_help(field, {help_attr: {class: 'mt-1 text-xs text-ink-muted'}}) }}
+                                        {{ form_errors(field) }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </section>
 
-            <div>
-                <div class="flex items-center gap-3">
-                    {{ form_widget(form.productoraLeche) }}
-                    {{ form_label(form.productoraLeche, null, {label_attr: {class: 'text-sm font-semibold'}}) }}
-                </div>
-                {{ form_help(form.productoraLeche, {help_attr: {class: 'mt-1 text-xs text-ink-muted'}}) }}
-                {{ form_errors(form.productoraLeche) }}
+                <section class="rounded-lg border border-surface-muted bg-surface p-5 shadow-sm" aria-labelledby="animal-origin-heading">
+                    <div class="mb-5">
+                        <h2 class="text-lg font-semibold" id="animal-origin-heading">Nacimiento y origen</h2>
+                        <p class="mt-1 text-sm text-ink-muted">Registra cuándo y dónde se originó.</p>
+                    </div>
+                    <div class="space-y-5">
+                        {% for row in [[form.fechaNacimiento, form.pesoNacimientoKg], [form.origen, form.procedencia]] %}
+                            <div class="flex flex-col gap-4 sm:flex-row">
+                                {% for field in row %}
+                                    <div class="min-w-0 flex-1">
+                                        {{ form_label(field, field.vars.label ~ (field.vars.required ? ' *' : ''), {label_attr: {class: 'mb-2 block text-sm font-semibold'}}) }}
+                                        {{ form_widget(field, {attr: {class: 'min-h-11 w-full rounded-md border border-surface-muted bg-surface px-3 py-2 text-ink'}}) }}
+                                        {{ form_help(field, {help_attr: {class: 'mt-1 text-xs text-ink-muted'}}) }}
+                                        {{ form_errors(field) }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="mt-5 rounded-md border border-surface-muted p-4">
+                        <div class="flex items-center gap-3">
+                            {{ form_widget(form.productoraLeche) }}
+                            {{ form_label(form.productoraLeche, null, {label_attr: {class: 'text-sm font-semibold'}}) }}
+                        </div>
+                        {{ form_help(form.productoraLeche, {help_attr: {class: 'mt-1 text-xs text-ink-muted'}}) }}
+                        {{ form_errors(form.productoraLeche) }}
+                    </div>
+                </section>
             </div>
 
-            <div class="flex flex-col gap-3 sm:flex-row sm:justify-end">
+            <div class="mt-5 flex flex-col gap-3 rounded-lg border border-surface-muted bg-surface p-5 shadow-sm sm:flex-row sm:justify-end">
                 <a class="inline-flex min-h-11 items-center justify-center rounded-md px-4 py-2.5 text-sm font-semibold text-ink hover:bg-surface-muted" href="{{ path('app_animal_index') }}">Cancelar</a>
                 <button class="min-h-11 rounded-md bg-brand px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-hover" type="submit">{{ submit_label }}</button>
             </div>
