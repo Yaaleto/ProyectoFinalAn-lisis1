@@ -7,7 +7,9 @@ namespace App\Tests\Functional;
 use App\Entity\Animal;
 use App\Entity\Finca;
 use App\Entity\OrganizacionGanadera;
+use App\Entity\Raza;
 use App\Entity\Usuario;
+use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -38,12 +40,61 @@ final class AnimalModuleTest extends WebTestCase
         $fixture = $this->createFixture($client);
         $client->loginUser($fixture['administrador']);
 
-        $client->request('GET', sprintf('/animals/%d', $fixture['animal']->getId()));
+        $crawler = $client->request('GET', sprintf('/animals/%d', $fixture['animal']->getId()));
 
         self::assertResponseIsSuccessful();
         self::assertStringContainsString((string) $fixture['animal']->getArete(), (string) $client->getResponse()->getContent());
         self::assertStringContainsString($fixture['finca']->getNombre(), (string) $client->getResponse()->getContent());
         self::assertStringNotContainsString($fixture['animal']->getCodigoInterno(), (string) $client->getResponse()->getContent());
+        self::assertCount(2, $crawler->filterXPath('//section[@aria-labelledby="animal-parents-heading"]//dd[normalize-space()="Sin registrar"]'));
+        self::assertStringContainsString('Sin raza', (string) $client->getResponse()->getContent());
+        self::assertCount(1, $crawler->filterXPath('//dt[normalize-space()="Procedencia"]/following-sibling::dd[normalize-space()="Sin registrar"]'));
+        self::assertCount(1, $crawler->filterXPath('//dt[normalize-space()="Fecha de nacimiento"]/following-sibling::dd[normalize-space()="Sin registrar"]'));
+    }
+
+    public function testProfileShowsBasicDataAndBothParents(): void
+    {
+        $client = static::createClient();
+        $fixture = $this->createFixture($client);
+        $entityManager = $this->entityManager($client);
+        $raza = new Raza($fixture['organizacion'], 'Brahman');
+        $madre = (new Animal($fixture['organizacion'], $fixture['finca'], 'INT-MADRE-'.$fixture['suffix'], Animal::SEXO_HEMBRA, Animal::ORIGEN_EXTERNO))
+            ->setArete('MADRE-'.$fixture['suffix'])
+            ->setNombre('Aurora');
+        $entityManager->persist($raza);
+        $entityManager->persist($madre);
+        $fixture['machoFinca']->setNombre('Toro');
+        $fixture['animal']->setNombre('Luna')
+            ->setRaza($raza)
+            ->setFechaNacimiento(new DateTimeImmutable('2025-01-15'))
+            ->setProcedencia('Finca de origen')
+            ->setPadre($fixture['machoFinca'])
+            ->setMadre($madre);
+        $entityManager->flush();
+        $client->loginUser($fixture['administrador']);
+
+        $crawler = $client->request('GET', sprintf('/animals/%d', $fixture['animal']->getId()));
+
+        self::assertResponseIsSuccessful();
+        foreach (['Luna', $fixture['animal']->getArete(), $fixture['finca']->getNombre(), 'Brahman', 'Hembra', '15/01/2025', 'Externo', 'Finca de origen'] as $dato) {
+            self::assertStringContainsString((string) $dato, (string) $client->getResponse()->getContent());
+        }
+        self::assertCount(1, $crawler->filterXPath('//span[contains(@class, "bg-success/10") and normalize-space()="Activo"]'));
+        self::assertCount(1, $crawler->filterXPath('//section[@aria-labelledby="animal-parents-heading"]//dt[normalize-space()="Padre"]/following-sibling::dd[contains(., "Toro")]'));
+        self::assertCount(1, $crawler->filterXPath('//section[@aria-labelledby="animal-parents-heading"]//dt[normalize-space()="Madre"]/following-sibling::dd[contains(., "Aurora")]'));
+        self::assertStringContainsString('Arete '.$madre->getArete(), (string) $client->getResponse()->getContent());
+        self::assertStringNotContainsString($fixture['animal']->getCodigoInterno(), (string) $client->getResponse()->getContent());
+        self::assertStringNotContainsString($madre->getCodigoInterno(), (string) $client->getResponse()->getContent());
+    }
+
+    public function testAnimalProfileRequiresAuthentication(): void
+    {
+        $client = static::createClient();
+        $fixture = $this->createFixture($client);
+
+        $client->request('GET', sprintf('/animals/%d', $fixture['animal']->getId()));
+
+        self::assertResponseRedirects('/login');
     }
 
     public function testAdministratorCanRegisterFarmBirthFromTheInterface(): void
