@@ -1,0 +1,40 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ animal.nombre ?: animal.arete ?: 'Animal' }} · BOVITRACK{% endblock %}
+
+{% block body %}
+    <div class="mx-auto max-w-5xl">
+        <a class="text-sm font-semibold text-brand hover:underline" href="{{ path('app_animal_index') }}">← Volver a animales</a>
+
+        <div class="mt-4 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+                <p class="text-sm font-semibold text-brand">Perfil del animal</p>
+                <h1 class="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">{{ animal.nombre ?: animal.arete ?: 'Animal sin identificar' }}</h1>
+                <p class="mt-2 text-sm text-ink-muted">{{ animal.finca.nombre }}</p>
+            </div>
+            <a class="inline-flex min-h-11 items-center justify-center rounded-md bg-brand px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-hover" href="{{ path('app_animal_edit', {animal: animal.id}) }}">Editar animal</a>
+        </div>
+
+        <dl class="mt-6 grid gap-px overflow-hidden rounded-lg border border-surface-muted bg-surface-muted sm:grid-cols-2 lg:grid-cols-3">
+            {% set details = {
+                'Arete': animal.arete ?: 'Sin arete',
+                'Nombre': animal.nombre ?: 'Sin nombre',
+                'Finca': animal.finca.nombre,
+                'Raza': animal.raza ? animal.raza.nombre : 'Sin raza',
+                'Sexo': animal.sexo == 'HEMBRA' ? 'Hembra' : 'Macho',
+                'Estado': animal.estado|lower|capitalize,
+                'Fecha de nacimiento': animal.fechaNacimiento ? animal.fechaNacimiento|date('d/m/Y') : 'Sin registrar',
+                'Peso al nacimiento': animal.pesoNacimientoKg ? animal.pesoNacimientoKg ~ ' kg' : 'Sin registrar',
+                'Origen': animal.origen == 'NACIDO_EN_FINCA' ? 'Nacido en finca' : 'Externo',
+                'Procedencia': animal.procedencia ?: 'Sin registrar',
+                'Productora de leche': animal.productoraLeche ? 'Sí' : 'No'
+            } %}
+            {% for label, value in details %}
+                <div class="bg-surface p-4">
+                    <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">{{ label }}</dt>
+                    <dd class="mt-1 font-medium text-ink">{{ value }}</dd>
+                </div>
+            {% endfor %}
+        </dl>
+    </div>
+{% endblock %}

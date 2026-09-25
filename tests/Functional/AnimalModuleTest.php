@@ -27,6 +27,21 @@ final class AnimalModuleTest extends WebTestCase
         self::assertStringContainsString((string) $fixture['animal']->getArete(), (string) $client->getResponse()->getContent());
         self::assertStringNotContainsString($fixture['animal']->getCodigoInterno(), (string) $client->getResponse()->getContent());
         self::assertStringNotContainsString((string) $fixture['animalAjeno']->getArete(), (string) $client->getResponse()->getContent());
+        self::assertCount(1, $crawler->filterXPath(sprintf('//a[@href="/animals/%d" and normalize-space()="Ver"]', $fixture['animal']->getId())));
+    }
+
+    public function testAdministratorCanOpenAuthorizedAnimalProfile(): void
+    {
+        $client = static::createClient();
+        $fixture = $this->createFixture($client);
+        $client->loginUser($fixture['administrador']);
+
+        $client->request('GET', sprintf('/animals/%d', $fixture['animal']->getId()));
+
+        self::assertResponseIsSuccessful();
+        self::assertStringContainsString((string) $fixture['animal']->getArete(), (string) $client->getResponse()->getContent());
+        self::assertStringContainsString($fixture['finca']->getNombre(), (string) $client->getResponse()->getContent());
+        self::assertStringNotContainsString($fixture['animal']->getCodigoInterno(), (string) $client->getResponse()->getContent());
     }
 
     public function testAdministratorCanRegisterAnimalFromTheInterface(): void

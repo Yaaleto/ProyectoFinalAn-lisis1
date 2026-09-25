@@ -43,7 +43,10 @@
                                     <td class="px-4 py-3 text-ink-muted">{{ animal.sexo == 'HEMBRA' ? 'Hembra' : 'Macho' }}</td>
                                     <td class="px-4 py-3 text-ink-muted">{{ animal.estado|lower|capitalize }}</td>
                                     <td class="px-4 py-3 text-right">
-                                        <a class="font-semibold text-brand hover:underline" href="{{ path('app_animal_edit', {animal: animal.id}) }}">Editar</a>
+                                        <div class="flex justify-end gap-3">
+                                            <a class="font-semibold text-brand hover:underline" href="{{ path('app_animal_show', {animal: animal.id}) }}">Ver</a>
+                                            <a class="font-semibold text-brand hover:underline" href="{{ path('app_animal_edit', {animal: animal.id}) }}">Editar</a>
+                                        </div>
                                     </td>
                                 </tr>
                             {% endfor %}
