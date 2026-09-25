@@ -61,8 +61,9 @@ final class AnimalController extends AbstractController
         ]);
     }
 
-    #[Route('/animals/new', name: 'app_animal_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager, ValidatorInterface $validator): Response
+    #[Route('/animals/new', name: 'app_animal_new', defaults: ['intakeOrigin' => Animal::ORIGEN_EXTERNO], methods: ['GET', 'POST'])]
+    #[Route('/animals/new/birth', name: 'app_animal_birth', defaults: ['intakeOrigin' => Animal::ORIGEN_NACIDO_EN_FINCA], methods: ['GET', 'POST'])]
+    public function new(Request $request, EntityManagerInterface $entityManager, ValidatorInterface $validator, string $intakeOrigin): Response
     {
         $usuario = $this->getUser();
         \assert($usuario instanceof Usuario);
@@ -80,6 +81,7 @@ final class AnimalController extends AbstractController
         $form = $this->createForm(AnimalType::class, null, [
             'organization' => $organizacion,
             'user' => $usuario,
+            'intake_origin' => $intakeOrigin,
         ]);
         $form->handleRequest($request);
 
@@ -95,9 +97,9 @@ final class AnimalController extends AbstractController
                     $data['finca'],
                     $this->generateInternalCode(),
                     (string) $data['sexo'],
-                    (string) $data['origen'],
+                    $intakeOrigin,
                 );
-                $this->applyFormData($animal, $data);
+                $this->applyFormData($animal, $data, $intakeOrigin);
                 $animal->setCreadoPor($usuario)->setActualizadoPor($usuario);
 
                 if (!$this->addValidationErrors($form, $animal, $validator)) {
@@ -115,8 +117,9 @@ final class AnimalController extends AbstractController
         return $this->render('animal/form.html.twig', [
             'form' => $form,
             'animal' => null,
+            'intake_origin' => $intakeOrigin,
             'page_title' => 'Registrar animal',
-            'submit_label' => 'Registrar animal',
+            'submit_label' => Animal::ORIGEN_NACIDO_EN_FINCA === $intakeOrigin ? 'Registrar nacimiento' : 'Registrar ingreso',
         ]);
     }
 
@@ -176,6 +179,7 @@ final class AnimalController extends AbstractController
         return $this->render('animal/form.html.twig', [
             'form' => $form,
             'animal' => $animal,
+            'intake_origin' => null,
             'page_title' => 'Editar animal',
             'submit_label' => 'Guardar cambios',
         ]);
@@ -187,22 +191,24 @@ final class AnimalController extends AbstractController
     }
 
     /** @param array<string, mixed> $data */
-    private function applyFormData(Animal $animal, array $data): void
+    private function applyFormData(Animal $animal, array $data, ?string $intakeOrigin = null): void
     {
         \assert($data['finca'] instanceof Finca);
         \assert(null === $data['raza'] || $data['raza'] instanceof Raza);
+
+        $origin = $intakeOrigin ?? (string) $data['origen'];
 
         $animal
             ->setProductoraLeche(false)
             ->setFinca($data['finca'])
             ->setSexo((string) $data['sexo'])
-            ->setOrigen((string) $data['origen'])
+            ->setOrigen($origin)
             ->setArete($this->optionalString($data['arete']))
             ->setNombre($this->optionalString($data['nombre']))
             ->setRaza($data['raza'])
             ->setFechaNacimiento($data['fechaNacimiento'])
             ->setPesoNacimientoKg($data['pesoNacimientoKg'])
-            ->setProcedencia($this->optionalString($data['procedencia']))
+            ->setProcedencia(Animal::ORIGEN_EXTERNO === $origin ? $this->optionalString($data['procedencia']) : null)
             ->setProductoraLeche((bool) $data['productoraLeche']);
     }
 

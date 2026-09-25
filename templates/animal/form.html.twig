@@ -7,7 +7,22 @@
         <a class="text-sm font-semibold text-brand hover:underline" href="{{ path('app_animal_index') }}">← Volver a animales</a>
         <h1 class="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">{{ page_title }}</h1>
         <p class="mt-2 text-sm text-ink-muted">Los datos quedarán asociados a {{ app.user.organizacion.nombre }}.</p>
-        <p class="mt-2 text-xs text-ink-muted">Los campos marcados con * son obligatorios.</p>
+        <p class="mt-6 text-sm text-ink-muted">Los campos marcados con * son obligatorios.</p>
+
+        {% if intake_origin is not null %}
+            <nav class="mt-5" style="text-align: right" aria-labelledby="animal-registration-type-heading">
+                <h2 class="text-sm font-semibold" id="animal-registration-type-heading">Tipo de registro</h2>
+                <div class="mt-2 flex border-b border-surface-muted" style="justify-content: flex-end">
+                    {% for tab in [
+                        {label: 'Nacimiento', route: 'app_animal_birth', origin: 'NACIDO_EN_FINCA'},
+                        {label: 'Ingreso', route: 'app_animal_new', origin: 'EXTERNO'}
+                    ] %}
+                        {% set selected = intake_origin == tab.origin %}
+                        <a class="inline-flex min-h-11 shrink-0 items-center justify-center px-4 py-2 text-sm {{ selected ? 'font-semibold text-brand' : 'font-medium text-ink-muted hover:bg-surface-muted hover:text-ink' }}" style="border-bottom: 2px solid {{ selected ? 'var(--color-brand)' : 'transparent' }}" href="{{ path(tab.route) }}" {% if selected %}aria-current="page"{% endif %}>{{ tab.label }}</a>
+                    {% endfor %}
+                </div>
+            </nav>
+        {% endif %}
 
         {{ form_start(form, {attr: {class: 'mt-6'}}) }}
             {{ form_errors(form) }}
@@ -37,10 +52,14 @@
                 <section class="rounded-lg border border-surface-muted bg-surface p-5 shadow-sm" aria-labelledby="animal-origin-heading">
                     <div class="mb-5">
                         <h2 class="text-lg font-semibold" id="animal-origin-heading">Nacimiento y origen</h2>
-                        <p class="mt-1 text-sm text-ink-muted">Registra cuándo y dónde se originó.</p>
+                        <p class="mt-1 text-sm text-ink-muted">{% if intake_origin == 'NACIDO_EN_FINCA' %}El origen se asignará como nacido en finca. Indica la fecha del nacimiento.{% elseif intake_origin == 'EXTERNO' %}El origen se asignará como externo. La procedencia es opcional.{% else %}Registra cuándo y dónde se originó.{% endif %}</p>
                     </div>
                     <div class="space-y-5">
-                        {% for row in [[form.fechaNacimiento, form.pesoNacimientoKg], [form.origen, form.procedencia]] %}
+                        {% set origin_fields = [] %}
+                        {% if form.origen is defined %}{% set origin_fields = origin_fields|merge([form.origen]) %}{% endif %}
+                        {% if form.procedencia is defined %}{% set origin_fields = origin_fields|merge([form.procedencia]) %}{% endif %}
+                        {% for row in [[form.fechaNacimiento, form.pesoNacimientoKg], origin_fields] %}
+                            {% if row is not empty %}
                             <div class="flex flex-col gap-4 sm:flex-row">
                                 {% for field in row %}
                                     <div class="min-w-0 flex-1">
@@ -51,6 +70,7 @@
                                     </div>
                                 {% endfor %}
                             </div>
+                            {% endif %}
                         {% endfor %}
                     </div>
 
