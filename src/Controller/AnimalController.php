@@ -118,7 +118,7 @@ final class AnimalController extends AbstractController
             'form' => $form,
             'animal' => null,
             'intake_origin' => $intakeOrigin,
-            'page_title' => Animal::ORIGEN_NACIDO_EN_FINCA === $intakeOrigin ? 'Registrar nacimiento' : 'Ingreso externo',
+            'page_title' => 'Registrar animal',
             'submit_label' => Animal::ORIGEN_NACIDO_EN_FINCA === $intakeOrigin ? 'Registrar nacimiento' : 'Registrar ingreso',
         ]);
     }

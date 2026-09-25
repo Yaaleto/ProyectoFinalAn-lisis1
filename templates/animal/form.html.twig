@@ -10,9 +10,13 @@
         <p class="mt-2 text-xs text-ink-muted">Los campos marcados con * son obligatorios.</p>
 
         {% if intake_origin is not null %}
-            <nav class="mt-5 flex flex-col gap-3 sm:flex-row" aria-label="Tipo de ingreso">
-                <a class="inline-flex min-h-11 items-center justify-center rounded-md px-4 py-2.5 text-sm font-semibold {{ intake_origin == 'NACIDO_EN_FINCA' ? 'bg-brand text-white' : 'border border-surface-muted bg-surface text-ink hover:bg-surface-muted' }}" href="{{ path('app_animal_birth') }}" {% if intake_origin == 'NACIDO_EN_FINCA' %}aria-current="page"{% endif %}>Nacimiento en finca</a>
-                <a class="inline-flex min-h-11 items-center justify-center rounded-md px-4 py-2.5 text-sm font-semibold {{ intake_origin == 'EXTERNO' ? 'bg-brand text-white' : 'border border-surface-muted bg-surface text-ink hover:bg-surface-muted' }}" href="{{ path('app_animal_new') }}" {% if intake_origin == 'EXTERNO' %}aria-current="page"{% endif %}>Ingreso externo</a>
+            <nav class="mt-5 rounded-lg border border-surface-muted bg-surface p-5 shadow-sm" aria-labelledby="animal-registration-type-heading">
+                <h2 class="text-lg font-semibold" id="animal-registration-type-heading">Tipo de registro</h2>
+                <p class="mt-1 text-sm text-ink-muted">Selecciona cómo se incorporó el animal.</p>
+                <div class="mt-4 flex flex-col gap-3 sm:flex-row">
+                    <a class="inline-flex min-h-11 items-center justify-center rounded-md px-4 py-2.5 text-sm font-semibold {{ intake_origin == 'NACIDO_EN_FINCA' ? 'bg-brand text-white' : 'border border-surface-muted bg-surface text-ink hover:bg-surface-muted' }}" href="{{ path('app_animal_birth') }}" {% if intake_origin == 'NACIDO_EN_FINCA' %}aria-current="page"{% endif %}>Nacimiento</a>
+                    <a class="inline-flex min-h-11 items-center justify-center rounded-md px-4 py-2.5 text-sm font-semibold {{ intake_origin == 'EXTERNO' ? 'bg-brand text-white' : 'border border-surface-muted bg-surface text-ink hover:bg-surface-muted' }}" href="{{ path('app_animal_new') }}" {% if intake_origin == 'EXTERNO' %}aria-current="page"{% endif %}>Ingreso</a>
+                </div>
             </nav>
         {% endif %}
 
