@@ -38,7 +38,13 @@
                                 <tr class="border-t border-surface-muted">
                                     <td class="px-4 py-3 font-medium">{{ raza.nombre }}</td>
                                     {% if canManage %}
-                                        <td class="px-4 py-3 text-ink-muted">{{ raza.activa ? 'Activa' : 'Inactiva' }}</td>
+                                        <td class="px-4 py-3">
+                                            {% if raza.activa %}
+                                                <span class="inline-flex rounded-full bg-success/10 px-2.5 py-1 text-xs font-semibold text-success">Activo</span>
+                                            {% else %}
+                                                <span class="inline-flex rounded-full bg-ink-muted/10 px-2.5 py-1 text-xs font-semibold text-ink-muted">Inactivo</span>
+                                            {% endif %}
+                                        </td>
                                         <td class="px-4 py-3 text-right">
                                             <a class="mr-4 font-semibold text-brand hover:underline" href="{{ path('app_breed_edit', {raza: raza.id}) }}">Editar</a>
                                             <form class="inline" method="post" action="{{ path('app_breed_toggle_status', {raza: raza.id}) }}">

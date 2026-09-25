@@ -40,7 +40,13 @@
                                     <td class="px-4 py-3 font-medium">{{ vacuna.nombre }}</td>
                                     <td class="px-4 py-3 text-ink-muted">{{ vacuna.descripcion ?: '—' }}</td>
                                     {% if canManage %}
-                                        <td class="px-4 py-3 text-ink-muted">{{ vacuna.activa ? 'Activa' : 'Inactiva' }}</td>
+                                        <td class="px-4 py-3">
+                                            {% if vacuna.activa %}
+                                                <span class="inline-flex rounded-full bg-success/10 px-2.5 py-1 text-xs font-semibold text-success">Activo</span>
+                                            {% else %}
+                                                <span class="inline-flex rounded-full bg-ink-muted/10 px-2.5 py-1 text-xs font-semibold text-ink-muted">Inactivo</span>
+                                            {% endif %}
+                                        </td>
                                         <td class="px-4 py-3 text-right">
                                             <a class="mr-4 font-semibold text-brand hover:underline" href="{{ path('app_vaccine_edit', {vacuna: vacuna.id}) }}">Editar</a>
                                             <form class="inline" method="post" action="{{ path('app_vaccine_toggle_status', {vacuna: vacuna.id}) }}">
