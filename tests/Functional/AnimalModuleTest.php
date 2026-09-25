@@ -142,6 +142,26 @@ final class AnimalModuleTest extends WebTestCase
         self::assertResponseStatusCodeSame(403);
     }
 
+    public function testFarmManagerOnlySeesAndOpensAssignedFarmAnimals(): void
+    {
+        $client = static::createClient();
+        $fixture = $this->createFixture($client);
+        $client->loginUser($fixture['encargado']);
+
+        $client->request('GET', '/animals');
+
+        self::assertResponseIsSuccessful();
+        self::assertStringContainsString((string) $fixture['animal']->getArete(), (string) $client->getResponse()->getContent());
+        self::assertStringNotContainsString((string) $fixture['animalOtraFinca']->getArete(), (string) $client->getResponse()->getContent());
+        self::assertStringNotContainsString((string) $fixture['animalAjeno']->getArete(), (string) $client->getResponse()->getContent());
+
+        $client->request('GET', sprintf('/animals/%d', $fixture['animal']->getId()));
+        self::assertResponseIsSuccessful();
+
+        $client->request('GET', sprintf('/animals/%d', $fixture['animalOtraFinca']->getId()));
+        self::assertResponseStatusCodeSame(403);
+    }
+
     public function testFarmManagerRegistrationOnlyOffersAssignedFarm(): void
     {
         $client = static::createClient();
@@ -165,11 +185,14 @@ final class AnimalModuleTest extends WebTestCase
         self::assertNull($this->entityManager($client)->getRepository(Animal::class)->findOneBy(['arete' => 'UNAUTHORIZED-'.$fixture['suffix']]));
     }
 
-    public function testAdministratorCannotEditAnimalFromAnotherOrganization(): void
+    public function testAdministratorCannotAccessAnimalFromAnotherOrganization(): void
     {
         $client = static::createClient();
         $fixture = $this->createFixture($client);
         $client->loginUser($fixture['administrador']);
+
+        $client->request('GET', sprintf('/animals/%d', $fixture['animalAjeno']->getId()));
+        self::assertResponseStatusCodeSame(403);
 
         $client->request('GET', sprintf('/animals/%d/edit', $fixture['animalAjeno']->getId()));
 
@@ -193,7 +216,8 @@ final class AnimalModuleTest extends WebTestCase
             ->setFincaActiva($finca);
         $animal = (new Animal($organizacion, $finca, 'AN-'.$suffix, Animal::SEXO_HEMBRA, Animal::ORIGEN_EXTERNO))
             ->setArete('GT-'.$suffix);
-        $animalOtraFinca = new Animal($organizacion, $fincaAlterna, 'ALT-'.$suffix, Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO);
+        $animalOtraFinca = (new Animal($organizacion, $fincaAlterna, 'ALT-'.$suffix, Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO))
+            ->setArete('OTRA-'.$suffix);
         $animalAjeno = (new Animal($otraOrganizacion, $fincaAjena, 'AJ-'.$suffix, Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO))
             ->setArete('AJENO-'.$suffix);
 
