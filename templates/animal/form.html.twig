@@ -10,9 +10,9 @@
         <p class="mt-2 text-xs text-ink-muted">Los campos marcados con * son obligatorios.</p>
 
         {% if intake_origin is not null %}
-            <nav class="mt-5" style="text-align: left" aria-labelledby="animal-registration-type-heading">
+            <nav class="mt-5" style="text-align: right" aria-labelledby="animal-registration-type-heading">
                 <h2 class="text-sm font-semibold" id="animal-registration-type-heading">Tipo de registro</h2>
-                <div class="mt-2 flex border-b border-surface-muted" style="justify-content: flex-start">
+                <div class="mt-2 flex border-b border-surface-muted" style="justify-content: flex-end">
                     {% for tab in [
                         {label: 'Nacimiento', route: 'app_animal_birth', origin: 'NACIDO_EN_FINCA'},
                         {label: 'Ingreso', route: 'app_animal_new', origin: 'EXTERNO'}
