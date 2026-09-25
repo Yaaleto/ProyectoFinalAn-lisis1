@@ -11,6 +11,7 @@ use App\Entity\Raza;
 use App\Entity\Usuario;
 use App\Repository\FincaRepository;
 use App\Repository\RazaRepository;
+use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
@@ -105,14 +106,65 @@ final class AnimalType extends AbstractType
                 'constraints' => [new Assert\Length(max: 255)],
             ]);
         }
+
+        foreach (['padre' => Animal::SEXO_MACHO, 'madre' => Animal::SEXO_HEMBRA] as $campo => $sexo) {
+            $animal = $options['animal'];
+            $progenitorActual = $animal instanceof Animal
+                ? ('padre' === $campo ? $animal->getPadre() : $animal->getMadre())
+                : null;
+            $builder->add($campo, EntityType::class, [
+                'label' => ucfirst($campo),
+                'class' => Animal::class,
+                'choice_label' => static fn (Animal $progenitor): string => sprintf(
+                    '%s%s · %s',
+                    $progenitor->getArete() ?: $progenitor->getNombre() ?: 'Animal n.º '.$progenitor->getId(),
+                    $progenitor->getArete() && $progenitor->getNombre() ? ' — '.$progenitor->getNombre() : '',
+                    $progenitor->getFinca()->getNombre(),
+                ),
+                'query_builder' => static function (EntityRepository $repository) use ($options, $sexo, $animal, $progenitorActual) {
+                    $queryBuilder = $repository->createQueryBuilder('progenitor')
+                        ->andWhere('progenitor.organizacion = :organizacion')
+                        ->andWhere('progenitor.sexo = :sexo')
+                        ->setParameter('organizacion', $options['organization'])
+                        ->setParameter('sexo', $sexo)
+                        ->orderBy('progenitor.arete')
+                        ->addOrderBy('progenitor.nombre');
+
+                    if ($animal instanceof Animal && null !== $animal->getId()) {
+                        $queryBuilder->andWhere('progenitor.id != :animalId')->setParameter('animalId', $animal->getId());
+                    }
+
+                    $usuario = $options['user'];
+                    if (Usuario::ROL_ENCARGADO === $usuario->getRol()) {
+                        $finca = $usuario->getFincaActiva();
+                        if (null === $finca) {
+                            $queryBuilder->andWhere('1 = 0');
+                        } elseif (null !== $progenitorActual) {
+                            $queryBuilder->andWhere('(progenitor.finca = :finca OR progenitor = :progenitorActual)')
+                                ->setParameter('finca', $finca)
+                                ->setParameter('progenitorActual', $progenitorActual);
+                        } else {
+                            $queryBuilder->andWhere('progenitor.finca = :finca')->setParameter('finca', $finca);
+                        }
+                    } elseif (Usuario::ROL_ADMINISTRADOR !== $usuario->getRol()) {
+                        $queryBuilder->andWhere('1 = 0');
+                    }
+
+                    return $queryBuilder;
+                },
+                'placeholder' => 'Sin '.$campo.' registrado',
+                'required' => false,
+            ]);
+        }
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
-        $resolver->setDefaults(['data_class' => null, 'intake_origin' => null]);
+        $resolver->setDefaults(['data_class' => null, 'intake_origin' => null, 'animal' => null]);
         $resolver->setRequired(['organization', 'user']);
         $resolver->setAllowedTypes('organization', OrganizacionGanadera::class);
         $resolver->setAllowedTypes('user', Usuario::class);
+        $resolver->setAllowedTypes('animal', ['null', Animal::class]);
         $resolver->setAllowedValues('intake_origin', [null, Animal::ORIGEN_NACIDO_EN_FINCA, Animal::ORIGEN_EXTERNO]);
     }
 }

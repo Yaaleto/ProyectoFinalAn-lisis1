@@ -97,6 +97,55 @@ final class LivestockModelTest extends TestCase
         $animal->setPadre($hembra);
     }
 
+    public function testMotherMustBeFemale(): void
+    {
+        [$organizacion, $finca] = $this->tenant();
+        $cria = new Animal($organizacion, $finca, 'CRIA', Animal::SEXO_HEMBRA, Animal::ORIGEN_NACIDO_EN_FINCA);
+        $macho = new Animal($organizacion, $finca, 'MACHO', Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO);
+
+        $this->expectException(DomainException::class);
+        $cria->setMadre($macho);
+    }
+
+    public function testParentRelationshipCannotCreateAnAncestryCycle(): void
+    {
+        [$organizacion, $finca] = $this->tenant();
+        $abuelo = new Animal($organizacion, $finca, 'ABUELO', Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO);
+        $padre = (new Animal($organizacion, $finca, 'PADRE', Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO))->setPadre($abuelo);
+        $cria = (new Animal($organizacion, $finca, 'CRIA', Animal::SEXO_MACHO, Animal::ORIGEN_NACIDO_EN_FINCA))->setPadre($padre);
+
+        $this->expectException(DomainException::class);
+        $abuelo->setPadre($cria);
+    }
+
+    public function testFatherCannotChangeSexUntilParentLinkIsRemoved(): void
+    {
+        [$organizacion, $finca] = $this->tenant();
+        $padre = new Animal($organizacion, $finca, 'PADRE', Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO);
+        $cria = (new Animal($organizacion, $finca, 'CRIA', Animal::SEXO_HEMBRA, Animal::ORIGEN_EXTERNO))->setPadre($padre);
+
+        try {
+            $padre->setSexo(Animal::SEXO_HEMBRA);
+            self::fail('Se permitió cambiar el sexo de un padre vinculado.');
+        } catch (DomainException) {
+            self::assertSame(Animal::SEXO_MACHO, $padre->getSexo());
+        }
+
+        $cria->setPadre(null);
+        $padre->setSexo(Animal::SEXO_HEMBRA);
+        self::assertSame(Animal::SEXO_HEMBRA, $padre->getSexo());
+    }
+
+    public function testMotherCannotChangeSexWhileReferenced(): void
+    {
+        [$organizacion, $finca] = $this->tenant();
+        $madre = new Animal($organizacion, $finca, 'MADRE', Animal::SEXO_HEMBRA, Animal::ORIGEN_EXTERNO);
+        (new Animal($organizacion, $finca, 'CRIA', Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO))->setMadre($madre);
+
+        $this->expectException(DomainException::class);
+        $madre->setSexo(Animal::SEXO_MACHO);
+    }
+
     /** @dataProvider nonPositiveValues */
     public function testWeightRejectsNonPositiveValues(string $peso): void
     {

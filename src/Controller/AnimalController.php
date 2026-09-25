@@ -154,6 +154,7 @@ final class AnimalController extends AbstractController
         $form = $this->createForm(AnimalType::class, $this->formData($animal), [
             'organization' => $animal->getOrganizacion(),
             'user' => $usuario,
+            'animal' => $animal,
         ]);
         $form->handleRequest($request);
 
@@ -195,10 +196,14 @@ final class AnimalController extends AbstractController
     {
         \assert($data['finca'] instanceof Finca);
         \assert(null === $data['raza'] || $data['raza'] instanceof Raza);
+        \assert(null === $data['padre'] || $data['padre'] instanceof Animal);
+        \assert(null === $data['madre'] || $data['madre'] instanceof Animal);
 
         $origin = $intakeOrigin ?? (string) $data['origen'];
 
         $animal
+            ->setPadre($data['padre'])
+            ->setMadre($data['madre'])
             ->setProductoraLeche(false)
             ->setFinca($data['finca'])
             ->setSexo((string) $data['sexo'])
@@ -220,6 +225,8 @@ final class AnimalController extends AbstractController
             'nombre' => $animal->getNombre(),
             'finca' => $animal->getFinca(),
             'raza' => $animal->getRaza(),
+            'padre' => $animal->getPadre(),
+            'madre' => $animal->getMadre(),
             'sexo' => $animal->getSexo(),
             'fechaNacimiento' => $animal->getFechaNacimiento(),
             'pesoNacimientoKg' => $animal->getPesoNacimientoKg(),
