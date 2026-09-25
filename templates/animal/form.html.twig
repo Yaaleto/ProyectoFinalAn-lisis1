@@ -9,6 +9,13 @@
         <p class="mt-2 text-sm text-ink-muted">Los datos quedarán asociados a {{ app.user.organizacion.nombre }}.</p>
         <p class="mt-2 text-xs text-ink-muted">Los campos marcados con * son obligatorios.</p>
 
+        {% if intake_origin is not null %}
+            <nav class="mt-5 flex flex-col gap-3 sm:flex-row" aria-label="Tipo de ingreso">
+                <a class="inline-flex min-h-11 items-center justify-center rounded-md px-4 py-2.5 text-sm font-semibold {{ intake_origin == 'NACIDO_EN_FINCA' ? 'bg-brand text-white' : 'border border-surface-muted bg-surface text-ink hover:bg-surface-muted' }}" href="{{ path('app_animal_birth') }}" {% if intake_origin == 'NACIDO_EN_FINCA' %}aria-current="page"{% endif %}>Nacimiento en finca</a>
+                <a class="inline-flex min-h-11 items-center justify-center rounded-md px-4 py-2.5 text-sm font-semibold {{ intake_origin == 'EXTERNO' ? 'bg-brand text-white' : 'border border-surface-muted bg-surface text-ink hover:bg-surface-muted' }}" href="{{ path('app_animal_new') }}" {% if intake_origin == 'EXTERNO' %}aria-current="page"{% endif %}>Ingreso externo</a>
+            </nav>
+        {% endif %}
+
         {{ form_start(form, {attr: {class: 'mt-6'}}) }}
             {{ form_errors(form) }}
 
@@ -37,10 +44,14 @@
                 <section class="rounded-lg border border-surface-muted bg-surface p-5 shadow-sm" aria-labelledby="animal-origin-heading">
                     <div class="mb-5">
                         <h2 class="text-lg font-semibold" id="animal-origin-heading">Nacimiento y origen</h2>
-                        <p class="mt-1 text-sm text-ink-muted">Registra cuándo y dónde se originó.</p>
+                        <p class="mt-1 text-sm text-ink-muted">{% if intake_origin == 'NACIDO_EN_FINCA' %}El origen se asignará como nacido en finca. Indica la fecha del nacimiento.{% elseif intake_origin == 'EXTERNO' %}El origen se asignará como externo. La procedencia es opcional.{% else %}Registra cuándo y dónde se originó.{% endif %}</p>
                     </div>
                     <div class="space-y-5">
-                        {% for row in [[form.fechaNacimiento, form.pesoNacimientoKg], [form.origen, form.procedencia]] %}
+                        {% set origin_fields = [] %}
+                        {% if form.origen is defined %}{% set origin_fields = origin_fields|merge([form.origen]) %}{% endif %}
+                        {% if form.procedencia is defined %}{% set origin_fields = origin_fields|merge([form.procedencia]) %}{% endif %}
+                        {% for row in [[form.fechaNacimiento, form.pesoNacimientoKg], origin_fields] %}
+                            {% if row is not empty %}
                             <div class="flex flex-col gap-4 sm:flex-row">
                                 {% for field in row %}
                                     <div class="min-w-0 flex-1">
@@ -51,6 +62,7 @@
                                     </div>
                                 {% endfor %}
                             </div>
+                            {% endif %}
                         {% endfor %}
                     </div>
 

@@ -68,8 +68,11 @@ final class AnimalType extends AbstractType
                 'label' => 'Fecha de nacimiento',
                 'widget' => 'single_text',
                 'input' => 'datetime_immutable',
-                'required' => false,
-                'constraints' => [new Assert\LessThanOrEqual('today', message: 'La fecha de nacimiento no puede estar en el futuro.')],
+                'required' => Animal::ORIGEN_NACIDO_EN_FINCA === $options['intake_origin'],
+                'constraints' => array_filter([
+                    Animal::ORIGEN_NACIDO_EN_FINCA === $options['intake_origin'] ? new Assert\NotBlank(message: 'Indica la fecha de nacimiento.') : null,
+                    new Assert\LessThanOrEqual('today', message: 'La fecha de nacimiento no puede estar en el futuro.'),
+                ]),
             ])
             ->add('pesoNacimientoKg', NumberType::class, [
                 'label' => 'Peso al nacimiento (kg)',
@@ -78,30 +81,38 @@ final class AnimalType extends AbstractType
                 'required' => false,
                 'constraints' => [new Assert\Positive(message: 'El peso al nacimiento debe ser mayor que cero.')],
             ])
-            ->add('origen', ChoiceType::class, [
-                'label' => 'Origen',
-                'choices' => [
-                    'Nacido en finca' => Animal::ORIGEN_NACIDO_EN_FINCA,
-                    'Externo' => Animal::ORIGEN_EXTERNO,
-                ],
-            ])
-            ->add('procedencia', TextType::class, [
-                'label' => 'Procedencia',
-                'required' => false,
-                'constraints' => [new Assert\Length(max: 255)],
-            ])
             ->add('productoraLeche', CheckboxType::class, [
                 'label' => 'Productora de leche',
                 'required' => false,
                 'help' => 'Solo puede activarse para hembras.',
             ]);
+
+        if (null === $options['intake_origin']) {
+            $builder->add('origen', ChoiceType::class, [
+                'label' => 'Origen',
+                'choices' => [
+                    'Nacido en finca' => Animal::ORIGEN_NACIDO_EN_FINCA,
+                    'Externo' => Animal::ORIGEN_EXTERNO,
+                ],
+            ]);
+        }
+
+        if (Animal::ORIGEN_NACIDO_EN_FINCA !== $options['intake_origin']) {
+            $builder->add('procedencia', TextType::class, [
+                'label' => 'Procedencia',
+                'required' => false,
+                'help' => 'Opcional. Indica la finca o lugar de procedencia.',
+                'constraints' => [new Assert\Length(max: 255)],
+            ]);
+        }
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
-        $resolver->setDefaults(['data_class' => null]);
+        $resolver->setDefaults(['data_class' => null, 'intake_origin' => null]);
         $resolver->setRequired(['organization', 'user']);
         $resolver->setAllowedTypes('organization', OrganizacionGanadera::class);
         $resolver->setAllowedTypes('user', Usuario::class);
+        $resolver->setAllowedValues('intake_origin', [null, Animal::ORIGEN_NACIDO_EN_FINCA, Animal::ORIGEN_EXTERNO]);
     }
 }
