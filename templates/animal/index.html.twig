@@ -41,7 +41,9 @@
                                     <td class="px-4 py-3 text-ink-muted">{{ animal.finca.nombre }}</td>
                                     <td class="px-4 py-3 text-ink-muted">{{ animal.raza ? animal.raza.nombre : 'Sin raza' }}</td>
                                     <td class="px-4 py-3 text-ink-muted">{{ animal.sexo == 'HEMBRA' ? 'Hembra' : 'Macho' }}</td>
-                                    <td class="px-4 py-3 text-ink-muted">{{ animal.estado|lower|capitalize }}</td>
+                                    <td class="px-4 py-3">
+                                        <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold {{ animal.estado == 'ACTIVO' ? 'bg-success/10 text-success' : 'bg-ink-muted/10 text-ink-muted' }}">{{ animal.estado|lower|capitalize }}</span>
+                                    </td>
                                     <td class="px-4 py-3 text-right">
                                         <div class="inline-flex gap-3">
                                             <a class="font-semibold text-brand hover:underline" href="{{ path('app_animal_show', {animal: animal.id}) }}">Ver</a>
