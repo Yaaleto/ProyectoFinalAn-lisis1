@@ -263,14 +263,30 @@ class Animal
         if (null === $progenitor) {
             return;
         }
-        if ($progenitor === $this) {
-            throw new DomainException('Un animal no puede ser su propio progenitor.');
-        }
         if ($progenitor->organizacion !== $this->organizacion) {
             throw new DomainException(sprintf('El %s debe pertenecer a la misma organización.', $rol));
         }
         if ($progenitor->sexo !== $sexo) {
             throw new DomainException(sprintf('El sexo del %s no es válido.', $rol));
+        }
+
+        $pendientes = [$progenitor];
+        $visitados = [];
+        while ($pendientes) {
+            $ancestro = array_pop($pendientes);
+            if ($ancestro === $this || (null !== $this->id && $ancestro->id === $this->id)) {
+                throw new DomainException('Un animal no puede ser su propio progenitor ni descendiente.');
+            }
+            $identificador = spl_object_id($ancestro);
+            if (isset($visitados[$identificador])) {
+                continue;
+            }
+            $visitados[$identificador] = true;
+            foreach ([$ancestro->padre, $ancestro->madre] as $progenitorAnterior) {
+                if (null !== $progenitorAnterior) {
+                    $pendientes[] = $progenitorAnterior;
+                }
+            }
         }
     }
 }

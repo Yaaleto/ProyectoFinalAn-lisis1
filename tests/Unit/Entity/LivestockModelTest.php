@@ -97,6 +97,27 @@ final class LivestockModelTest extends TestCase
         $animal->setPadre($hembra);
     }
 
+    public function testMotherMustBeFemale(): void
+    {
+        [$organizacion, $finca] = $this->tenant();
+        $cria = new Animal($organizacion, $finca, 'CRIA', Animal::SEXO_HEMBRA, Animal::ORIGEN_NACIDO_EN_FINCA);
+        $macho = new Animal($organizacion, $finca, 'MACHO', Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO);
+
+        $this->expectException(DomainException::class);
+        $cria->setMadre($macho);
+    }
+
+    public function testParentRelationshipCannotCreateAnAncestryCycle(): void
+    {
+        [$organizacion, $finca] = $this->tenant();
+        $abuelo = new Animal($organizacion, $finca, 'ABUELO', Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO);
+        $padre = (new Animal($organizacion, $finca, 'PADRE', Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO))->setPadre($abuelo);
+        $cria = (new Animal($organizacion, $finca, 'CRIA', Animal::SEXO_MACHO, Animal::ORIGEN_NACIDO_EN_FINCA))->setPadre($padre);
+
+        $this->expectException(DomainException::class);
+        $abuelo->setPadre($cria);
+    }
+
     /** @dataProvider nonPositiveValues */
     public function testWeightRejectsNonPositiveValues(string $peso): void
     {
