@@ -83,6 +83,22 @@
                         {{ form_errors(form.productoraLeche) }}
                     </div>
                 </section>
+
+                <section class="rounded-lg border border-surface-muted bg-surface p-5 shadow-sm" aria-labelledby="animal-parents-heading">
+                    <div class="mb-5">
+                        <h2 class="text-lg font-semibold" id="animal-parents-heading">Progenitores</h2>
+                        <p class="mt-1 text-sm text-ink-muted">Opcional. Selecciona animales ya registrados para vincular al padre y a la madre.</p>
+                    </div>
+                    <div class="flex flex-col gap-4 sm:flex-row">
+                        {% for field in [form.padre, form.madre] %}
+                            <div class="min-w-0 flex-1">
+                                {{ form_label(field, null, {label_attr: {class: 'mb-2 block text-sm font-semibold'}}) }}
+                                {{ form_widget(field, {attr: {class: 'min-h-11 w-full rounded-md border border-surface-muted bg-surface px-3 py-2 text-ink'}}) }}
+                                {{ form_errors(field) }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </section>
             </div>
 
             <div class="mt-5 flex flex-col gap-3 rounded-lg border border-surface-muted bg-surface p-5 shadow-sm sm:flex-row sm:justify-end">
