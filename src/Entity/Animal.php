@@ -7,6 +7,8 @@ namespace App\Entity;
 use App\Entity\Concerns\Auditable;
 use DateTimeImmutable;
 use DateTimeInterface;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use DomainException;
@@ -50,13 +52,21 @@ class Animal
     #[ORM\JoinColumn(nullable: true, onDelete: 'RESTRICT')]
     private ?Raza $raza = null;
 
-    #[ORM\ManyToOne(targetEntity: self::class)]
+    #[ORM\ManyToOne(targetEntity: self::class, inversedBy: 'hijosComoPadre')]
     #[ORM\JoinColumn(nullable: true, onDelete: 'RESTRICT')]
     private ?self $padre = null;
 
-    #[ORM\ManyToOne(targetEntity: self::class)]
+    #[ORM\ManyToOne(targetEntity: self::class, inversedBy: 'hijosComoMadre')]
     #[ORM\JoinColumn(nullable: true, onDelete: 'RESTRICT')]
     private ?self $madre = null;
+
+    /** @var Collection<int, self> */
+    #[ORM\OneToMany(mappedBy: 'padre', targetEntity: self::class)]
+    private Collection $hijosComoPadre;
+
+    /** @var Collection<int, self> */
+    #[ORM\OneToMany(mappedBy: 'madre', targetEntity: self::class)]
+    private Collection $hijosComoMadre;
 
     #[ORM\Column(length: 36, unique: true)]
     #[Assert\NotBlank]
@@ -119,6 +129,8 @@ class Animal
         $this->codigoInterno = $codigoInterno;
         $this->sexo = $sexo;
         $this->origen = $origen;
+        $this->hijosComoPadre = new ArrayCollection();
+        $this->hijosComoMadre = new ArrayCollection();
     }
 
     public function getId(): ?int { return $this->id; }
@@ -163,14 +175,24 @@ class Animal
     public function setPadre(?self $padre): static
     {
         $this->assertProgenitor($padre, self::SEXO_MACHO, 'padre');
+        if ($this->padre === $padre) {
+            return $this;
+        }
+        $this->padre?->hijosComoPadre->removeElement($this);
         $this->padre = $padre;
+        $padre?->hijosComoPadre->add($this);
         return $this;
     }
 
     public function setMadre(?self $madre): static
     {
         $this->assertProgenitor($madre, self::SEXO_HEMBRA, 'madre');
+        if ($this->madre === $madre) {
+            return $this;
+        }
+        $this->madre?->hijosComoMadre->removeElement($this);
         $this->madre = $madre;
+        $madre?->hijosComoMadre->add($this);
         return $this;
     }
 
@@ -183,6 +205,12 @@ class Animal
         }
         if (self::SEXO_MACHO === $sexo && $this->productoraLeche) {
             throw new DomainException('Una productora de leche no puede cambiarse a macho.');
+        }
+        if (self::SEXO_HEMBRA === $sexo && !$this->hijosComoPadre->isEmpty()) {
+            throw new DomainException('No puedes cambiar el sexo de un animal registrado como progenitor.');
+        }
+        if (self::SEXO_MACHO === $sexo && !$this->hijosComoMadre->isEmpty()) {
+            throw new DomainException('No puedes cambiar el sexo de un animal registrado como progenitor.');
         }
         $this->sexo = $sexo;
 
