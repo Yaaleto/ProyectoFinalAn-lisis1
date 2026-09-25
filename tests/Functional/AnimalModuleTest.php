@@ -28,6 +28,8 @@ final class AnimalModuleTest extends WebTestCase
         self::assertStringNotContainsString($fixture['animal']->getCodigoInterno(), (string) $client->getResponse()->getContent());
         self::assertStringNotContainsString((string) $fixture['animalAjeno']->getArete(), (string) $client->getResponse()->getContent());
         self::assertCount(1, $crawler->filterXPath(sprintf('//a[@href="/animals/%d" and normalize-space()="Ver"]', $fixture['animal']->getId())));
+        self::assertCount(1, $crawler->filterXPath('//a[@href="/animals/new" and normalize-space()="Registrar animal"]'));
+        self::assertCount(0, $crawler->filterXPath('//a[@href="/animals/new/birth"]'));
     }
 
     public function testAdministratorCanOpenAuthorizedAnimalProfile(): void
@@ -51,7 +53,11 @@ final class AnimalModuleTest extends WebTestCase
         $client->loginUser($fixture['administrador']);
         $arete = 'GT-'.strtoupper(bin2hex(random_bytes(3)));
 
-        $crawler = $client->request('GET', '/animals/new/birth');
+        $crawler = $client->request('GET', '/animals');
+        $crawler = $client->click($crawler->selectLink('Registrar animal')->link());
+        self::assertCount(1, $crawler->filterXPath('//nav[@aria-labelledby="animal-registration-type-heading"]//a[@aria-current="page" and normalize-space()="Ingreso"]'));
+        $crawler = $client->click($crawler->selectLink('Nacimiento')->link());
+        self::assertCount(1, $crawler->filterXPath('//nav[@aria-labelledby="animal-registration-type-heading"]//a[@aria-current="page" and normalize-space()="Nacimiento"]'));
         self::assertCount(0, $crawler->filterXPath('//input[@name="animal[codigoInterno]"]'));
         self::assertCount(0, $crawler->filterXPath('//*[@name="animal[origen]" or @name="animal[procedencia]"]'));
         $client->submit($crawler->selectButton('Registrar nacimiento')->form([
@@ -85,6 +91,7 @@ final class AnimalModuleTest extends WebTestCase
         foreach ([null, 'Finca de procedencia'] as $procedencia) {
             $arete = 'EXT-'.strtoupper(bin2hex(random_bytes(4)));
             $crawler = $client->request('GET', '/animals/new');
+            self::assertCount(1, $crawler->filterXPath('//nav[@aria-labelledby="animal-registration-type-heading"]//a[@aria-current="page" and normalize-space()="Ingreso"]'));
             self::assertCount(0, $crawler->filterXPath('//*[@name="animal[origen]"]'));
 
             $client->submit($crawler->selectButton('Registrar ingreso')->form([
