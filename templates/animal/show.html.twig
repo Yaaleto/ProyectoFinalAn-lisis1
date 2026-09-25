@@ -12,7 +12,7 @@
                 <h1 class="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">{{ animal.nombre ?: animal.arete ?: 'Animal sin identificar' }}</h1>
                 <p class="mt-2 text-sm text-ink-muted">{{ animal.finca.nombre }}</p>
             </div>
-            <a class="inline-flex min-h-11 items-center justify-center rounded-md border border-surface-muted bg-surface px-4 py-2 text-sm font-semibold text-ink shadow-sm hover:bg-surface-muted" href="{{ path('app_animal_edit', {animal: animal.id}) }}">Editar</a>
+            <a class="inline-flex min-h-11 items-center justify-center rounded-md bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-hover" href="{{ path('app_animal_edit', {animal: animal.id}) }}">Editar</a>
         </div>
 
         <div class="mt-6 flex flex-col gap-4 sm:flex-row">
