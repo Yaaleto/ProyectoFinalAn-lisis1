@@ -9,6 +9,7 @@ use App\Entity\Finca;
 use App\Entity\OrganizacionGanadera;
 use App\Entity\Pesaje;
 use App\Entity\Raza;
+use App\Entity\Usuario;
 use Doctrine\DBAL\Exception\DriverException;
 use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
@@ -67,6 +68,41 @@ final class DatabaseSchemaTest extends KernelTestCase
 
         $this->expectException(UniqueConstraintViolationException::class);
         $this->entityManager->flush();
+    }
+
+    public function testDatabaseRejectsFarmManagerWithoutAssignedFarm(): void
+    {
+        $suffix = strtoupper(bin2hex(random_bytes(4)));
+        $organizacion = new OrganizacionGanadera('Organización '.$suffix, 'ORG-'.$suffix);
+        $encargado = (new Usuario('Encargado '.$suffix, 'sin-finca-'.$suffix.'@example.com', 'hash', Usuario::ROL_ENCARGADO))
+            ->setOrganizacion($organizacion);
+        $this->entityManager->persist($organizacion);
+        $this->entityManager->persist($encargado);
+
+        $this->expectException(DriverException::class);
+        $this->entityManager->flush();
+    }
+
+    public function testDatabaseRejectsFarmAssignedFromAnotherOrganization(): void
+    {
+        $suffix = strtoupper(bin2hex(random_bytes(4)));
+        $organizacion = new OrganizacionGanadera('Organización '.$suffix, 'ORG-'.$suffix);
+        $otraOrganizacion = new OrganizacionGanadera('Otra organización '.$suffix, 'OTRA-'.$suffix);
+        $fincaAjena = (new Finca('Finca ajena', 'AJENA-'.$suffix))->setOrganizacion($otraOrganizacion);
+        $this->entityManager->persist($organizacion);
+        $this->entityManager->persist($otraOrganizacion);
+        $this->entityManager->persist($fincaAjena);
+        $this->entityManager->flush();
+
+        $this->expectException(ForeignKeyConstraintViolationException::class);
+        $this->entityManager->getConnection()->insert('usuario', [
+            'id_organizacion' => $organizacion->getId(),
+            'nombre' => 'Encargado '.$suffix,
+            'correo' => 'finca-ajena-'.$suffix.'@example.com',
+            'contrasena_hash' => 'hash',
+            'rol' => Usuario::ROL_ENCARGADO,
+            'finca_activa_id' => $fincaAjena->getId(),
+        ]);
     }
 
     public function testSameEarringIsAllowedInDifferentOrganizations(): void

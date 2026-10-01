@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Functional;
 
+use App\Entity\Finca;
 use App\Entity\OrganizacionGanadera;
 use App\Entity\Usuario;
 use App\Security\UsuarioPasswordManager;
@@ -150,6 +151,9 @@ final class AuthenticationTest extends WebTestCase
         $entityManager->createQuery('DELETE FROM App\\Entity\\Usuario u WHERE u.email = :email')
             ->setParameter('email', $email)
             ->execute();
+        $entityManager->createQuery('DELETE FROM App\\Entity\\Finca f WHERE f.codigo = :code')
+            ->setParameter('code', $organizationCode)
+            ->execute();
         $entityManager->createQuery('DELETE FROM App\\Entity\\OrganizacionGanadera o WHERE o.codigo = :code')
             ->setParameter('code', $organizationCode)
             ->execute();
@@ -158,6 +162,11 @@ final class AuthenticationTest extends WebTestCase
         $user = (new Usuario('Usuario de prueba', $email, '', $rol))
             ->setOrganizacion($organization)
             ->setActivo($activo);
+        if (Usuario::ROL_ENCARGADO === $rol) {
+            $farm = (new Finca('Finca de prueba', $organizationCode))->setOrganizacion($organization);
+            $user->setFincaActiva($farm);
+            $entityManager->persist($farm);
+        }
         $passwordManager = new UsuarioPasswordManager($client->getContainer()->get(UserPasswordHasherInterface::class));
         $passwordManager->setPassword($user, 'correct-password');
 

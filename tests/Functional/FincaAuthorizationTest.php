@@ -55,21 +55,6 @@ final class FincaAuthorizationTest extends WebTestCase
         self::assertStringNotContainsString('Editar', (string) $client->getResponse()->getContent());
     }
 
-    public function testFarmManagerWithoutAssignmentReceivesAnExplanation(): void
-    {
-        $client = static::createClient();
-        $fixture = $this->createFixture($client);
-        $fixture['encargado']->setFincaActiva(null);
-        $this->entityManager($client)->flush();
-        $client->loginUser($fixture['encargado']);
-
-        $client->request('GET', '/farms');
-
-        self::assertResponseRedirects('/');
-        $client->followRedirect();
-        self::assertStringContainsString('Tu cuenta todavía no tiene una finca asignada.', (string) $client->getResponse()->getContent());
-    }
-
     public function testUserIsBlockedFromAFarmInAnotherOrganization(): void
     {
         $client = static::createClient();
