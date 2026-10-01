@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
-use App\Entity\Concerns\Auditable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -13,15 +12,12 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'organizacion_ganadera')]
-#[ORM\HasLifecycleCallbacks]
 #[UniqueEntity(fields: ['codigo'], message: 'El código de organización ya está en uso.')]
 class OrganizacionGanadera
 {
-    use Auditable;
-
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(name: 'id_organizacion', options: ['unsigned' => true])]
     private ?int $id = null;
 
     #[ORM\Column(length: 150)]
@@ -33,6 +29,17 @@ class OrganizacionGanadera
     #[Assert\NotBlank]
     #[Assert\Length(max: 50)]
     private string $codigo;
+
+    #[ORM\Column(length: 30, nullable: true)]
+    #[Assert\Length(max: 30)]
+    private ?string $telefono = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\Length(max: 255)]
+    private ?string $direccion = null;
+
+    #[ORM\Column(options: ['default' => true])]
+    private bool $activo = true;
 
     /** @var Collection<int, Usuario> */
     #[ORM\OneToMany(mappedBy: 'organizacion', targetEntity: Usuario::class)]
@@ -75,6 +82,42 @@ class OrganizacionGanadera
     public function setCodigo(string $codigo): static
     {
         $this->codigo = $codigo;
+
+        return $this;
+    }
+
+    public function getTelefono(): ?string
+    {
+        return $this->telefono;
+    }
+
+    public function setTelefono(?string $telefono): static
+    {
+        $this->telefono = $telefono;
+
+        return $this;
+    }
+
+    public function getDireccion(): ?string
+    {
+        return $this->direccion;
+    }
+
+    public function setDireccion(?string $direccion): static
+    {
+        $this->direccion = $direccion;
+
+        return $this;
+    }
+
+    public function isActivo(): bool
+    {
+        return $this->activo;
+    }
+
+    public function setActivo(bool $activo): static
+    {
+        $this->activo = $activo;
 
         return $this;
     }

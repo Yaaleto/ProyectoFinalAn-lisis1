@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
-use App\Entity\Concerns\Auditable;
 use App\Repository\RazaRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
@@ -12,20 +11,18 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: RazaRepository::class)]
 #[ORM\Table(name: 'raza')]
-#[ORM\UniqueConstraint(name: 'uniq_raza_organizacion_nombre', columns: ['organizacion_id', 'nombre'])]
-#[ORM\HasLifecycleCallbacks]
+#[ORM\UniqueConstraint(name: 'uq_raza_organizacion_nombre', columns: ['id_organizacion', 'nombre'])]
+#[ORM\UniqueConstraint(name: 'uq_raza_id_organizacion', columns: ['id_raza', 'id_organizacion'])]
 #[UniqueEntity(fields: ['organizacion', 'nombre'], message: 'La raza ya existe en la organización.')]
 class Raza
 {
-    use Auditable;
-
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(name: 'id_raza', options: ['unsigned' => true])]
     private ?int $id = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false, onDelete: 'RESTRICT')]
+    #[ORM\JoinColumn(name: 'id_organizacion', referencedColumnName: 'id_organizacion', nullable: false, onDelete: 'RESTRICT')]
     private OrganizacionGanadera $organizacion;
 
     #[ORM\Column(length: 100)]

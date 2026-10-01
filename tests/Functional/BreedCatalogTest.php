@@ -41,8 +41,6 @@ final class BreedCatalogTest extends WebTestCase
         $raza = $this->entityManager($client)->getRepository(Raza::class)->findOneBy(['nombre' => $nombre]);
         self::assertInstanceOf(Raza::class, $raza);
         self::assertSame($fixture['organizacion']->getId(), $raza->getOrganizacion()->getId());
-        self::assertSame($fixture['administrador']->getId(), $raza->getCreadoPor()?->getId());
-        self::assertSame($fixture['administrador']->getId(), $raza->getActualizadoPor()?->getId());
     }
 
     public function testDuplicateNameInSameOrganizationIsRejected(): void
@@ -80,7 +78,6 @@ final class BreedCatalogTest extends WebTestCase
         $fixture = $this->createFixture($client);
         $client->loginUser($fixture['administrador']);
         $id = $fixture['raza']->getId();
-        $administradorId = $fixture['administrador']->getId();
 
         $crawler = $client->request('GET', sprintf('/breeds/%d/edit', $id));
         $client->submit($crawler->selectButton('Guardar cambios')->form(['raza[nombre]' => 'Raza actualizada']));
@@ -89,7 +86,6 @@ final class BreedCatalogTest extends WebTestCase
         $this->entityManager($client)->clear();
         $raza = $this->entityManager($client)->find(Raza::class, $id);
         self::assertSame('Raza actualizada', $raza?->getNombre());
-        self::assertSame($administradorId, $raza?->getActualizadoPor()?->getId());
     }
 
     public function testAdministratorCannotEditBreedFromAnotherOrganization(): void

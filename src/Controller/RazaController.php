@@ -56,9 +56,7 @@ final class RazaController extends AbstractController
             throw $this->createAccessDeniedException();
         }
 
-        $raza = (new Raza($organizacion, ''))
-            ->setCreadoPor($administrador)
-            ->setActualizadoPor($administrador);
+        $raza = new Raza($organizacion, '');
         $form = $this->createForm(RazaType::class, $raza);
         $form->handleRequest($request);
 
@@ -97,7 +95,6 @@ final class RazaController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $raza->setActualizadoPor($administrador);
             $entityManager->flush();
             $this->addFlash('success', 'La raza fue actualizada correctamente.');
 
@@ -130,8 +127,7 @@ final class RazaController extends AbstractController
             throw $this->createAccessDeniedException();
         }
 
-        $raza->setActiva(!$raza->isActiva())
-            ->setActualizadoPor($administrador);
+        $raza->setActiva(!$raza->isActiva());
         $entityManager->flush();
         $this->addFlash('success', $raza->isActiva() ? 'La raza fue activada correctamente.' : 'La raza fue desactivada correctamente.');
 

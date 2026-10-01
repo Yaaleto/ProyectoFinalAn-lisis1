@@ -57,9 +57,7 @@ final class UsuarioController extends AbstractController
         }
 
         $usuario = (new Usuario('', '', '', Usuario::ROL_ENCARGADO))
-            ->setOrganizacion($organizacion)
-            ->setCreadoPor($administrador)
-            ->setActualizadoPor($administrador);
+            ->setOrganizacion($organizacion);
         $form = $this->createForm(UsuarioType::class, $usuario, [
             'organization' => $organizacion,
             'require_password' => true,
@@ -122,7 +120,6 @@ final class UsuarioController extends AbstractController
                 $passwordManager->setPassword($usuario, $plainPassword);
             }
 
-            $usuario->setActualizadoPor($administrador);
             $entityManager->flush();
             $this->addFlash('success', 'El usuario fue actualizado correctamente.');
 

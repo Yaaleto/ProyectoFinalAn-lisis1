@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
-use App\Entity\Concerns\Auditable;
 use App\Repository\UsuarioRepository;
 use DomainException;
 use Doctrine\ORM\Mapping as ORM;
@@ -16,27 +15,24 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 #[ORM\Entity(repositoryClass: UsuarioRepository::class)]
 #[ORM\Table(name: 'usuario')]
-#[ORM\HasLifecycleCallbacks]
 #[UniqueEntity(fields: ['email'], message: 'El correo electrónico ya está en uso.')]
 class Usuario implements UserInterface, PasswordAuthenticatedUserInterface
 {
-    use Auditable;
-
     public const ROL_ADMINISTRADOR = 'ADMINISTRADOR';
     public const ROL_ENCARGADO = 'ENCARGADO';
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(name: 'id_usuario', options: ['unsigned' => true])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'usuarios')]
-    #[ORM\JoinColumn(nullable: false, onDelete: 'RESTRICT')]
+    #[ORM\JoinColumn(name: 'id_organizacion', referencedColumnName: 'id_organizacion', nullable: false, onDelete: 'RESTRICT')]
     #[Assert\NotNull]
     private ?OrganizacionGanadera $organizacion = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(name: 'finca_activa_id', nullable: true, onDelete: 'SET NULL')]
+    #[ORM\JoinColumn(name: 'finca_activa_id', referencedColumnName: 'id_finca', nullable: true, onDelete: 'RESTRICT')]
     private ?Finca $fincaActiva = null;
 
     #[ORM\Column(length: 150)]
@@ -44,16 +40,16 @@ class Usuario implements UserInterface, PasswordAuthenticatedUserInterface
     #[Assert\Length(max: 150)]
     private string $nombre;
 
-    #[ORM\Column(length: 180, unique: true)]
+    #[ORM\Column(name: 'correo', length: 180, unique: true)]
     #[Assert\NotBlank]
     #[Assert\Email]
     #[Assert\Length(max: 180)]
     private string $email;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(name: 'contrasena_hash', length: 255)]
     private string $contrasenaHash;
 
-    #[ORM\Column(length: 20)]
+    #[ORM\Column(length: 15)]
     #[Assert\Choice(choices: [self::ROL_ADMINISTRADOR, self::ROL_ENCARGADO])]
     private string $rol;
 
