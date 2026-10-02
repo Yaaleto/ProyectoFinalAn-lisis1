@@ -16,11 +16,6 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 final class AnimalModuleTest extends WebTestCase
 {
-    protected function setUp(): void
-    {
-        self::markTestSkipped('Pendiente de #39: la entidad Animal aún no está alineada con el esquema V1.');
-    }
-
     public function testAdministratorCanOpenAnimalSectionAndOnlySeesItsOrganization(): void
     {
         $client = static::createClient();
@@ -65,7 +60,8 @@ final class AnimalModuleTest extends WebTestCase
         $raza = new Raza($fixture['organizacion'], 'Brahman');
         $madre = (new Animal($fixture['organizacion'], $fixture['finca'], 'INT-MADRE-'.$fixture['suffix'], Animal::SEXO_HEMBRA, Animal::ORIGEN_EXTERNO))
             ->setArete('MADRE-'.$fixture['suffix'])
-            ->setNombre('Aurora');
+            ->setNombre('Aurora')
+            ->setCreadoPor($fixture['administrador']);
         $entityManager->persist($raza);
         $entityManager->persist($madre);
         $fixture['machoFinca']->setNombre('Toro');
@@ -468,13 +464,17 @@ final class AnimalModuleTest extends WebTestCase
             ->setOrganizacion($organizacion)
             ->setFincaActiva($finca);
         $animal = (new Animal($organizacion, $finca, 'AN-'.$suffix, Animal::SEXO_HEMBRA, Animal::ORIGEN_EXTERNO))
-            ->setArete('GT-'.$suffix);
+            ->setArete('GT-'.$suffix)
+            ->setCreadoPor($administrador);
         $machoFinca = (new Animal($organizacion, $finca, 'MACHO-'.$suffix, Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO))
-            ->setArete('MACHO-'.$suffix);
+            ->setArete('MACHO-'.$suffix)
+            ->setCreadoPor($administrador);
         $animalOtraFinca = (new Animal($organizacion, $fincaAlterna, 'ALT-'.$suffix, Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO))
-            ->setArete('OTRA-'.$suffix);
+            ->setArete('OTRA-'.$suffix)
+            ->setCreadoPor($administrador);
         $animalAjeno = (new Animal($otraOrganizacion, $fincaAjena, 'AJ-'.$suffix, Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO))
-            ->setArete('AJENO-'.$suffix);
+            ->setArete('AJENO-'.$suffix)
+            ->setCreadoPor($administrador);
 
         foreach ([$organizacion, $otraOrganizacion, $finca, $fincaAlterna, $fincaAjena, $administrador, $encargado, $animal, $machoFinca, $animalOtraFinca, $animalAjeno] as $entity) {
             $entityManager->persist($entity);
