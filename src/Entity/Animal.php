@@ -17,8 +17,9 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'animal')]
-#[ORM\UniqueConstraint(name: 'uniq_animal_organizacion_arete', columns: ['organizacion_id', 'arete'])]
-#[ORM\Index(name: 'idx_animal_finca_estado', columns: ['finca_id', 'estado'])]
+#[ORM\UniqueConstraint(name: 'uq_animal_codigo_interno', columns: ['codigo_interno'])]
+#[ORM\UniqueConstraint(name: 'uq_animal_organizacion_arete', columns: ['id_organizacion', 'numero_arete'])]
+#[ORM\UniqueConstraint(name: 'uq_animal_id_organizacion', columns: ['id_animal', 'id_organizacion'])]
 #[ORM\HasLifecycleCallbacks]
 #[UniqueEntity(fields: ['codigoInterno'], message: 'El código interno ya existe.')]
 #[UniqueEntity(fields: ['organizacion', 'arete'], message: 'El arete ya existe en la organización.')]
@@ -37,27 +38,28 @@ class Animal
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(name: 'id_animal', options: ['unsigned' => true])]
     private ?int $id = null;
 
+    // Las FK compuestas con id_organizacion viven en el SQL inicial; Doctrine solo mapea cada columna.
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false, onDelete: 'RESTRICT')]
+    #[ORM\JoinColumn(name: 'id_organizacion', referencedColumnName: 'id_organizacion', nullable: false, onDelete: 'RESTRICT')]
     private OrganizacionGanadera $organizacion;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false, onDelete: 'RESTRICT')]
+    #[ORM\JoinColumn(name: 'id_finca', referencedColumnName: 'id_finca', nullable: false, onDelete: 'RESTRICT')]
     private Finca $finca;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: true, onDelete: 'RESTRICT')]
+    #[ORM\JoinColumn(name: 'raza_id', referencedColumnName: 'id_raza', nullable: true, onDelete: 'RESTRICT')]
     private ?Raza $raza = null;
 
     #[ORM\ManyToOne(targetEntity: self::class, inversedBy: 'hijosComoPadre')]
-    #[ORM\JoinColumn(nullable: true, onDelete: 'RESTRICT')]
+    #[ORM\JoinColumn(name: 'id_padre', referencedColumnName: 'id_animal', nullable: true, onDelete: 'RESTRICT')]
     private ?self $padre = null;
 
     #[ORM\ManyToOne(targetEntity: self::class, inversedBy: 'hijosComoMadre')]
-    #[ORM\JoinColumn(nullable: true, onDelete: 'RESTRICT')]
+    #[ORM\JoinColumn(name: 'id_madre', referencedColumnName: 'id_animal', nullable: true, onDelete: 'RESTRICT')]
     private ?self $madre = null;
 
     /** @var Collection<int, self> */
@@ -68,12 +70,13 @@ class Animal
     #[ORM\OneToMany(mappedBy: 'madre', targetEntity: self::class)]
     private Collection $hijosComoMadre;
 
-    #[ORM\Column(length: 36, unique: true)]
+    #[ORM\Column(name: 'codigo_interno', length: 36)]
     #[Assert\NotBlank]
     #[Assert\Length(max: 36)]
     private string $codigoInterno;
 
-    #[ORM\Column(length: 50, nullable: true)]
+    #[ORM\Column(name: 'numero_arete', length: 50)]
+    #[Assert\NotBlank(message: 'El arete es obligatorio.')]
     #[Assert\Length(max: 50)]
     private ?string $arete = null;
 
@@ -81,7 +84,7 @@ class Animal
     #[Assert\Length(max: 120)]
     private ?string $nombre = null;
 
-    #[ORM\Column(length: 10)]
+    #[ORM\Column(length: 6)]
     #[Assert\Choice(choices: [self::SEXO_HEMBRA, self::SEXO_MACHO])]
     private string $sexo;
 
@@ -91,17 +94,18 @@ class Animal
     #[ORM\Column(type: Types::DECIMAL, precision: 8, scale: 2, nullable: true)]
     private ?string $pesoNacimientoKg = null;
 
-    #[ORM\Column(length: 20)]
+    #[ORM\Column(length: 15)]
     #[Assert\Choice(choices: [self::ORIGEN_NACIDO_EN_FINCA, self::ORIGEN_EXTERNO])]
     private string $origen;
 
-    #[ORM\Column(length: 255, nullable: true)]
+    #[ORM\Column(length: 200, nullable: true)]
+    #[Assert\Length(max: 200)]
     private ?string $procedencia = null;
 
-    #[ORM\Column(options: ['default' => false])]
+    #[ORM\Column(name: 'es_productora', options: ['default' => false])]
     private bool $productoraLeche = false;
 
-    #[ORM\Column(length: 15, options: ['default' => self::ESTADO_ACTIVO])]
+    #[ORM\Column(length: 10, options: ['default' => self::ESTADO_ACTIVO])]
     #[Assert\Choice(choices: [self::ESTADO_ACTIVO, self::ESTADO_VENDIDO, self::ESTADO_FALLECIDO, self::ESTADO_EGRESADO])]
     private string $estado = self::ESTADO_ACTIVO;
 
