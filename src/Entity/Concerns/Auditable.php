@@ -11,17 +11,17 @@ use Doctrine\ORM\Mapping as ORM;
 trait Auditable
 {
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(name: 'creado_por', nullable: true, onDelete: 'SET NULL')]
+    #[ORM\JoinColumn(name: 'creado_por', referencedColumnName: 'id_usuario', nullable: false, onDelete: 'RESTRICT')]
     private ?Usuario $creadoPor = null;
 
     #[ORM\Column(name: 'fecha_creacion', type: 'datetime_immutable')]
     private ?DateTimeImmutable $fechaCreacion = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(name: 'actualizado_por', nullable: true, onDelete: 'SET NULL')]
+    #[ORM\JoinColumn(name: 'modificado_por', referencedColumnName: 'id_usuario', nullable: true, onDelete: 'RESTRICT')]
     private ?Usuario $actualizadoPor = null;
 
-    #[ORM\Column(name: 'fecha_actualizacion', type: 'datetime_immutable')]
+    #[ORM\Column(name: 'fecha_actualizacion', type: 'datetime_immutable', nullable: true)]
     private ?DateTimeImmutable $fechaActualizacion = null;
 
     public function getCreadoPor(): ?Usuario
