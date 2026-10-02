@@ -56,9 +56,7 @@ final class VacunaController extends AbstractController
             throw $this->createAccessDeniedException();
         }
 
-        $vacuna = (new Vacuna($organizacion, ''))
-            ->setCreadoPor($administrador)
-            ->setActualizadoPor($administrador);
+        $vacuna = new Vacuna($organizacion, '');
         $form = $this->createForm(VacunaType::class, $vacuna);
         $form->handleRequest($request);
 
@@ -97,7 +95,6 @@ final class VacunaController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $vacuna->setActualizadoPor($administrador);
             $entityManager->flush();
             $this->addFlash('success', 'La vacuna fue actualizada correctamente.');
 
@@ -130,8 +127,7 @@ final class VacunaController extends AbstractController
             throw $this->createAccessDeniedException();
         }
 
-        $vacuna->setActiva(!$vacuna->isActiva())
-            ->setActualizadoPor($administrador);
+        $vacuna->setActiva(!$vacuna->isActiva());
         $entityManager->flush();
         $this->addFlash('success', $vacuna->isActiva() ? 'La vacuna fue activada correctamente.' : 'La vacuna fue desactivada correctamente.');
 

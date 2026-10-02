@@ -49,14 +49,4 @@ final class TenantModelTest extends TestCase
 
         $user->setOrganizacion($otherOrganization);
     }
-
-    public function testAuditDatesAreInitializedBeforePersistence(): void
-    {
-        $organization = new OrganizacionGanadera('Ganadería Norte', 'NORTE');
-
-        $organization->initializeAuditDates();
-
-        self::assertNotNull($organization->getFechaCreacion());
-        self::assertSame($organization->getFechaCreacion(), $organization->getFechaActualizacion());
-    }
 }

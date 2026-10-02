@@ -53,8 +53,6 @@ final class FarmAdministrationTest extends WebTestCase
         $finca = $this->entityManager($client)->getRepository(Finca::class)->findOneBy(['codigo' => $codigo]);
         self::assertInstanceOf(Finca::class, $finca);
         self::assertSame($fixture['organizacion']->getId(), $finca->getOrganizacion()?->getId());
-        self::assertSame($fixture['administrador']->getId(), $finca->getCreadoPor()?->getId());
-        self::assertSame($fixture['administrador']->getId(), $finca->getActualizadoPor()?->getId());
     }
 
     public function testDuplicateCodeInSameOrganizationIsRejectedWithoutCreatingFarm(): void
@@ -127,7 +125,6 @@ final class FarmAdministrationTest extends WebTestCase
         $this->entityManager($client)->clear();
         $finca = $this->entityManager($client)->find(Finca::class, $id);
         self::assertSame('Finca Actualizada', $finca?->getNombre());
-        self::assertSame($fixture['administrador']->getId(), $finca?->getActualizadoPor()?->getId());
     }
 
     public function testAdministratorCannotEditFarmFromAnotherOrganization(): void

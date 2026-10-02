@@ -62,9 +62,7 @@ final class FincaAccessController extends AbstractController
         }
 
         $finca = (new Finca('', ''))
-            ->setOrganizacion($organizacion)
-            ->setCreadoPor($usuario)
-            ->setActualizadoPor($usuario);
+            ->setOrganizacion($organizacion);
         $form = $this->createForm(FincaType::class, $finca);
         $form->handleRequest($request);
 
@@ -98,7 +96,6 @@ final class FincaAccessController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $finca->setActualizadoPor($usuario);
             $entityManager->flush();
             $this->addFlash('success', 'La finca fue actualizada correctamente.');
 

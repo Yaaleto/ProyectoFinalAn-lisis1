@@ -59,8 +59,6 @@ final class UserAdministrationTest extends WebTestCase
         self::assertInstanceOf(Usuario::class, $usuario);
         self::assertSame($fixture['organizacion']->getId(), $usuario->getOrganizacion()?->getId());
         self::assertSame($fixture['finca']->getId(), $usuario->getFincaActiva()?->getId());
-        self::assertSame($fixture['administrador']->getId(), $usuario->getCreadoPor()?->getId());
-        self::assertSame($fixture['administrador']->getId(), $usuario->getActualizadoPor()?->getId());
         self::assertTrue($this->passwordHasher($client)->isPasswordValid($usuario, 'secure-password'));
     }
 
@@ -133,7 +131,6 @@ final class UserAdministrationTest extends WebTestCase
         self::assertSame('Encargado actualizado', $usuario?->getNombre());
         self::assertSame($fixture['segundaFinca']->getId(), $usuario?->getFincaActiva()?->getId());
         self::assertSame($oldHash, $usuario?->getPassword());
-        self::assertSame($fixture['administrador']->getId(), $usuario?->getActualizadoPor()?->getId());
     }
 
     public function testChangingUserToAdministratorRemovesItsFarmAssignment(): void

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit bootstrap="tests/bootstrap.php" colors="true">
     <php>
+        <env name="APP_ENV" value="test" force="true" />
         <server name="APP_ENV" value="test" force="true" />
         <server name="DEFAULT_URI" value="http://localhost" />
         <server name="KERNEL_CLASS" value="App\Kernel" />

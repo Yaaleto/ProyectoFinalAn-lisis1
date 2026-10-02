@@ -61,8 +61,6 @@ final class VaccineCatalogTest extends WebTestCase
         self::assertInstanceOf(Vacuna::class, $vacuna);
         self::assertSame('Aplicación anual.', $vacuna->getDescripcion());
         self::assertSame($fixture['organizacion']->getId(), $vacuna->getOrganizacion()->getId());
-        self::assertSame($fixture['administrador']->getId(), $vacuna->getCreadoPor()?->getId());
-        self::assertSame($fixture['administrador']->getId(), $vacuna->getActualizadoPor()?->getId());
     }
 
     public function testDuplicateNameInSameOrganizationIsRejected(): void
@@ -100,7 +98,6 @@ final class VaccineCatalogTest extends WebTestCase
         $fixture = $this->createFixture($client);
         $client->loginUser($fixture['administrador']);
         $id = $fixture['vacuna']->getId();
-        $administradorId = $fixture['administrador']->getId();
 
         $crawler = $client->request('GET', sprintf('/vaccines/%d/edit', $id));
         $client->submit($crawler->selectButton('Guardar cambios')->form([
@@ -113,7 +110,6 @@ final class VaccineCatalogTest extends WebTestCase
         $vacuna = $this->entityManager($client)->find(Vacuna::class, $id);
         self::assertSame('Vacuna actualizada', $vacuna?->getNombre());
         self::assertSame('Nueva descripción.', $vacuna?->getDescripcion());
-        self::assertSame($administradorId, $vacuna?->getActualizadoPor()?->getId());
     }
 
     public function testAdministratorCannotEditVaccineFromAnotherOrganization(): void

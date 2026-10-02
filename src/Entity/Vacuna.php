@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
-use App\Entity\Concerns\Auditable;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
@@ -12,20 +11,18 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: \App\Repository\VacunaRepository::class)]
 #[ORM\Table(name: 'vacuna')]
-#[ORM\UniqueConstraint(name: 'uniq_vacuna_organizacion_nombre', columns: ['organizacion_id', 'nombre'])]
-#[ORM\HasLifecycleCallbacks]
+#[ORM\UniqueConstraint(name: 'uq_vacuna_organizacion_nombre', columns: ['id_organizacion', 'nombre'])]
+#[ORM\UniqueConstraint(name: 'uq_vacuna_id_organizacion', columns: ['id_vacuna', 'id_organizacion'])]
 #[UniqueEntity(fields: ['organizacion', 'nombre'], message: 'La vacuna ya existe en la organización.')]
 class Vacuna
 {
-    use Auditable;
-
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(name: 'id_vacuna', options: ['unsigned' => true])]
     private ?int $id = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false, onDelete: 'RESTRICT')]
+    #[ORM\JoinColumn(name: 'id_organizacion', referencedColumnName: 'id_organizacion', nullable: false, onDelete: 'RESTRICT')]
     private OrganizacionGanadera $organizacion;
 
     #[ORM\Column(length: 120)]
