@@ -18,7 +18,7 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 final class DatabaseSchemaTest extends KernelTestCase
 {
-    private const ANIMAL_PENDIENTE = 'Pendiente de #39 a #41: Animal y los registros operativos aún no están alineados con el esquema V1.';
+    private const OPERATIVO_PENDIENTE = 'Pendiente de #40 y #41: los registros operativos aún no están alineados con el esquema V1.';
 
     private EntityManagerInterface $entityManager;
 
@@ -49,6 +49,7 @@ final class DatabaseSchemaTest extends KernelTestCase
 
     public function testDatabaseRejectsTwoWeightsForTheSameAnimalAndDate(): void
     {
+        self::markTestSkipped(self::OPERATIVO_PENDIENTE);
         [$animal] = $this->persistAnimal('PESAJE');
         $fecha = new \DateTimeImmutable('2026-09-17');
         $this->entityManager->persist(new Pesaje($animal, $fecha, '120.00'));
@@ -107,6 +108,28 @@ final class DatabaseSchemaTest extends KernelTestCase
         ]);
     }
 
+    public function testAnimalWithTargetIdentifiersIsStoredThroughTheEntity(): void
+    {
+        [, $organizacion, $finca, $creador] = $this->persistAnimal('BASE');
+        $codigo = 'AN-'.strtoupper(bin2hex(random_bytes(6)));
+        $animal = (new Animal($organizacion, $finca, $codigo, Animal::SEXO_HEMBRA, Animal::ORIGEN_NACIDO_EN_FINCA))
+            ->setArete('GT-V1')
+            ->setCreadoPor($creador);
+        $this->entityManager->persist($animal);
+        $this->entityManager->flush();
+        $this->entityManager->clear();
+
+        $guardado = $this->entityManager->find(Animal::class, $animal->getId());
+
+        self::assertMatchesRegularExpression('/^AN-[0-9A-F]{12}$/', $guardado->getCodigoInterno());
+        self::assertSame($codigo, $guardado->getCodigoInterno());
+        self::assertSame('GT-V1', $guardado->getArete());
+        self::assertSame(Animal::ESTADO_ACTIVO, $guardado->getEstado());
+        self::assertFalse($guardado->isProductoraLeche());
+        self::assertNotNull($guardado->getCreadoPor());
+        self::assertNull($guardado->getActualizadoPor());
+    }
+
     public function testSameEarringIsAllowedInDifferentOrganizations(): void
     {
         [$primero] = $this->persistAnimal('ARETE-A', 'GT-101');
@@ -120,11 +143,13 @@ final class DatabaseSchemaTest extends KernelTestCase
 
     public function testDatabaseRejectsDuplicateInternalAnimalCodeGlobally(): void
     {
-        [$primero] = $this->persistAnimal('CODIGO-GLOBAL');
+        [$primero, , , $creador] = $this->persistAnimal('CODIGO-GLOBAL');
         $suffix = strtoupper(bin2hex(random_bytes(4)));
         $organizacion = new OrganizacionGanadera('Otra organización '.$suffix, 'OTRA-'.$suffix);
         $finca = (new Finca('Otra finca '.$suffix, 'OTRA-FIN-'.$suffix))->setOrganizacion($organizacion);
-        $segundo = new Animal($organizacion, $finca, $primero->getCodigoInterno(), Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO);
+        $segundo = (new Animal($organizacion, $finca, $primero->getCodigoInterno(), Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO))
+            ->setArete('GT-'.$suffix)
+            ->setCreadoPor($creador);
         foreach ([$organizacion, $finca, $segundo] as $entity) {
             $this->entityManager->persist($entity);
         }
@@ -135,18 +160,87 @@ final class DatabaseSchemaTest extends KernelTestCase
 
     public function testDatabaseRejectsDuplicateEarringInsideOneOrganization(): void
     {
-        self::markTestSkipped(self::ANIMAL_PENDIENTE);
-        $suffix = strtoupper(bin2hex(random_bytes(4)));
-        $organizacion = new OrganizacionGanadera('Organización '.$suffix, 'ORG-'.$suffix);
-        $finca = (new Finca('Finca '.$suffix, 'FIN-'.$suffix))->setOrganizacion($organizacion);
-        $primero = (new Animal($organizacion, $finca, 'A-'.$suffix, Animal::SEXO_HEMBRA, Animal::ORIGEN_EXTERNO))->setArete('GT-101');
-        $segundo = (new Animal($organizacion, $finca, 'B-'.$suffix, Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO))->setArete('GT-101');
-        foreach ([$organizacion, $finca, $primero, $segundo] as $entity) {
-            $this->entityManager->persist($entity);
-        }
+        [, $organizacion, $finca, $creador] = $this->persistAnimal('ARETE-DUP', 'GT-101');
+        $segundo = (new Animal($organizacion, $finca, 'B-'.bin2hex(random_bytes(4)), Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO))
+            ->setArete('GT-101')
+            ->setCreadoPor($creador);
+        $this->entityManager->persist($segundo);
 
         $this->expectException(UniqueConstraintViolationException::class);
         $this->entityManager->flush();
+    }
+
+    public function testDirectSqlAcceptsAValidAnimalRow(): void
+    {
+        [, $organizacion, $finca, $creador] = $this->persistAnimal('SQL-VALIDO');
+        $this->entityManager->flush();
+
+        self::assertSame(1, $this->insertAnimalRow($organizacion, $finca, $creador));
+    }
+
+    public function testDirectSqlCannotPlaceAnAnimalOnAnotherOrganizationFarm(): void
+    {
+        [, $organizacion, , $creador] = $this->persistAnimal('CRUCE-FINCA');
+        [, , $fincaAjena] = $this->persistAnimal('CRUCE-FINCA-AJENA');
+        $this->entityManager->flush();
+
+        $this->expectException(ForeignKeyConstraintViolationException::class);
+        $this->insertAnimalRow($organizacion, $fincaAjena, $creador);
+    }
+
+    public function testDirectSqlCannotUseABreedFromAnotherOrganization(): void
+    {
+        [, $organizacion, $finca, $creador] = $this->persistAnimal('CRUCE-RAZA');
+        [, $otraOrganizacion] = $this->persistAnimal('CRUCE-RAZA-AJENA');
+        $razaAjena = new Raza($otraOrganizacion, 'Brahman');
+        $this->entityManager->persist($razaAjena);
+        $this->entityManager->flush();
+
+        $this->expectException(ForeignKeyConstraintViolationException::class);
+        $this->insertAnimalRow($organizacion, $finca, $creador, ['raza_id' => $razaAjena->getId()]);
+    }
+
+    public function testDirectSqlCannotLinkParentsFromAnotherOrganization(): void
+    {
+        [, $organizacion, $finca, $creador] = $this->persistAnimal('CRUCE-MADRE');
+        [$madreAjena] = $this->persistAnimal('CRUCE-MADRE-AJENA');
+        $this->entityManager->flush();
+
+        $this->expectException(ForeignKeyConstraintViolationException::class);
+        $this->insertAnimalRow($organizacion, $finca, $creador, ['id_madre' => $madreAjena->getId()]);
+    }
+
+    public function testDirectSqlCannotLinkAFatherFromAnotherOrganization(): void
+    {
+        [, $organizacion, $finca, $creador] = $this->persistAnimal('CRUCE-PADRE');
+        [$padreAjeno] = $this->persistAnimal('CRUCE-PADRE-AJENO');
+        $this->entityManager->flush();
+
+        $this->expectException(ForeignKeyConstraintViolationException::class);
+        $this->insertAnimalRow($organizacion, $finca, $creador, ['id_padre' => $padreAjeno->getId()]);
+    }
+
+    /** @return iterable<string, array{array<string, mixed>, string}> */
+    public static function invalidAnimalRows(): iterable
+    {
+        yield 'sexo desconocido' => [['sexo' => 'OTRO'], 'ck_animal_sexo'];
+        yield 'origen desconocido' => [['origen' => 'COMPRADO'], 'ck_animal_origen'];
+        yield 'estado desconocido' => [['estado' => 'PERDIDO', 'fecha_salida' => '2026-09-17'], 'ck_animal_estado'];
+        yield 'macho productor' => [['sexo' => Animal::SEXO_MACHO, 'es_productora' => 1], 'ck_animal_productora_hembra'];
+        yield 'activo con salida' => [['fecha_salida' => '2026-09-17'], 'ck_animal_salida_por_estado'];
+        yield 'vendido sin salida' => [['estado' => Animal::ESTADO_VENDIDO], 'ck_animal_salida_por_estado'];
+        yield 'peso de nacimiento cero' => [['peso_nacimiento_kg' => '0.00'], 'ck_animal_peso_nacimiento'];
+    }
+
+    /** @dataProvider invalidAnimalRows */
+    public function testDatabaseChecksRejectInvalidAnimalRows(array $cambios, string $restriccion): void
+    {
+        [, $organizacion, $finca, $creador] = $this->persistAnimal('CHECK');
+        $this->entityManager->flush();
+
+        $this->expectException(DriverException::class);
+        $this->expectExceptionMessageMatches('/'.$restriccion.'/');
+        $this->insertAnimalRow($organizacion, $finca, $creador, $cambios);
     }
 
     public function testBreedNameCanBeReusedOnlyAcrossOrganizations(): void
@@ -166,27 +260,9 @@ final class DatabaseSchemaTest extends KernelTestCase
         $this->entityManager->flush();
     }
 
-    public function testDatabaseCheckRejectsAnInvalidAnimalSex(): void
-    {
-        [, $organizacion, $finca] = $this->persistAnimal('CHECK');
-        $this->entityManager->flush();
-
-        $this->expectException(DriverException::class);
-        $this->entityManager->getConnection()->insert('animal', [
-            'organizacion_id' => $organizacion->getId(),
-            'finca_id' => $finca->getId(),
-            'codigo_interno' => 'INVALID-'.bin2hex(random_bytes(4)),
-            'sexo' => 'DESCONOCIDO',
-            'origen' => Animal::ORIGEN_EXTERNO,
-            'productora_leche' => 0,
-            'estado' => Animal::ESTADO_ACTIVO,
-            'fecha_creacion' => '2026-09-17 00:00:00',
-            'fecha_actualizacion' => '2026-09-17 00:00:00',
-        ]);
-    }
-
     public function testDatabaseCheckRejectsNonPositiveWeight(): void
     {
+        self::markTestSkipped(self::OPERATIVO_PENDIENTE);
         [$animal] = $this->persistAnimal('PESO-CHECK');
         $this->entityManager->flush();
 
@@ -202,6 +278,7 @@ final class DatabaseSchemaTest extends KernelTestCase
 
     public function testDatabaseCheckRejectsNonPositiveMilkProduction(): void
     {
+        self::markTestSkipped(self::OPERATIVO_PENDIENTE);
         [$animal] = $this->persistAnimal('LECHE-CHECK');
         $this->entityManager->flush();
 
@@ -217,6 +294,7 @@ final class DatabaseSchemaTest extends KernelTestCase
 
     public function testDatabaseRestrictsDeletionOfAnimalWithWeightHistory(): void
     {
+        self::markTestSkipped(self::OPERATIVO_PENDIENTE);
         [$animal] = $this->persistAnimal('HISTORIAL');
         $this->entityManager->persist(new Pesaje($animal, new \DateTimeImmutable('2026-09-17'), '120.00'));
         $this->entityManager->flush();
@@ -227,6 +305,7 @@ final class DatabaseSchemaTest extends KernelTestCase
 
     public function testWeightHistorySupportsEmptySingleAndOrderedMultipleEntries(): void
     {
+        self::markTestSkipped(self::OPERATIVO_PENDIENTE);
         [$animal] = $this->persistAnimal('HISTORIAL-CONSULTA');
         $this->entityManager->flush();
         $connection = $this->entityManager->getConnection();
@@ -243,18 +322,35 @@ final class DatabaseSchemaTest extends KernelTestCase
         self::assertSame(['110.00', '115.00'], $connection->fetchFirstColumn('SELECT peso_kg FROM pesaje WHERE animal_id = ? ORDER BY fecha ASC', [$animal->getId()]));
     }
 
-    /** @return array{Animal, OrganizacionGanadera, Finca} */
+    /** @return array{Animal, OrganizacionGanadera, Finca, Usuario} */
     private function persistAnimal(string $prefix, ?string $arete = null): array
     {
-        self::markTestSkipped(self::ANIMAL_PENDIENTE);
         $suffix = strtoupper(bin2hex(random_bytes(4)));
         $organizacion = new OrganizacionGanadera('Organización '.$suffix, 'ORG-'.$suffix);
         $finca = (new Finca('Finca '.$suffix, 'FIN-'.$suffix))->setOrganizacion($organizacion);
-        $animal = (new Animal($organizacion, $finca, $prefix.'-'.$suffix, Animal::SEXO_HEMBRA, Animal::ORIGEN_EXTERNO))->setArete($arete);
-        foreach ([$organizacion, $finca, $animal] as $entity) {
+        $creador = (new Usuario('Administrador '.$suffix, 'admin-'.$suffix.'@example.com', 'hash', Usuario::ROL_ADMINISTRADOR))
+            ->setOrganizacion($organizacion);
+        $animal = (new Animal($organizacion, $finca, $prefix.'-'.$suffix, Animal::SEXO_HEMBRA, Animal::ORIGEN_EXTERNO))
+            ->setArete($arete ?? 'GT-'.$suffix)
+            ->setCreadoPor($creador);
+        foreach ([$organizacion, $finca, $creador, $animal] as $entity) {
             $this->entityManager->persist($entity);
         }
 
-        return [$animal, $organizacion, $finca];
+        return [$animal, $organizacion, $finca, $creador];
+    }
+
+    /** Inserta un animal con SQL directo, sin pasar por las validaciones de la entidad. */
+    private function insertAnimalRow(OrganizacionGanadera $organizacion, Finca $finca, Usuario $creador, array $cambios = []): int
+    {
+        return (int) $this->entityManager->getConnection()->insert('animal', array_merge([
+            'id_organizacion' => $organizacion->getId(),
+            'id_finca' => $finca->getId(),
+            'codigo_interno' => 'AN-'.strtoupper(bin2hex(random_bytes(6))),
+            'numero_arete' => 'SQL-'.strtoupper(bin2hex(random_bytes(4))),
+            'sexo' => Animal::SEXO_HEMBRA,
+            'origen' => Animal::ORIGEN_EXTERNO,
+            'creado_por' => $creador->getId(),
+        ], $cambios));
     }
 }
