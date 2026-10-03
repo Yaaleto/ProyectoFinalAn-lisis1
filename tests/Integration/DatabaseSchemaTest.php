@@ -18,7 +18,7 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 final class DatabaseSchemaTest extends KernelTestCase
 {
-    private const OPERATIVO_PENDIENTE = 'Pendiente de #40 y #41: los registros operativos aún no están alineados con el esquema V1.';
+    private const LECHE_PENDIENTE = 'Pendiente de #41: la producción de leche aún no está alineada con el esquema V1.';
 
     private EntityManagerInterface $entityManager;
 
@@ -49,11 +49,9 @@ final class DatabaseSchemaTest extends KernelTestCase
 
     public function testDatabaseRejectsTwoWeightsForTheSameAnimalAndDate(): void
     {
-        self::markTestSkipped(self::OPERATIVO_PENDIENTE);
-        [$animal] = $this->persistAnimal('PESAJE');
-        $fecha = new \DateTimeImmutable('2026-09-17');
-        $this->entityManager->persist(new Pesaje($animal, $fecha, '120.00'));
-        $this->entityManager->persist(new Pesaje($animal, $fecha, '121.00'));
+        [$animal, , , $creador] = $this->persistAnimal('PESAJE');
+        $this->entityManager->persist($this->pesaje($animal, '2026-09-17', '120.00', $creador));
+        $this->entityManager->persist($this->pesaje($animal, '2026-09-17', '121.00', $creador));
 
         $this->expectException(UniqueConstraintViolationException::class);
         $this->entityManager->flush();
@@ -262,23 +260,23 @@ final class DatabaseSchemaTest extends KernelTestCase
 
     public function testDatabaseCheckRejectsNonPositiveWeight(): void
     {
-        self::markTestSkipped(self::OPERATIVO_PENDIENTE);
-        [$animal] = $this->persistAnimal('PESO-CHECK');
+        [$animal, $organizacion, , $creador] = $this->persistAnimal('PESO-CHECK');
         $this->entityManager->flush();
 
         $this->expectException(DriverException::class);
+        $this->expectExceptionMessageMatches('/ck_pesaje_peso/');
         $this->entityManager->getConnection()->insert('pesaje', [
-            'animal_id' => $animal->getId(),
-            'fecha' => '2026-09-17',
+            'organizacion_id' => $organizacion->getId(),
+            'id_animal' => $animal->getId(),
+            'fecha_pesaje' => '2026-09-17',
             'peso_kg' => '0.00',
-            'fecha_creacion' => '2026-09-17 00:00:00',
-            'fecha_actualizacion' => '2026-09-17 00:00:00',
+            'creado_por' => $creador->getId(),
         ]);
     }
 
     public function testDatabaseCheckRejectsNonPositiveMilkProduction(): void
     {
-        self::markTestSkipped(self::OPERATIVO_PENDIENTE);
+        self::markTestSkipped(self::LECHE_PENDIENTE);
         [$animal] = $this->persistAnimal('LECHE-CHECK');
         $this->entityManager->flush();
 
@@ -294,32 +292,35 @@ final class DatabaseSchemaTest extends KernelTestCase
 
     public function testDatabaseRestrictsDeletionOfAnimalWithWeightHistory(): void
     {
-        self::markTestSkipped(self::OPERATIVO_PENDIENTE);
-        [$animal] = $this->persistAnimal('HISTORIAL');
-        $this->entityManager->persist(new Pesaje($animal, new \DateTimeImmutable('2026-09-17'), '120.00'));
+        [$animal, , , $creador] = $this->persistAnimal('HISTORIAL');
+        $this->entityManager->persist($this->pesaje($animal, '2026-09-17', '120.00', $creador));
         $this->entityManager->flush();
 
         $this->expectException(ForeignKeyConstraintViolationException::class);
-        $this->entityManager->getConnection()->delete('animal', ['id' => $animal->getId()]);
+        $this->entityManager->getConnection()->delete('animal', ['id_animal' => $animal->getId()]);
     }
 
     public function testWeightHistorySupportsEmptySingleAndOrderedMultipleEntries(): void
     {
-        self::markTestSkipped(self::OPERATIVO_PENDIENTE);
-        [$animal] = $this->persistAnimal('HISTORIAL-CONSULTA');
+        [$animal, , , $creador] = $this->persistAnimal('HISTORIAL-CONSULTA');
         $this->entityManager->flush();
         $connection = $this->entityManager->getConnection();
 
-        self::assertSame(0, (int) $connection->fetchOne('SELECT COUNT(*) FROM pesaje WHERE animal_id = ?', [$animal->getId()]));
+        self::assertSame(0, (int) $connection->fetchOne('SELECT COUNT(*) FROM pesaje WHERE id_animal = ?', [$animal->getId()]));
 
-        $this->entityManager->persist(new Pesaje($animal, new \DateTimeImmutable('2026-09-16'), '110.00'));
+        $this->entityManager->persist($this->pesaje($animal, '2026-09-16', '110.00', $creador));
         $this->entityManager->flush();
-        self::assertSame(1, (int) $connection->fetchOne('SELECT COUNT(*) FROM pesaje WHERE animal_id = ?', [$animal->getId()]));
+        self::assertSame(1, (int) $connection->fetchOne('SELECT COUNT(*) FROM pesaje WHERE id_animal = ?', [$animal->getId()]));
 
-        $this->entityManager->persist(new Pesaje($animal, new \DateTimeImmutable('2026-09-17'), '115.00'));
+        $this->entityManager->persist($this->pesaje($animal, '2026-09-17', '115.00', $creador));
         $this->entityManager->flush();
 
-        self::assertSame(['110.00', '115.00'], $connection->fetchFirstColumn('SELECT peso_kg FROM pesaje WHERE animal_id = ? ORDER BY fecha ASC', [$animal->getId()]));
+        self::assertSame(['110.00', '115.00'], $connection->fetchFirstColumn('SELECT peso_kg FROM pesaje WHERE id_animal = ? ORDER BY fecha_pesaje ASC', [$animal->getId()]));
+    }
+
+    private function pesaje(Animal $animal, string $fecha, string $peso, Usuario $creador): Pesaje
+    {
+        return (new Pesaje($animal, new \DateTimeImmutable($fecha), $peso))->setCreadoPor($creador);
     }
 
     /** @return array{Animal, OrganizacionGanadera, Finca, Usuario} */

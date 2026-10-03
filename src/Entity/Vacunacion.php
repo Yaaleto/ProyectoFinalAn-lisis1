@@ -12,7 +12,7 @@ use DomainException;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'vacunacion')]
-#[ORM\Index(name: 'idx_vacunacion_animal_fecha', columns: ['animal_id', 'fecha'])]
+#[ORM\Index(name: 'idx_vacunacion_animal_fecha', columns: ['id_animal', 'fecha_vacunacion'])]
 #[ORM\HasLifecycleCallbacks]
 class Vacunacion
 {
@@ -20,18 +20,23 @@ class Vacunacion
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(name: 'id_vacunacion', options: ['unsigned' => true])]
     private ?int $id = null;
 
+    // Las FK compuestas con organizacion_id hacia animal y vacuna viven en el SQL inicial.
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false, onDelete: 'RESTRICT')]
+    #[ORM\JoinColumn(name: 'organizacion_id', referencedColumnName: 'id_organizacion', nullable: false, onDelete: 'RESTRICT')]
+    private OrganizacionGanadera $organizacion;
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(name: 'id_animal', referencedColumnName: 'id_animal', nullable: false, onDelete: 'RESTRICT')]
     private Animal $animal;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false, onDelete: 'RESTRICT')]
+    #[ORM\JoinColumn(name: 'id_vacuna', referencedColumnName: 'id_vacuna', nullable: false, onDelete: 'RESTRICT')]
     private Vacuna $vacuna;
 
-    #[ORM\Column(type: Types::DATE_IMMUTABLE)]
+    #[ORM\Column(name: 'fecha_vacunacion', type: Types::DATE_IMMUTABLE)]
     private DateTimeImmutable $fecha;
 
     #[ORM\Column(length: 50)]
@@ -52,6 +57,7 @@ class Vacunacion
         if ('' === trim($dosis)) {
             throw new DomainException('La dosis es obligatoria.');
         }
+        $this->organizacion = $animal->getOrganizacion();
         $this->animal = $animal;
         $this->vacuna = $vacuna;
         $this->fecha = $fecha;
@@ -59,6 +65,7 @@ class Vacunacion
     }
 
     public function getId(): ?int { return $this->id; }
+    public function getOrganizacion(): OrganizacionGanadera { return $this->organizacion; }
     public function getAnimal(): Animal { return $this->animal; }
     public function getVacuna(): Vacuna { return $this->vacuna; }
     public function getFecha(): DateTimeImmutable { return $this->fecha; }
