@@ -12,7 +12,7 @@ use DomainException;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'monta_reproductiva')]
-#[ORM\Index(name: 'idx_monta_hembra_fecha', columns: ['hembra_id', 'fecha'])]
+#[ORM\Index(name: 'idx_monta_hembra_fecha', columns: ['id_hembra', 'fecha_monta'])]
 #[ORM\HasLifecycleCallbacks]
 class MontaReproductiva
 {
@@ -20,18 +20,23 @@ class MontaReproductiva
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(name: 'id_monta', options: ['unsigned' => true])]
     private ?int $id = null;
 
+    // Las FK compuestas con organizacion_id hacia la hembra y el macho viven en el SQL inicial.
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false, onDelete: 'RESTRICT')]
+    #[ORM\JoinColumn(name: 'organizacion_id', referencedColumnName: 'id_organizacion', nullable: false, onDelete: 'RESTRICT')]
+    private OrganizacionGanadera $organizacion;
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(name: 'id_hembra', referencedColumnName: 'id_animal', nullable: false, onDelete: 'RESTRICT')]
     private Animal $hembra;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: true, onDelete: 'RESTRICT')]
+    #[ORM\JoinColumn(name: 'id_macho', referencedColumnName: 'id_animal', nullable: true, onDelete: 'RESTRICT')]
     private ?Animal $macho;
 
-    #[ORM\Column(type: Types::DATE_IMMUTABLE)]
+    #[ORM\Column(name: 'fecha_monta', type: Types::DATE_IMMUTABLE)]
     private DateTimeImmutable $fecha;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
@@ -50,12 +55,14 @@ class MontaReproductiva
         }
         $hembra->assertFechaOperativa($fecha);
         $macho?->assertFechaOperativa($fecha);
+        $this->organizacion = $hembra->getOrganizacion();
         $this->hembra = $hembra;
         $this->macho = $macho;
         $this->fecha = $fecha;
     }
 
     public function getId(): ?int { return $this->id; }
+    public function getOrganizacion(): OrganizacionGanadera { return $this->organizacion; }
     public function getHembra(): Animal { return $this->hembra; }
     public function getMacho(): ?Animal { return $this->macho; }
     public function getFecha(): DateTimeImmutable { return $this->fecha; }
