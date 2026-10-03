@@ -12,7 +12,7 @@ use DomainException;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'pesaje')]
-#[ORM\UniqueConstraint(name: 'uniq_pesaje_animal_fecha', columns: ['animal_id', 'fecha'])]
+#[ORM\UniqueConstraint(name: 'uq_pesaje_animal_fecha', columns: ['id_animal', 'fecha_pesaje'])]
 #[ORM\HasLifecycleCallbacks]
 class Pesaje
 {
@@ -20,14 +20,19 @@ class Pesaje
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(name: 'id_pesaje', options: ['unsigned' => true])]
     private ?int $id = null;
 
+    // La FK compuesta (id_animal, organizacion_id) vive en el SQL inicial.
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false, onDelete: 'RESTRICT')]
+    #[ORM\JoinColumn(name: 'organizacion_id', referencedColumnName: 'id_organizacion', nullable: false, onDelete: 'RESTRICT')]
+    private OrganizacionGanadera $organizacion;
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(name: 'id_animal', referencedColumnName: 'id_animal', nullable: false, onDelete: 'RESTRICT')]
     private Animal $animal;
 
-    #[ORM\Column(type: Types::DATE_IMMUTABLE)]
+    #[ORM\Column(name: 'fecha_pesaje', type: Types::DATE_IMMUTABLE)]
     private DateTimeImmutable $fecha;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 8, scale: 2)]
@@ -37,12 +42,14 @@ class Pesaje
     {
         $animal->assertFechaOperativa($fecha);
         $this->assertPeso($pesoKg);
+        $this->organizacion = $animal->getOrganizacion();
         $this->animal = $animal;
         $this->fecha = $fecha;
         $this->pesoKg = $pesoKg;
     }
 
     public function getId(): ?int { return $this->id; }
+    public function getOrganizacion(): OrganizacionGanadera { return $this->organizacion; }
     public function getAnimal(): Animal { return $this->animal; }
     public function getFecha(): DateTimeImmutable { return $this->fecha; }
     public function getPesoKg(): string { return $this->pesoKg; }
