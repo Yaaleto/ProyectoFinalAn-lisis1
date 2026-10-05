@@ -100,7 +100,6 @@ final class AnimalController extends AbstractController
                     $intakeOrigin,
                 );
                 $this->applyFormData($animal, $data, $intakeOrigin);
-                $animal->setCreadoPor($usuario)->setActualizadoPor($usuario);
 
                 if (!$this->addValidationErrors($form, $animal, $validator)) {
                     $entityManager->persist($animal);
@@ -164,7 +163,6 @@ final class AnimalController extends AbstractController
 
             try {
                 $this->applyFormData($animal, $data);
-                $animal->setActualizadoPor($usuario);
 
                 if (!$this->addValidationErrors($form, $animal, $validator)) {
                     $entityManager->flush();
