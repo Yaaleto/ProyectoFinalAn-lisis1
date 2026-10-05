@@ -417,6 +417,40 @@ final class AnimalModuleTest extends WebTestCase
         self::assertSame($fixture['animalOtraFinca']->getId(), $animal?->getPadre()?->getId());
     }
 
+    public function testInactiveFarmIsNotOfferedForNewAnimals(): void
+    {
+        $client = static::createClient();
+        $fixture = $this->createFixture($client);
+        $fixture['fincaAlterna']->setActivo(false);
+        $client->loginUser($fixture['administrador']);
+        $this->entityManager($client)->flush();
+
+        $crawler = $client->request('GET', '/animals/new');
+
+        $opciones = $crawler->filterXPath('//select[@name="animal[finca]"]/option')->each(static fn ($option) => $option->attr('value'));
+        self::assertContains((string) $fixture['finca']->getId(), $opciones);
+        self::assertNotContains((string) $fixture['fincaAlterna']->getId(), $opciones);
+    }
+
+    public function testAnimalOnADeactivatedFarmCanStillBeEditedAndKeepsItsFarm(): void
+    {
+        $client = static::createClient();
+        $fixture = $this->createFixture($client);
+        $fixture['fincaAlterna']->setActivo(false);
+        $client->loginUser($fixture['administrador']);
+        $this->entityManager($client)->flush();
+        $animalId = $fixture['animalOtraFinca']->getId();
+
+        $crawler = $client->request('GET', sprintf('/animals/%d/edit', $animalId));
+        $client->submit($crawler->selectButton('Guardar cambios')->form(['animal[nombre]' => 'Sigue en su finca']));
+
+        self::assertResponseRedirects('/animals');
+        $this->entityManager($client)->clear();
+        $animal = $this->entityManager($client)->find(Animal::class, $animalId);
+        self::assertSame('Sigue en su finca', $animal?->getNombre());
+        self::assertSame($fixture['fincaAlterna']->getId(), $animal?->getFinca()->getId());
+    }
+
     public function testParentSexCannotBeChangedWhileReferencedByAnAnimal(): void
     {
         $client = static::createClient();
