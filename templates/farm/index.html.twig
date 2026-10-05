@@ -26,6 +26,8 @@
                             <tr>
                                 <th class="px-4 py-3 font-semibold" scope="col">Nombre</th>
                                 <th class="px-4 py-3 font-semibold" scope="col">Código</th>
+                                <th class="px-4 py-3 font-semibold" scope="col">Ubicación</th>
+                                <th class="px-4 py-3 font-semibold" scope="col">Estado</th>
                                 <th class="px-4 py-3 text-right font-semibold" scope="col">Acciones</th>
                             </tr>
                         </thead>
@@ -34,6 +36,10 @@
                                 <tr class="border-t border-surface-muted">
                                     <td class="px-4 py-3 font-medium">{{ finca.nombre }}</td>
                                     <td class="px-4 py-3 text-ink-muted">{{ finca.codigo }}</td>
+                                    <td class="px-4 py-3 text-ink-muted">{{ finca.ubicacion ?: '—' }}</td>
+                                    <td class="px-4 py-3">
+                                        <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold {{ finca.activo ? 'bg-success/10 text-success' : 'bg-ink-muted/10 text-ink-muted' }}">{{ finca.activo ? 'Activa' : 'Inactiva' }}</span>
+                                    </td>
                                     <td class="px-4 py-3 text-right">
                                         <a class="font-semibold text-brand hover:underline" href="{{ path('app_farm_edit', {finca: finca.id}) }}">Editar</a>
                                     </td>
