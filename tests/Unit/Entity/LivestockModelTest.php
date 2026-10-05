@@ -276,23 +276,44 @@ final class LivestockModelTest extends TestCase
         $animal = $this->animal(Animal::SEXO_HEMBRA)->setProductoraLeche(true);
         $this->expectException(DomainException::class);
 
-        new ProduccionLeche($animal, new DateTimeImmutable('2026-09-17 06:00:00'), $cantidad);
+        new ProduccionLeche($animal, $animal->getFinca(), new DateTimeImmutable('2026-09-17 06:00:00'), $cantidad);
     }
 
     public function testMilkProductionAllowsMultipleRecordsOnTheSameDay(): void
     {
         $animal = $this->animal(Animal::SEXO_HEMBRA)->setProductoraLeche(true);
-        $morning = new ProduccionLeche($animal, new DateTimeImmutable('2026-09-17 06:00:00'), '8.50');
-        $evening = new ProduccionLeche($animal, new DateTimeImmutable('2026-09-17 17:00:00'), '7.25');
+        $morning = new ProduccionLeche($animal, $animal->getFinca(), new DateTimeImmutable('2026-09-17 06:00:00'), '8.50');
+        $evening = new ProduccionLeche($animal, $animal->getFinca(), new DateTimeImmutable('2026-09-17 17:00:00'), '7.25');
 
         self::assertSame('15.75', number_format((float) $morning->getCantidadLitros() + (float) $evening->getCantidadLitros(), 2, '.', ''));
     }
 
     public function testMilkProductionRequiresAFemaleProducer(): void
     {
+        $animal = $this->animal(Animal::SEXO_HEMBRA);
         $this->expectException(DomainException::class);
 
-        new ProduccionLeche($this->animal(Animal::SEXO_HEMBRA), new DateTimeImmutable('2026-09-17 06:00:00'), '8.50');
+        new ProduccionLeche($animal, $animal->getFinca(), new DateTimeImmutable('2026-09-17 06:00:00'), '8.50');
+    }
+
+    public function testMilkProductionKeepsTheConfirmedMilkingFarm(): void
+    {
+        $animal = $this->animal(Animal::SEXO_HEMBRA)->setProductoraLeche(true);
+        $fincaAnterior = (new Finca('Finca anterior', 'ANT-'.bin2hex(random_bytes(3))))->setOrganizacion($animal->getOrganizacion());
+
+        $ordeno = new ProduccionLeche($animal, $fincaAnterior, new DateTimeImmutable('2026-09-17 06:00:00'), '8.50');
+
+        self::assertSame($fincaAnterior, $ordeno->getFincaOrdeno());
+        self::assertSame($animal->getOrganizacion(), $ordeno->getOrganizacion());
+    }
+
+    public function testMilkProductionRejectsAFarmFromAnotherOrganization(): void
+    {
+        $animal = $this->animal(Animal::SEXO_HEMBRA)->setProductoraLeche(true);
+        [, $fincaAjena] = $this->tenant();
+        $this->expectException(DomainException::class);
+
+        new ProduccionLeche($animal, $fincaAjena, new DateTimeImmutable('2026-09-17 06:00:00'), '8.50');
     }
 
     /** @return iterable<string, array{string}> */

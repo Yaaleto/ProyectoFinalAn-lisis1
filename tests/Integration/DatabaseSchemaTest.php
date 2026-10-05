@@ -18,8 +18,6 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 final class DatabaseSchemaTest extends KernelTestCase
 {
-    private const LECHE_PENDIENTE = 'Pendiente de #41: la producción de leche aún no está alineada con el esquema V1.';
-
     private EntityManagerInterface $entityManager;
 
     protected function setUp(): void
@@ -276,17 +274,18 @@ final class DatabaseSchemaTest extends KernelTestCase
 
     public function testDatabaseCheckRejectsNonPositiveMilkProduction(): void
     {
-        self::markTestSkipped(self::LECHE_PENDIENTE);
-        [$animal] = $this->persistAnimal('LECHE-CHECK');
+        [$animal, $organizacion, $finca, $creador] = $this->persistAnimal('LECHE-CHECK');
         $this->entityManager->flush();
 
         $this->expectException(DriverException::class);
+        $this->expectExceptionMessageMatches('/ck_produccion_cantidad/');
         $this->entityManager->getConnection()->insert('produccion_leche', [
-            'animal_id' => $animal->getId(),
+            'organizacion_id' => $organizacion->getId(),
+            'id_animal' => $animal->getId(),
+            'id_finca_ordeno' => $finca->getId(),
             'fecha_hora' => '2026-09-17 06:00:00',
             'cantidad_litros' => '0.00',
-            'fecha_creacion' => '2026-09-17 00:00:00',
-            'fecha_actualizacion' => '2026-09-17 00:00:00',
+            'creado_por' => $creador->getId(),
         ]);
     }
 
