@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
+use App\Entity\Finca;
 use App\Entity\OrganizacionGanadera;
 use App\Entity\Usuario;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -23,5 +24,17 @@ final class UsuarioRepository extends ServiceEntityRepository
         return $this->createQueryBuilder($alias)
             ->andWhere(sprintf('%s.organizacion = :organizacion', $alias))
             ->setParameter('organizacion', $organizacion);
+    }
+
+    public function countFarmManagersAssignedTo(Finca $finca): int
+    {
+        return (int) $this->createQueryBuilder('usuario')
+            ->select('COUNT(usuario.id)')
+            ->andWhere('usuario.fincaActiva = :finca')
+            ->andWhere('usuario.rol = :rol')
+            ->setParameter('finca', $finca)
+            ->setParameter('rol', Usuario::ROL_ENCARGADO)
+            ->getQuery()
+            ->getSingleScalarResult();
     }
 }
