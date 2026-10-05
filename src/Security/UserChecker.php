@@ -17,6 +17,9 @@ final class UserChecker implements UserCheckerInterface
         if ($user instanceof Usuario && !$user->isActivo()) {
             throw new CustomUserMessageAccountStatusException('Esta cuenta está inactiva.');
         }
+        if ($user instanceof Usuario && true !== $user->getOrganizacion()?->isActivo()) {
+            throw new CustomUserMessageAccountStatusException('Esta organización está inactiva.');
+        }
     }
 
     public function checkPostAuth(UserInterface $user, ?TokenInterface $token = null): void
