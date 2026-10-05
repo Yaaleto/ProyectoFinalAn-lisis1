@@ -17,6 +17,7 @@ use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
 use Doctrine\DBAL\Exception\NotNullConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 
 final class OperationalRecordSchemaTest extends KernelTestCase
 {
@@ -138,6 +139,7 @@ final class OperationalRecordSchemaTest extends KernelTestCase
         $this->entityManager->persist($ordeno);
         $this->entityManager->flush();
 
+        $this->autenticar($propia['creador']);
         $propia['hembra']->setFinca($fincaNueva);
         $this->entityManager->flush();
 
@@ -201,6 +203,12 @@ final class OperationalRecordSchemaTest extends KernelTestCase
         $this->entityManager->flush();
 
         return compact('organizacion', 'finca', 'creador', 'hembra', 'macho', 'vacuna');
+    }
+
+    private function autenticar(Usuario $usuario): void
+    {
+        self::getContainer()->get('security.token_storage')
+            ->setToken(new UsernamePasswordToken($usuario, 'main', $usuario->getRoles()));
     }
 
     private function ordeno(array $tenant, Finca $finca, string $fechaHora, string $litros): ProduccionLeche
