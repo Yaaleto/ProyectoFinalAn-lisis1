@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use App\Entity\Concerns\Auditable;
+use App\Entity\Concerns\AuditableInterface;
 use DateTimeImmutable;
 use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -23,7 +24,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\HasLifecycleCallbacks]
 #[UniqueEntity(fields: ['codigoInterno'], message: 'El código interno ya existe.')]
 #[UniqueEntity(fields: ['organizacion', 'arete'], message: 'El arete ya existe en la organización.')]
-class Animal
+class Animal implements AuditableInterface
 {
     use Auditable;
 
