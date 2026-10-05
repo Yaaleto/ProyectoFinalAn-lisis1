@@ -46,7 +46,7 @@ class Finca
     public function __construct(string $nombre, string $codigo)
     {
         $this->nombre = $nombre;
-        $this->codigo = $codigo;
+        $this->setCodigo($codigo);
     }
 
     public function getId(): ?int
@@ -83,9 +83,10 @@ class Finca
         return $this->codigo;
     }
 
+    /** El código se guarda en mayúsculas (CA-02-C). */
     public function setCodigo(string $codigo): static
     {
-        $this->codigo = $codigo;
+        $this->codigo = mb_strtoupper(trim($codigo));
 
         return $this;
     }
