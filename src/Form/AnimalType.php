@@ -65,9 +65,17 @@ final class AnimalType extends AbstractType
                 'label' => 'Raza',
                 'class' => Raza::class,
                 'choice_label' => 'nombre',
-                'query_builder' => static fn (RazaRepository $repository) => $repository
-                    ->createActiveOrganizationQueryBuilder($options['organization'])
-                    ->orderBy('raza.nombre', SortDirection::Ascending),
+                // Solo razas activas; un animal existente conserva su raza aunque se haya desactivado (CA-03-C).
+                'query_builder' => static function (RazaRepository $repository) use ($options) {
+                    $queryBuilder = $repository->createActiveOrganizationQueryBuilder($options['organization'])
+                        ->orderBy('raza.nombre', SortDirection::Ascending);
+                    $razaActual = $options['animal']?->getRaza();
+                    if (null !== $razaActual) {
+                        $queryBuilder->orWhere('raza = :razaActual')->setParameter('razaActual', $razaActual);
+                    }
+
+                    return $queryBuilder;
+                },
                 'placeholder' => 'Sin raza',
                 'required' => false,
             ])

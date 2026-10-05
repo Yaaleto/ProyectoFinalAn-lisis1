@@ -176,7 +176,7 @@ class Animal implements AuditableInterface
         if (null !== $raza && $raza->getOrganizacion() !== $this->organizacion) {
             throw new DomainException('La raza debe pertenecer a la organización del animal.');
         }
-        if (null !== $raza && !$raza->isActiva()) {
+        if (null !== $raza && $raza !== $this->raza && !$raza->isActiva()) {
             throw new DomainException('La raza debe estar activa.');
         }
         $this->raza = $raza;

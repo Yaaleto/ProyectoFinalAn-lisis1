@@ -451,6 +451,32 @@ final class AnimalModuleTest extends WebTestCase
         self::assertSame($fixture['fincaAlterna']->getId(), $animal?->getFinca()->getId());
     }
 
+    public function testAnimalKeepsItsBreedAfterTheBreedIsDeactivated(): void
+    {
+        $client = static::createClient();
+        $fixture = $this->createFixture($client);
+        $entityManager = $this->entityManager($client);
+        $raza = new Raza($fixture['organizacion'], 'Gyr '.$fixture['suffix']);
+        $entityManager->persist($raza);
+        $client->loginUser($fixture['administrador']);
+        $fixture['animal']->setRaza($raza);
+        $entityManager->flush();
+        $raza->setActiva(false);
+        $entityManager->flush();
+        $animalId = $fixture['animal']->getId();
+
+        $crawler = $client->request('GET', '/animals/new');
+        $opciones = $crawler->filterXPath('//select[@name="animal[raza]"]/option')->each(static fn ($option) => $option->attr('value'));
+        self::assertNotContains((string) $raza->getId(), $opciones);
+
+        $crawler = $client->request('GET', sprintf('/animals/%d/edit', $animalId));
+        $client->submit($crawler->selectButton('Guardar cambios')->form(['animal[nombre]' => 'Conserva su raza']));
+
+        self::assertResponseRedirects('/animals');
+        $entityManager->clear();
+        self::assertSame($raza->getId(), $entityManager->find(Animal::class, $animalId)?->getRaza()?->getId());
+    }
+
     public function testParentSexCannotBeChangedWhileReferencedByAnAnimal(): void
     {
         $client = static::createClient();
