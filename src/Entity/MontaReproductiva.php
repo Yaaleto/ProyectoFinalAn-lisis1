@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use App\Entity\Concerns\Auditable;
+use App\Entity\Concerns\AuditableInterface;
 use DateTimeImmutable;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -14,7 +15,7 @@ use DomainException;
 #[ORM\Table(name: 'monta_reproductiva')]
 #[ORM\Index(name: 'idx_monta_hembra_fecha', columns: ['id_hembra', 'fecha_monta'])]
 #[ORM\HasLifecycleCallbacks]
-class MontaReproductiva
+class MontaReproductiva implements AuditableInterface
 {
     use Auditable;
 

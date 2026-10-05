@@ -123,7 +123,8 @@ final class DatabaseSchemaTest extends KernelTestCase
         self::assertSame(Animal::ESTADO_ACTIVO, $guardado->getEstado());
         self::assertFalse($guardado->isProductoraLeche());
         self::assertNotNull($guardado->getCreadoPor());
-        self::assertNull($guardado->getActualizadoPor());
+        self::assertNull($guardado->getModificadoPor());
+        self::assertNull($guardado->getFechaActualizacion());
     }
 
     public function testSameEarringIsAllowedInDifferentOrganizations(): void

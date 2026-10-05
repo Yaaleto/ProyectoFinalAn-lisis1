@@ -71,8 +71,8 @@ final class AnimalModuleTest extends WebTestCase
             ->setProcedencia('Finca de origen')
             ->setPadre($fixture['machoFinca'])
             ->setMadre($madre);
-        $entityManager->flush();
         $client->loginUser($fixture['administrador']);
+        $entityManager->flush();
 
         $crawler = $client->request('GET', sprintf('/animals/%d', $fixture['animal']->getId()));
 
@@ -314,7 +314,8 @@ final class AnimalModuleTest extends WebTestCase
         self::assertSame('Luna editada', $animal?->getNombre());
         self::assertSame('42.50', $animal?->getPesoNacimientoKg());
         self::assertTrue($animal?->isProductoraLeche());
-        self::assertSame($fixture['administrador']->getId(), $animal?->getActualizadoPor()?->getId());
+        self::assertSame($fixture['administrador']->getId(), $animal?->getModificadoPor()?->getId());
+        self::assertNotNull($animal?->getFechaActualizacion());
     }
 
     public function testFarmManagerCanEditAssignedAnimalButNotAnotherFarmAnimal(): void
@@ -422,8 +423,8 @@ final class AnimalModuleTest extends WebTestCase
         $fixture = $this->createFixture($client);
         $entityManager = $this->entityManager($client);
         $fixture['animal']->setPadre($fixture['machoFinca']);
-        $entityManager->flush();
         $client->loginUser($fixture['administrador']);
+        $entityManager->flush();
 
         $crawler = $client->request('GET', sprintf('/animals/%d/edit', $fixture['machoFinca']->getId()));
         $client->submit($crawler->selectButton('Guardar cambios')->form(['animal[sexo]' => Animal::SEXO_HEMBRA]));
