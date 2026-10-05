@@ -41,6 +41,7 @@ class Pesaje implements AuditableInterface
 
     public function __construct(Animal $animal, DateTimeImmutable $fecha, string $pesoKg)
     {
+        $animal->assertFincaAdmiteRegistros();
         $animal->assertFechaOperativa($fecha);
         $this->assertPeso($pesoKg);
         $this->organizacion = $animal->getOrganizacion();
