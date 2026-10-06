@@ -7,5 +7,7 @@
         <p class="text-sm font-semibold text-brand">Finca autorizada</p>
         <h1 class="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">{{ finca.nombre }}</h1>
         <p class="mt-2 text-sm text-ink-muted">Código: {{ finca.codigo }}</p>
+        <p class="mt-1 text-sm text-ink-muted">Ubicación: {{ finca.ubicacion ?: 'Sin registrar' }}</p>
+        <p class="mt-1 text-sm text-ink-muted">Estado: {{ finca.activo ? 'Activa' : 'Inactiva' }}</p>
     </div>
 {% endblock %}

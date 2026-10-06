@@ -52,6 +52,9 @@ class ProduccionLeche implements AuditableInterface
         if ($fincaOrdeno->getOrganizacion() !== $animal->getOrganizacion()) {
             throw new DomainException('La finca del ordeño debe pertenecer a la organización del animal.');
         }
+        if (!$fincaOrdeno->isActivo()) {
+            throw new DomainException('La finca del ordeño está inactiva y no admite registros nuevos.');
+        }
         if (!is_numeric($cantidadLitros) || (float) $cantidadLitros <= 0) {
             throw new DomainException('La cantidad de leche debe ser mayor que cero.');
         }

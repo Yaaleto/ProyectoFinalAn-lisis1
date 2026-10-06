@@ -62,7 +62,9 @@ final class UsuarioType extends AbstractType
                 'query_builder' => static fn (FincaRepository $repository) => $repository
                     ->createQueryBuilder('finca')
                     ->andWhere('finca.organizacion = :organizacion')
+                    ->andWhere('finca.activo = :activa')
                     ->setParameter('organizacion', $options['organization'])
+                    ->setParameter('activa', true)
                     ->orderBy('finca.nombre', SortDirection::Ascending),
                 'placeholder' => 'Selecciona una finca',
                 'required' => false,

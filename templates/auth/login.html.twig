@@ -15,11 +15,15 @@
                 <p class="mt-2 text-sm text-ink-muted">Accede a la información autorizada de tu organización.</p>
             </div>
 
+            {% for message in app.flashes('warning') %}
+                <div class="mb-5 rounded-md border border-danger/30 bg-danger/10 p-3 text-sm text-danger" role="alert">{{ message }}</div>
+            {% endfor %}
+
             {% if error %}
                 <div class="mb-5 rounded-md border border-danger/30 bg-danger/10 p-3 text-sm text-danger" role="alert">
                     {% if csrfError %}
                         La sesión del formulario expiró. Recarga la página e intenta de nuevo.
-                    {% elseif error.messageKey == 'Esta cuenta está inactiva.' %}
+                    {% elseif error.messageKey in ['Esta cuenta está inactiva.', 'Esta organización está inactiva.'] %}
                         {{ error.messageKey }}
                     {% else %}
                         El correo o la contraseña no son correctos.

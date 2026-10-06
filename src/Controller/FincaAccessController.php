@@ -8,9 +8,11 @@ use App\Entity\Finca;
 use App\Entity\Usuario;
 use App\Form\FincaType;
 use App\Repository\FincaRepository;
+use App\Repository\UsuarioRepository;
 use App\Security\Voter\FincaVoter;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -82,7 +84,7 @@ final class FincaAccessController extends AbstractController
     }
 
     #[Route('/farms/{finca}/edit', name: 'app_farm_edit', methods: ['GET', 'POST'], requirements: ['finca' => '\\d+'])]
-    public function edit(Finca $finca, Request $request, EntityManagerInterface $entityManager): Response
+    public function edit(Finca $finca, Request $request, EntityManagerInterface $entityManager, UsuarioRepository $usuarioRepository): Response
     {
         if ($redirect = $this->redirectWhenCannotAdminister()) {
             return $redirect;
@@ -92,8 +94,14 @@ final class FincaAccessController extends AbstractController
         $usuario = $this->getUser();
         \assert($usuario instanceof Usuario);
 
+        $estabaActiva = $finca->isActivo();
         $form = $this->createForm(FincaType::class, $finca);
         $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid() && $estabaActiva && !$finca->isActivo()
+            && $usuarioRepository->countFarmManagersAssignedTo($finca) > 0) {
+            $form->get('activo')->addError(new FormError('Reasigna a los encargados de esta finca antes de desactivarla.'));
+        }
 
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();

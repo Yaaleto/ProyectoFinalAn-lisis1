@@ -127,6 +127,82 @@ final class FarmAdministrationTest extends WebTestCase
         self::assertSame('Finca Actualizada', $finca?->getNombre());
     }
 
+    public function testFarmCodeIsStoredInUppercaseWithItsLocation(): void
+    {
+        $client = static::createClient();
+        $fixture = $this->createFixture($client);
+        $client->loginUser($fixture['administrador']);
+        $codigo = 'min-'.strtolower(bin2hex(random_bytes(3)));
+
+        $crawler = $client->request('GET', '/farms/new');
+        $client->submit($crawler->selectButton('Crear finca')->form([
+            'finca[nombre]' => 'Finca Minúsculas',
+            'finca[codigo]' => '  '.$codigo.' ',
+            'finca[ubicacion]' => 'Km 12, carretera al norte',
+        ]));
+
+        self::assertResponseRedirects('/farms');
+        $finca = $this->entityManager($client)->getRepository(Finca::class)->findOneBy(['codigo' => strtoupper($codigo)]);
+        self::assertInstanceOf(Finca::class, $finca);
+        self::assertSame('Km 12, carretera al norte', $finca->getUbicacion());
+        self::assertTrue($finca->isActivo());
+    }
+
+    public function testDuplicateCodeThatOnlyDiffersInCaseIsRejected(): void
+    {
+        $client = static::createClient();
+        $fixture = $this->createFixture($client);
+        $client->loginUser($fixture['administrador']);
+
+        $crawler = $client->request('GET', '/farms/new');
+        $client->submit($crawler->selectButton('Crear finca')->form([
+            'finca[nombre]' => 'Finca Repetida',
+            'finca[codigo]' => strtolower($fixture['finca']->getCodigo()),
+        ]));
+
+        self::assertResponseStatusCodeSame(422);
+        self::assertStringContainsString('El código de finca ya existe en la organización.', (string) $client->getResponse()->getContent());
+    }
+
+    public function testFarmWithoutManagersCanBeDeactivatedAndKeepsBeingListed(): void
+    {
+        $client = static::createClient();
+        $fixture = $this->createFixture($client);
+        $libre = (new Finca('Finca libre', 'LIBRE-'.strtoupper(bin2hex(random_bytes(3)))))->setOrganizacion($fixture['organizacion']);
+        $this->entityManager($client)->persist($libre);
+        $this->entityManager($client)->flush();
+        $client->loginUser($fixture['administrador']);
+
+        $crawler = $client->request('GET', sprintf('/farms/%d/edit', $libre->getId()));
+        $form = $crawler->selectButton('Guardar cambios')->form();
+        $form['finca[activo]']->untick();
+        $client->submit($form);
+
+        self::assertResponseRedirects('/farms');
+        $this->entityManager($client)->clear();
+        self::assertFalse($this->entityManager($client)->find(Finca::class, $libre->getId())?->isActivo());
+        $client->request('GET', '/farms');
+        self::assertStringContainsString('Finca libre', (string) $client->getResponse()->getContent());
+        self::assertStringContainsString('Inactiva', (string) $client->getResponse()->getContent());
+    }
+
+    public function testFarmWithAssignedManagersCannotBeDeactivated(): void
+    {
+        $client = static::createClient();
+        $fixture = $this->createFixture($client);
+        $client->loginUser($fixture['administrador']);
+
+        $crawler = $client->request('GET', sprintf('/farms/%d/edit', $fixture['finca']->getId()));
+        $form = $crawler->selectButton('Guardar cambios')->form();
+        $form['finca[activo]']->untick();
+        $client->submit($form);
+
+        self::assertResponseStatusCodeSame(422);
+        self::assertStringContainsString('Reasigna a los encargados de esta finca antes de desactivarla.', (string) $client->getResponse()->getContent());
+        $this->entityManager($client)->clear();
+        self::assertTrue($this->entityManager($client)->find(Finca::class, $fixture['finca']->getId())?->isActivo());
+    }
+
     public function testAdministratorCannotEditFarmFromAnotherOrganization(): void
     {
         $client = static::createClient();

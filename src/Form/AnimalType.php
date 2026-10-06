@@ -46,18 +46,36 @@ final class AnimalType extends AbstractType
                 'label' => 'Finca',
                 'class' => Finca::class,
                 'choice_label' => static fn (Finca $finca): string => sprintf('%s · %s', $finca->getNombre(), $finca->getCodigo()),
-                'query_builder' => static fn (FincaRepository $repository) => $repository
-                    ->createAuthorizedQueryBuilder($options['user'])
-                    ->orderBy('finca.nombre', SortDirection::Ascending),
+                // Solo fincas activas; un animal existente conserva su finca aunque se haya desactivado.
+                'query_builder' => static function (FincaRepository $repository) use ($options) {
+                    $queryBuilder = $repository->createAuthorizedQueryBuilder($options['user'])
+                        ->setParameter('activa', true)
+                        ->orderBy('finca.nombre', SortDirection::Ascending);
+                    if (null === $options['animal']) {
+                        return $queryBuilder->andWhere('finca.activo = :activa');
+                    }
+
+                    return $queryBuilder
+                        ->andWhere('(finca.activo = :activa OR finca = :fincaActual)')
+                        ->setParameter('fincaActual', $options['animal']->getFinca());
+                },
                 'placeholder' => 'Selecciona una finca',
             ])
             ->add('raza', EntityType::class, [
                 'label' => 'Raza',
                 'class' => Raza::class,
                 'choice_label' => 'nombre',
-                'query_builder' => static fn (RazaRepository $repository) => $repository
-                    ->createActiveOrganizationQueryBuilder($options['organization'])
-                    ->orderBy('raza.nombre', SortDirection::Ascending),
+                // Solo razas activas; un animal existente conserva su raza aunque se haya desactivado (CA-03-C).
+                'query_builder' => static function (RazaRepository $repository) use ($options) {
+                    $queryBuilder = $repository->createActiveOrganizationQueryBuilder($options['organization'])
+                        ->orderBy('raza.nombre', SortDirection::Ascending);
+                    $razaActual = $options['animal']?->getRaza();
+                    if (null !== $razaActual) {
+                        $queryBuilder->orWhere('raza = :razaActual')->setParameter('razaActual', $razaActual);
+                    }
+
+                    return $queryBuilder;
+                },
                 'placeholder' => 'Sin raza',
                 'required' => false,
             ])

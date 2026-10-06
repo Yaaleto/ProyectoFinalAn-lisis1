@@ -107,6 +107,46 @@ final class UserAdministrationTest extends WebTestCase
         self::assertNull($this->entityManager($client)->getRepository(Usuario::class)->findOneBy(['email' => $email]));
     }
 
+    public function testInactiveFarmIsNotOfferedForAssignment(): void
+    {
+        $client = static::createClient();
+        $fixture = $this->createFixture($client);
+        $fixture['segundaFinca']->setActivo(false);
+        $this->entityManager($client)->flush();
+        $client->loginUser($fixture['administrador']);
+
+        $crawler = $client->request('GET', '/users/new');
+
+        $opciones = $crawler->filterXPath('//select[@name="usuario[fincaActiva]"]/option')->each(static fn ($option) => $option->attr('value'));
+        self::assertContains((string) $fixture['finca']->getId(), $opciones);
+        self::assertNotContains((string) $fixture['segundaFinca']->getId(), $opciones);
+    }
+
+    public function testManagerCannotBeAssignedToAnInactiveFarm(): void
+    {
+        $client = static::createClient();
+        $fixture = $this->createFixture($client);
+        $fixture['segundaFinca']->setActivo(false);
+        $this->entityManager($client)->flush();
+        $client->loginUser($fixture['administrador']);
+        $email = 'inactive-farm-'.strtolower(bin2hex(random_bytes(4))).'@example.com';
+
+        $crawler = $client->request('GET', '/users/new');
+        $token = $crawler->filterXPath('//input[@name="usuario[_token]"]')->attr('value');
+        $client->request('POST', '/users/new', ['usuario' => [
+            'nombre' => 'Asignación inactiva',
+            'email' => $email,
+            'rol' => Usuario::ROL_ENCARGADO,
+            'fincaActiva' => (string) $fixture['segundaFinca']->getId(),
+            'activo' => '1',
+            'plainPassword' => 'secure-password',
+            '_token' => $token,
+        ]]);
+
+        self::assertResponseStatusCodeSame(422);
+        self::assertNull($this->entityManager($client)->getRepository(Usuario::class)->findOneBy(['email' => $email]));
+    }
+
     public function testEditingManagerReplacesItsActiveFarmAndKeepsPasswordWhenLeftBlank(): void
     {
         $client = static::createClient();

@@ -48,6 +48,7 @@ class Vacunacion implements AuditableInterface
 
     public function __construct(Animal $animal, Vacuna $vacuna, DateTimeImmutable $fecha, string $dosis)
     {
+        $animal->assertFincaAdmiteRegistros();
         $animal->assertFechaOperativa($fecha);
         if ($vacuna->getOrganizacion() !== $animal->getOrganizacion()) {
             throw new DomainException('La vacuna debe pertenecer a la organización del animal.');

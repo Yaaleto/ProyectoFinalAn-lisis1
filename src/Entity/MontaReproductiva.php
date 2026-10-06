@@ -54,6 +54,7 @@ class MontaReproductiva implements AuditableInterface
         if (null !== $macho && $macho->getOrganizacion() !== $hembra->getOrganizacion()) {
             throw new DomainException('Los animales de la monta deben pertenecer a la misma organización.');
         }
+        $hembra->assertFincaAdmiteRegistros();
         $hembra->assertFechaOperativa($fecha);
         $macho?->assertFechaOperativa($fecha);
         $this->organizacion = $hembra->getOrganizacion();

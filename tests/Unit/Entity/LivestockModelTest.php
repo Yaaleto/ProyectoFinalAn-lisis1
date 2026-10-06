@@ -316,6 +316,59 @@ final class LivestockModelTest extends TestCase
         new ProduccionLeche($animal, $fincaAjena, new DateTimeImmutable('2026-09-17 06:00:00'), '8.50');
     }
 
+    public function testAnimalCannotBeRegisteredOnAnInactiveFarm(): void
+    {
+        [$organizacion, $finca] = $this->tenant();
+        $finca->setActivo(false);
+        $this->expectException(DomainException::class);
+
+        new Animal($organizacion, $finca, 'AN-INACTIVA', Animal::SEXO_HEMBRA, Animal::ORIGEN_EXTERNO);
+    }
+
+    public function testAnimalCannotBeMovedToAnInactiveFarm(): void
+    {
+        $animal = $this->animal();
+        $fincaInactiva = (new Finca('Inactiva', 'INA-'.bin2hex(random_bytes(3))))
+            ->setOrganizacion($animal->getOrganizacion())
+            ->setActivo(false);
+        $this->expectException(DomainException::class);
+
+        $animal->setFinca($fincaInactiva);
+    }
+
+    public function testAnimalKeepsItsFarmAfterTheFarmIsDeactivated(): void
+    {
+        $animal = $this->animal();
+        $animal->getFinca()->setActivo(false);
+
+        $animal->setFinca($animal->getFinca());
+
+        self::assertFalse($animal->getFinca()->isActivo());
+    }
+
+    public function testOperationalRecordsAreRejectedOnAnInactiveFarm(): void
+    {
+        $hembra = $this->animal(Animal::SEXO_HEMBRA)->setProductoraLeche(true);
+        $vacuna = new Vacuna($hembra->getOrganizacion(), 'Aftosa');
+        $hembra->getFinca()->setActivo(false);
+        $fecha = new DateTimeImmutable('2026-09-17');
+        $intentos = [
+            'pesaje' => static fn () => new Pesaje($hembra, $fecha, '120.00'),
+            'vacunación' => static fn () => new Vacunacion($hembra, $vacuna, $fecha, '5 ml'),
+            'monta' => static fn () => new MontaReproductiva($hembra, null, $fecha),
+            'ordeño' => static fn () => new ProduccionLeche($hembra, $hembra->getFinca(), new DateTimeImmutable('2026-09-17 06:00:00'), '8.50'),
+        ];
+
+        foreach ($intentos as $registro => $crear) {
+            try {
+                $crear();
+                self::fail(sprintf('Se aceptó un registro de %s en una finca inactiva.', $registro));
+            } catch (DomainException) {
+                $this->addToAssertionCount(1);
+            }
+        }
+    }
+
     /** @return iterable<string, array{string}> */
     public static function nonPositiveValues(): iterable
     {

@@ -190,6 +190,12 @@ class Usuario implements UserInterface, PasswordAuthenticatedUserInterface
                 ->atPath('fincaActiva')
                 ->addViolation();
         }
+        if (self::ROL_ENCARGADO === $this->rol && null !== $this->fincaActiva && !$this->fincaActiva->isActivo()) {
+            $context
+                ->buildViolation('La finca asignada debe estar activa.')
+                ->atPath('fincaActiva')
+                ->addViolation();
+        }
     }
 
     #[\Deprecated]

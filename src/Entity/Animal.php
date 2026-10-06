@@ -122,6 +122,9 @@ class Animal implements AuditableInterface
         if ($finca->getOrganizacion() !== $organizacion) {
             throw new DomainException('La finca debe pertenecer a la organización del animal.');
         }
+        if (!$finca->isActivo()) {
+            throw new DomainException('La finca está inactiva y no admite animales nuevos.');
+        }
         if (!in_array($sexo, [self::SEXO_HEMBRA, self::SEXO_MACHO], true)) {
             throw new DomainException('El sexo del animal no es válido.');
         }
@@ -161,6 +164,9 @@ class Animal implements AuditableInterface
         if ($finca->getOrganizacion() !== $this->organizacion) {
             throw new DomainException('La finca debe pertenecer a la organización del animal.');
         }
+        if ($finca !== $this->finca && !$finca->isActivo()) {
+            throw new DomainException('La finca está inactiva y no admite animales nuevos.');
+        }
         $this->finca = $finca;
         return $this;
     }
@@ -170,7 +176,7 @@ class Animal implements AuditableInterface
         if (null !== $raza && $raza->getOrganizacion() !== $this->organizacion) {
             throw new DomainException('La raza debe pertenecer a la organización del animal.');
         }
-        if (null !== $raza && !$raza->isActiva()) {
+        if (null !== $raza && $raza !== $this->raza && !$raza->isActiva()) {
             throw new DomainException('La raza debe estar activa.');
         }
         $this->raza = $raza;
@@ -279,6 +285,14 @@ class Animal implements AuditableInterface
         $this->estado = $estado;
         $this->fechaSalida = $fecha;
         return $this;
+    }
+
+    /** Una finca inactiva conserva su historial, pero no recibe registros operativos nuevos. */
+    public function assertFincaAdmiteRegistros(): void
+    {
+        if (!$this->finca->isActivo()) {
+            throw new DomainException('La finca del animal está inactiva y no admite registros nuevos.');
+        }
     }
 
     public function assertFechaOperativa(DateTimeInterface $fecha): void
