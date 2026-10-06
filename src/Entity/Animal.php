@@ -6,6 +6,7 @@ namespace App\Entity;
 
 use App\Entity\Concerns\Auditable;
 use App\Entity\Concerns\AuditableInterface;
+use App\Validation\ValidadorFechas;
 use DateTimeImmutable;
 use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -230,8 +231,8 @@ class Animal implements AuditableInterface
 
     public function setFechaNacimiento(?DateTimeImmutable $fecha): static
     {
-        if (null !== $fecha && $fecha > new DateTimeImmutable('today')) {
-            throw new DomainException('La fecha de nacimiento no puede estar en el futuro.');
+        if (null !== $fecha) {
+            ValidadorFechas::assertNoFutura($fecha, 'La fecha de nacimiento');
         }
         if (null !== $fecha && null !== $this->fechaSalida && $fecha > $this->fechaSalida) {
             throw new DomainException('La fecha de nacimiento no puede ser posterior a la salida.');
@@ -271,20 +272,41 @@ class Animal implements AuditableInterface
         return $this;
     }
 
-    public function registrarSalida(string $estado, DateTimeImmutable $fecha): static
+    /**
+     * Cambia el estado a VENDIDO, FALLECIDO o EGRESADO con su fecha de salida (CA-04-C, RN-12).
+     * La salida no puede ser futura, anterior al nacimiento ni anterior al último registro operativo.
+     */
+    public function registrarSalida(string $estado, DateTimeImmutable $fecha, ?DateTimeImmutable $ultimoRegistro = null): static
     {
         if (!in_array($estado, [self::ESTADO_VENDIDO, self::ESTADO_FALLECIDO, self::ESTADO_EGRESADO], true)) {
             throw new DomainException('El estado de salida no es válido.');
         }
-        if ($fecha > new DateTimeImmutable('today')) {
-            throw new DomainException('La fecha de salida no puede estar en el futuro.');
-        }
+        ValidadorFechas::assertNoFutura($fecha, 'La fecha de salida');
         if (null !== $this->fechaNacimiento && $fecha < $this->fechaNacimiento) {
             throw new DomainException('La salida no puede preceder al nacimiento.');
+        }
+        if (null !== $ultimoRegistro && $fecha->format('Y-m-d') < $ultimoRegistro->format('Y-m-d')) {
+            throw new DomainException(sprintf(
+                'La salida no puede ser anterior al último registro operativo (%s).',
+                $ultimoRegistro->format('d/m/Y'),
+            ));
         }
         $this->estado = $estado;
         $this->fechaSalida = $fecha;
         return $this;
+    }
+
+    /** Devuelve el animal a ACTIVO; el estado activo no lleva fecha de salida. */
+    public function reactivar(): static
+    {
+        $this->estado = self::ESTADO_ACTIVO;
+        $this->fechaSalida = null;
+        return $this;
+    }
+
+    public function isActivo(): bool
+    {
+        return self::ESTADO_ACTIVO === $this->estado;
     }
 
     /** Una finca inactiva conserva su historial, pero no recibe registros operativos nuevos. */
@@ -297,12 +319,7 @@ class Animal implements AuditableInterface
 
     public function assertFechaOperativa(DateTimeInterface $fecha): void
     {
-        if (null !== $this->fechaNacimiento && $fecha < $this->fechaNacimiento) {
-            throw new DomainException('La fecha no puede preceder al nacimiento.');
-        }
-        if (null !== $this->fechaSalida && $fecha > $this->fechaSalida) {
-            throw new DomainException('No se permiten registros posteriores a la salida del animal.');
-        }
+        ValidadorFechas::assertFechaOperativa($this, $fecha);
     }
 
     private function assertProgenitor(?self $progenitor, string $sexo, string $rol): void
