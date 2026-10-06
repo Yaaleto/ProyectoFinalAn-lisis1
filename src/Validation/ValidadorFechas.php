@@ -1,0 +1,49 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Validation;
+
+use App\Entity\Animal;
+use DateTimeImmutable;
+use DateTimeInterface;
+use DomainException;
+
+/**
+ * Validador de fechas compartido (DERCAS v1.2, sección 5.2).
+ * Compara solo la parte de fecha, de modo que un ordeño con hora cuenta en su día.
+ */
+final class ValidadorFechas
+{
+    /** RN-15: ninguna fecha puede ser posterior a la actual. */
+    public static function assertNoFutura(DateTimeInterface $fecha, string $descripcion): void
+    {
+        if (self::dia($fecha) > self::dia(new DateTimeImmutable('today'))) {
+            throw new DomainException(sprintf('%s no puede estar en el futuro.', $descripcion));
+        }
+    }
+
+    /**
+     * Un registro operativo no puede ser anterior al nacimiento (RN-11), posterior a la salida (RN-12)
+     * ni posterior a la fecha actual (RN-15).
+     */
+    public static function assertFechaOperativa(Animal $animal, DateTimeInterface $fecha): void
+    {
+        self::assertNoFutura($fecha, 'La fecha del registro');
+
+        $nacimiento = $animal->getFechaNacimiento();
+        if (null !== $nacimiento && self::dia($fecha) < self::dia($nacimiento)) {
+            throw new DomainException('La fecha del registro no puede ser anterior al nacimiento del animal.');
+        }
+
+        $salida = $animal->getFechaSalida();
+        if (null !== $salida && self::dia($fecha) > self::dia($salida)) {
+            throw new DomainException('La fecha del registro no puede ser posterior a la salida del animal.');
+        }
+    }
+
+    private static function dia(DateTimeInterface $fecha): string
+    {
+        return $fecha->format('Y-m-d');
+    }
+}

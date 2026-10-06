@@ -9,7 +9,9 @@ use App\Entity\Finca;
 use App\Entity\Raza;
 use App\Entity\Usuario;
 use App\Form\AnimalType;
+use App\Form\SalidaAnimalType;
 use App\Security\FincaAccess;
+use App\Service\AnimalHistorial;
 use Doctrine\ORM\EntityManagerInterface;
 use DomainException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -182,6 +184,92 @@ final class AnimalController extends AbstractController
             'page_title' => 'Editar animal',
             'submit_label' => 'Guardar cambios',
         ]);
+    }
+
+    /** Cambio de estado con fecha de salida (CA-04-C); disponible para ambos roles dentro de su ámbito. */
+    #[Route('/animals/{animal}/status', name: 'app_animal_status', methods: ['GET', 'POST'], requirements: ['animal' => '\\d+'])]
+    public function status(
+        Animal $animal,
+        Request $request,
+        EntityManagerInterface $entityManager,
+        FincaAccess $fincaAccess,
+        AnimalHistorial $historial,
+    ): Response {
+        $usuario = $this->getUser();
+        \assert($usuario instanceof Usuario);
+
+        if (!$fincaAccess->canView($usuario, $animal->getFinca())) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $form = $this->createForm(SalidaAnimalType::class, [
+            'estado' => $animal->getEstado(),
+            'fechaSalida' => $animal->getFechaSalida(),
+        ]);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $data = $form->getData();
+            \assert(is_array($data));
+
+            try {
+                if (Animal::ESTADO_ACTIVO === $data['estado']) {
+                    $animal->reactivar();
+                } else {
+                    $animal->registrarSalida((string) $data['estado'], $data['fechaSalida'], $historial->ultimaFechaOperativa($animal));
+                }
+                $entityManager->flush();
+                $this->addFlash('success', 'El estado del animal fue actualizado correctamente.');
+
+                return $this->redirectToRoute('app_animal_show', ['animal' => $animal->getId()]);
+            } catch (DomainException $exception) {
+                $form->get('fechaSalida')->addError(new FormError($exception->getMessage()));
+            }
+        }
+
+        return $this->render('animal/status.html.twig', [
+            'form' => $form,
+            'animal' => $animal,
+        ], new Response(null, $form->isSubmitted() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK));
+    }
+
+    /** Eliminación física solo por el Administrador y solo sin registros operativos ni descendientes (CA-04-D, CA-04-E). */
+    #[Route('/animals/{animal}/delete', name: 'app_animal_delete', methods: ['POST'], requirements: ['animal' => '\\d+'])]
+    public function delete(
+        Animal $animal,
+        Request $request,
+        EntityManagerInterface $entityManager,
+        FincaAccess $fincaAccess,
+        AnimalHistorial $historial,
+    ): Response {
+        $usuario = $this->getUser();
+        \assert($usuario instanceof Usuario);
+
+        if (!$this->isGranted('ROLE_ADMINISTRADOR') || !$fincaAccess->canView($usuario, $animal->getFinca())) {
+            throw $this->createAccessDeniedException();
+        }
+        if (!$this->isCsrfTokenValid('delete-animal-'.$animal->getId(), (string) $request->request->get('_token'))) {
+            $this->addFlash('warning', 'La solicitud expiró. Intenta eliminar el animal de nuevo.');
+
+            return $this->redirectToRoute('app_animal_show', ['animal' => $animal->getId()]);
+        }
+
+        $motivo = match (true) {
+            $historial->tieneRegistrosOperativos($animal) => 'tiene registros operativos',
+            $historial->tieneDescendientes($animal) => 'está registrado como progenitor de otros animales',
+            default => null,
+        };
+        if (null !== $motivo) {
+            $this->addFlash('warning', sprintf('No se puede eliminar el animal porque %s. Puedes registrar su salida en su lugar.', $motivo));
+
+            return $this->redirectToRoute('app_animal_show', ['animal' => $animal->getId()]);
+        }
+
+        $entityManager->remove($animal);
+        $entityManager->flush();
+        $this->addFlash('success', 'El animal fue eliminado correctamente.');
+
+        return $this->redirectToRoute('app_animal_index');
     }
 
     private function generateInternalCode(): string

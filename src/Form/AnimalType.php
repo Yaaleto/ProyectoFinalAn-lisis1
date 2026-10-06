@@ -32,8 +32,7 @@ final class AnimalType extends AbstractType
         $builder
             ->add('arete', TextType::class, [
                 'label' => 'Arete',
-                'required' => false,
-                'constraints' => [new Assert\Length(max: 50)],
+                'constraints' => [new Assert\NotBlank(message: 'El arete es obligatorio.'), new Assert\Length(max: 50)],
                 'help' => 'Debe ser único dentro de la organización.',
                 'attr' => ['autocomplete' => 'off'],
             ])
@@ -120,8 +119,8 @@ final class AnimalType extends AbstractType
             $builder->add('procedencia', TextType::class, [
                 'label' => 'Procedencia',
                 'required' => false,
-                'help' => 'Opcional. Indica la finca o lugar de procedencia.',
-                'constraints' => [new Assert\Length(max: 255)],
+                'help' => 'Opcional. Indica la finca o lugar de procedencia (hasta 200 caracteres).',
+                'constraints' => [new Assert\Length(max: 200)],
             ]);
         }
 
