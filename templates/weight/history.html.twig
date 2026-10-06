@@ -1,0 +1,68 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Historial de pesajes · BOVITRACK{% endblock %}
+
+{% block body %}
+    <div class="mx-auto max-w-5xl">
+        <a class="text-sm font-semibold text-brand hover:underline" href="{{ path('app_animal_show', {animal: animal.id}) }}">← Volver al perfil</a>
+
+        <div class="mt-6 mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <p class="text-sm font-semibold text-brand">Historial de pesajes</p>
+                <h1 class="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">{{ animal.nombre ?: 'Arete ' ~ animal.arete }}</h1>
+                <p class="mt-2 text-sm text-ink-muted">Arete {{ animal.arete }} · {{ animal.finca.nombre }} · en orden cronológico.</p>
+            </div>
+            {% if animal.finca.activo %}
+                <a class="inline-flex min-h-11 items-center justify-center rounded-md bg-brand px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-hover" href="{{ path('app_weight_new', {animal: animal.id}) }}">Registrar pesaje</a>
+            {% endif %}
+        </div>
+
+        <div class="overflow-hidden rounded-lg border border-surface-muted bg-surface shadow-sm">
+            {% if historial is empty %}
+                <div class="p-6 text-center">
+                    <p class="font-medium">Este animal todavía no tiene pesajes.</p>
+                </div>
+            {% else %}
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-surface-muted text-ink-muted">
+                            <tr>
+                                <th class="px-4 py-3 font-semibold" scope="col">Fecha</th>
+                                <th class="px-4 py-3 text-right font-semibold" scope="col">Peso</th>
+                                <th class="px-4 py-3 text-right font-semibold" scope="col">Variación</th>
+                                <th class="px-4 py-3 text-right font-semibold" scope="col">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for fila in historial %}
+                                {% set pesaje = fila.pesaje %}
+                                <tr class="border-t border-surface-muted" data-weight-row>
+                                    <td class="px-4 py-3 font-medium">{{ pesaje.fecha|date('d/m/Y') }}</td>
+                                    <td class="px-4 py-3 text-right">{{ pesaje.pesoKg|number_format(2, '.', ',') }} kg</td>
+                                    <td class="px-4 py-3 text-right" data-weight-variation>
+                                        {% if fila.variacion is null %}
+                                            <span class="text-ink-muted">Primer pesaje</span>
+                                        {% else %}
+                                            <span class="font-semibold {{ fila.variacion > 0 ? 'text-success' : (fila.variacion < 0 ? 'text-danger' : 'text-ink-muted') }}">{{ fila.variacion > 0 ? '+' }}{{ fila.variacion|number_format(2, '.', ',') }} kg</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="px-4 py-3 text-right">
+                                        <div class="inline-flex items-center gap-3">
+                                            <a class="font-semibold text-brand hover:underline" href="{{ path('app_weight_edit', {pesaje: pesaje.id}) }}">Editar</a>
+                                            {% if is_granted('ROLE_ADMINISTRADOR') %}
+                                                <form method="post" action="{{ path('app_weight_delete', {pesaje: pesaje.id}) }}" onsubmit="return confirm('¿Eliminar este pesaje?');">
+                                                    <input type="hidden" name="_token" value="{{ csrf_token('delete-weight-' ~ pesaje.id) }}">
+                                                    <button class="font-semibold text-danger hover:underline" type="submit">Eliminar</button>
+                                                </form>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
