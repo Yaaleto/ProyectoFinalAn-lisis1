@@ -17,6 +17,7 @@
                 <a class="inline-flex min-h-11 items-center justify-center rounded-md border border-surface-muted px-4 py-2 text-sm font-semibold text-ink hover:bg-surface-muted" href="{{ path('app_animal_status', {animal: animal.id}) }}">Cambiar estado</a>
                 <a class="inline-flex min-h-11 items-center justify-center rounded-md border border-surface-muted px-4 py-2 text-sm font-semibold text-ink hover:bg-surface-muted" href="{{ path('app_weight_history', {animal: animal.id}) }}">Pesajes</a>
                 <a class="inline-flex min-h-11 items-center justify-center rounded-md border border-surface-muted px-4 py-2 text-sm font-semibold text-ink hover:bg-surface-muted" href="{{ path('app_vaccination_history', {animal: animal.id}) }}">Vacunaciones</a>
+                <a class="inline-flex min-h-11 items-center justify-center rounded-md border border-surface-muted px-4 py-2 text-sm font-semibold text-ink hover:bg-surface-muted" href="{{ path('app_mating_history', {animal: animal.id}) }}">Reproducción</a>
                 {% if is_granted('ROLE_ADMINISTRADOR') %}
                     <form method="post" action="{{ path('app_animal_delete', {animal: animal.id}) }}" onsubmit="return confirm('¿Eliminar definitivamente este animal? Esta acción no se puede deshacer.');">
                         <input type="hidden" name="_token" value="{{ csrf_token('delete-animal-' ~ animal.id) }}">
