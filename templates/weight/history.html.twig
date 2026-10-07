@@ -17,6 +17,10 @@
             {% endif %}
         </div>
 
+        {% if not animal.finca.activo %}
+            <p class="mb-4 rounded-md border border-surface-muted bg-surface-muted p-3 text-sm text-ink-muted" role="note">La finca está inactiva; su historial es de solo lectura.</p>
+        {% endif %}
+
         <div class="overflow-hidden rounded-lg border border-surface-muted bg-surface shadow-sm">
             {% if historial is empty %}
                 <div class="p-6 text-center">
@@ -47,15 +51,19 @@
                                         {% endif %}
                                     </td>
                                     <td class="px-4 py-3 text-right">
-                                        <div class="inline-flex items-center gap-3">
-                                            <a class="font-semibold text-brand hover:underline" href="{{ path('app_weight_edit', {pesaje: pesaje.id}) }}">Editar</a>
-                                            {% if is_granted('ROLE_ADMINISTRADOR') %}
-                                                <form method="post" action="{{ path('app_weight_delete', {pesaje: pesaje.id}) }}" onsubmit="return confirm('¿Eliminar este pesaje?');">
-                                                    <input type="hidden" name="_token" value="{{ csrf_token('delete-weight-' ~ pesaje.id) }}">
-                                                    <button class="font-semibold text-danger hover:underline" type="submit">Eliminar</button>
-                                                </form>
-                                            {% endif %}
-                                        </div>
+                                        {% if animal.finca.activo %}
+                                            <div class="inline-flex items-center gap-3">
+                                                <a class="font-semibold text-brand hover:underline" href="{{ path('app_weight_edit', {pesaje: pesaje.id}) }}">Editar</a>
+                                                {% if is_granted('ROLE_ADMINISTRADOR') %}
+                                                    <form method="post" action="{{ path('app_weight_delete', {pesaje: pesaje.id}) }}" onsubmit="return confirm('¿Eliminar este pesaje?');">
+                                                        <input type="hidden" name="_token" value="{{ csrf_token('delete-weight-' ~ pesaje.id) }}">
+                                                        <button class="font-semibold text-danger hover:underline" type="submit">Eliminar</button>
+                                                    </form>
+                                                {% endif %}
+                                            </div>
+                                        {% else %}
+                                            <span class="text-ink-muted">Solo lectura</span>
+                                        {% endif %}
                                     </td>
                                 </tr>
                             {% endfor %}

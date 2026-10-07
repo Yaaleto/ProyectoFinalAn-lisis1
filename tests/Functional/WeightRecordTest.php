@@ -190,6 +190,39 @@ final class WeightRecordTest extends WebTestCase
         self::assertCount(0, $this->pesajes($client, $fixture['animal']));
     }
 
+    public function testWeightsOfAnInactiveFarmAreReadOnly(): void
+    {
+        $client = static::createClient();
+        $fixture = $this->createFixture($client);
+        $client->loginUser($fixture['administrador']);
+        $pesaje = new Pesaje($fixture['animal'], new DateTimeImmutable('2026-03-01'), '250.00');
+        $this->entityManager($client)->persist($pesaje);
+        $this->entityManager($client)->flush();
+        $historial = sprintf('/animals/%d/weights', $fixture['animal']->getId());
+        // Token válido obtenido mientras la finca seguía activa: el rechazo debe venir de la finca, no del CSRF.
+        $tokenValido = $client->request('GET', $historial)->filterXPath('//form[contains(@action, "/delete")]//input[@name="_token"]')->attr('value');
+        $finca = $this->entityManager($client)->find(Finca::class, $fixture['finca']->getId());
+        $finca?->setActivo(false);
+        $this->entityManager($client)->flush();
+
+        $crawler = $client->request('GET', $historial);
+        $contenido = (string) $client->getResponse()->getContent();
+        self::assertResponseIsSuccessful();
+        self::assertStringContainsString('250.00 kg', $contenido);
+        self::assertStringContainsString('La finca está inactiva; su historial es de solo lectura.', $contenido);
+        self::assertCount(0, $crawler->filterXPath(sprintf('//a[contains(@href, "/weights/%d/edit")]', $pesaje->getId())));
+        self::assertCount(0, $crawler->filterXPath('//form[contains(@action, "/delete")]'));
+
+        $client->request('GET', sprintf('/weights/%d/edit', $pesaje->getId()));
+        self::assertResponseRedirects($historial);
+
+        $client->request('POST', sprintf('/weights/%d/delete', $pesaje->getId()), ['_token' => $tokenValido]);
+        self::assertResponseRedirects($historial);
+        $client->followRedirect();
+        self::assertStringContainsString('La finca del animal está inactiva; su historial de pesajes es de solo lectura.', (string) $client->getResponse()->getContent());
+        self::assertCount(1, $this->pesajes($client, $fixture['animal']));
+    }
+
     public function testListingOnlyShowsWeightsInsideTheUserScope(): void
     {
         $client = static::createClient();

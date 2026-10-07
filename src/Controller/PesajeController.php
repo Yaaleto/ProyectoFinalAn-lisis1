@@ -26,6 +26,7 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 final class PesajeController extends AbstractController
 {
     private const MENSAJE_DUPLICADO = 'Ya existe un pesaje de este animal en esa fecha. Modifica el registro existente.';
+    private const MENSAJE_SOLO_LECTURA = 'La finca del animal está inactiva; su historial de pesajes es de solo lectura.';
 
     #[Route('/weights', name: 'app_weight_index', methods: ['GET'])]
     public function index(PesajeRepository $pesajeRepository): Response
@@ -101,6 +102,11 @@ final class PesajeController extends AbstractController
         if (!$fincaAccess->canView($usuario, $pesaje->getAnimal()->getFinca())) {
             throw $this->createAccessDeniedException();
         }
+        if (!$pesaje->getAnimal()->getFinca()->isActivo()) {
+            $this->addFlash('warning', self::MENSAJE_SOLO_LECTURA);
+
+            return $this->redirectToRoute('app_weight_history', ['animal' => $pesaje->getAnimal()->getId()]);
+        }
 
         $form = $this->createForm(PesajeType::class, [
             'fecha' => $pesaje->getFecha(),
@@ -140,7 +146,9 @@ final class PesajeController extends AbstractController
             throw $this->createAccessDeniedException();
         }
 
-        if ($this->isCsrfTokenValid('delete-weight-'.$pesaje->getId(), (string) $request->request->get('_token'))) {
+        if (!$animal->getFinca()->isActivo()) {
+            $this->addFlash('warning', self::MENSAJE_SOLO_LECTURA);
+        } elseif ($this->isCsrfTokenValid('delete-weight-'.$pesaje->getId(), (string) $request->request->get('_token'))) {
             $entityManager->remove($pesaje);
             $entityManager->flush();
             $this->addFlash('success', 'El pesaje fue eliminado correctamente.');
