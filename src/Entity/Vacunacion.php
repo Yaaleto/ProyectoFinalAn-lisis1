@@ -6,12 +6,13 @@ namespace App\Entity;
 
 use App\Entity\Concerns\Auditable;
 use App\Entity\Concerns\AuditableInterface;
+use App\Repository\VacunacionRepository;
 use DateTimeImmutable;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use DomainException;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: VacunacionRepository::class)]
 #[ORM\Table(name: 'vacunacion')]
 #[ORM\Index(name: 'idx_vacunacion_animal_fecha', columns: ['id_animal', 'fecha_vacunacion'])]
 #[ORM\HasLifecycleCallbacks]
@@ -56,14 +57,45 @@ class Vacunacion implements AuditableInterface
         if (!$vacuna->isActiva()) {
             throw new DomainException('La vacuna debe estar activa.');
         }
-        if ('' === trim($dosis)) {
-            throw new DomainException('La dosis es obligatoria.');
-        }
         $this->organizacion = $animal->getOrganizacion();
         $this->animal = $animal;
         $this->vacuna = $vacuna;
         $this->fecha = $fecha;
-        $this->dosis = $dosis;
+        $this->dosis = $this->dosisValida($dosis);
+    }
+
+    /**
+     * La modificación aplica las reglas del alta, salvo que conserva la vacuna aplicada aunque
+     * ahora esté inactiva; cambiar a otra vacuna exige que esté activa (CA-03-C, RF-07).
+     */
+    public function modificar(Vacuna $vacuna, DateTimeImmutable $fecha, string $dosis, ?string $observaciones): static
+    {
+        $this->animal->assertFincaAdmiteRegistros();
+        $this->animal->assertFechaOperativa($fecha);
+        if ($vacuna->getOrganizacion() !== $this->organizacion) {
+            throw new DomainException('La vacuna debe pertenecer a la organización del animal.');
+        }
+        if ($vacuna !== $this->vacuna && !$vacuna->isActiva()) {
+            throw new DomainException('La vacuna debe estar activa.');
+        }
+        $this->vacuna = $vacuna;
+        $this->fecha = $fecha;
+        $this->dosis = $this->dosisValida($dosis);
+        $this->observaciones = $observaciones;
+        return $this;
+    }
+
+    private function dosisValida(string $dosis): string
+    {
+        $dosis = trim($dosis);
+        if ('' === $dosis) {
+            throw new DomainException('La dosis es obligatoria.');
+        }
+        if (mb_strlen($dosis) > 50) {
+            throw new DomainException('La dosis admite hasta 50 caracteres.');
+        }
+
+        return $dosis;
     }
 
     public function getId(): ?int { return $this->id; }
