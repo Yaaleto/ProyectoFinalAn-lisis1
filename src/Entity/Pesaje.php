@@ -6,15 +6,18 @@ namespace App\Entity;
 
 use App\Entity\Concerns\Auditable;
 use App\Entity\Concerns\AuditableInterface;
+use App\Repository\PesajeRepository;
 use DateTimeImmutable;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use DomainException;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: PesajeRepository::class)]
 #[ORM\Table(name: 'pesaje')]
 #[ORM\UniqueConstraint(name: 'uq_pesaje_animal_fecha', columns: ['id_animal', 'fecha_pesaje'])]
 #[ORM\HasLifecycleCallbacks]
+#[UniqueEntity(fields: ['animal', 'fecha'], message: 'Ya existe un pesaje de este animal en esa fecha. Modifica el registro existente.', errorPath: 'fecha')]
 class Pesaje implements AuditableInterface
 {
     use Auditable;
@@ -59,6 +62,17 @@ class Pesaje implements AuditableInterface
     public function setPesoKg(string $pesoKg): static
     {
         $this->assertPeso($pesoKg);
+        $this->pesoKg = $pesoKg;
+        return $this;
+    }
+
+    /** La modificación aplica las mismas reglas que el alta (RN-11, RN-12, RN-14, RN-15). */
+    public function modificar(DateTimeImmutable $fecha, string $pesoKg): static
+    {
+        $this->animal->assertFincaAdmiteRegistros();
+        $this->animal->assertFechaOperativa($fecha);
+        $this->assertPeso($pesoKg);
+        $this->fecha = $fecha;
         $this->pesoKg = $pesoKg;
         return $this;
     }

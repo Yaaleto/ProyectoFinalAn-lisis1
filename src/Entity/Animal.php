@@ -6,6 +6,7 @@ namespace App\Entity;
 
 use App\Entity\Concerns\Auditable;
 use App\Entity\Concerns\AuditableInterface;
+use App\Repository\AnimalRepository;
 use App\Validation\ValidadorFechas;
 use DateTimeImmutable;
 use DateTimeInterface;
@@ -17,7 +18,7 @@ use DomainException;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: AnimalRepository::class)]
 #[ORM\Table(name: 'animal')]
 #[ORM\UniqueConstraint(name: 'uq_animal_codigo_interno', columns: ['codigo_interno'])]
 #[ORM\UniqueConstraint(name: 'uq_animal_organizacion_arete', columns: ['id_organizacion', 'numero_arete'])]
