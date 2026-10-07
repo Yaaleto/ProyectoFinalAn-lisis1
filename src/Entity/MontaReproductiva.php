@@ -6,12 +6,13 @@ namespace App\Entity;
 
 use App\Entity\Concerns\Auditable;
 use App\Entity\Concerns\AuditableInterface;
+use App\Repository\MontaReproductivaRepository;
 use DateTimeImmutable;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use DomainException;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: MontaReproductivaRepository::class)]
 #[ORM\Table(name: 'monta_reproductiva')]
 #[ORM\Index(name: 'idx_monta_hembra_fecha', columns: ['id_hembra', 'fecha_monta'])]
 #[ORM\HasLifecycleCallbacks]
@@ -48,17 +49,32 @@ class MontaReproductiva implements AuditableInterface
         if (Animal::SEXO_HEMBRA !== $hembra->getSexo()) {
             throw new DomainException('La hembra de la monta debe tener sexo HEMBRA.');
         }
+        $hembra->assertFincaAdmiteRegistros();
+        $this->organizacion = $hembra->getOrganizacion();
+        $this->hembra = $hembra;
+        $this->asignar($macho, $fecha);
+    }
+
+    /** La modificación aplica las reglas del alta; la hembra de la monta no cambia (RN-10, CA-08-B a D). */
+    public function modificar(?Animal $macho, DateTimeImmutable $fecha, ?string $observacion): static
+    {
+        $this->hembra->assertFincaAdmiteRegistros();
+        $this->asignar($macho, $fecha);
+        $this->observacion = $observacion;
+        return $this;
+    }
+
+    /** El macho es opcional y puede ser de otra finca, pero debe ser macho y de la misma organización. */
+    private function asignar(?Animal $macho, DateTimeImmutable $fecha): void
+    {
         if (null !== $macho && Animal::SEXO_MACHO !== $macho->getSexo()) {
             throw new DomainException('El macho de la monta debe tener sexo MACHO.');
         }
-        if (null !== $macho && $macho->getOrganizacion() !== $hembra->getOrganizacion()) {
+        if (null !== $macho && $macho->getOrganizacion() !== $this->organizacion) {
             throw new DomainException('Los animales de la monta deben pertenecer a la misma organización.');
         }
-        $hembra->assertFincaAdmiteRegistros();
-        $hembra->assertFechaOperativa($fecha);
+        $this->hembra->assertFechaOperativa($fecha);
         $macho?->assertFechaOperativa($fecha);
-        $this->organizacion = $hembra->getOrganizacion();
-        $this->hembra = $hembra;
         $this->macho = $macho;
         $this->fecha = $fecha;
     }
