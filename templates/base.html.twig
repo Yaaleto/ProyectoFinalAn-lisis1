@@ -58,7 +58,7 @@
                         <li><twig:NavItem label="Pesajes" icon="ruler" href="{{ path('app_weight_index') }}" active="{{ app.current_route starts with 'app_weight_' }}" /></li>
                         <li><twig:NavItem label="Vacunaciones" icon="syringe" href="{{ path('app_vaccination_index') }}" active="{{ app.current_route starts with 'app_vaccination_' }}" /></li>
                         <li><twig:NavItem label="Reproducción" icon="calendar" href="{{ path('app_mating_index') }}" active="{{ app.current_route starts with 'app_mating_' }}" /></li>
-                        <li><twig:NavItem label="Leche" icon="drop" /></li>
+                        <li><twig:NavItem label="Leche" icon="drop" href="{{ path('app_milk_index') }}" active="{{ app.current_route starts with 'app_milk_' }}" /></li>
                         <li><twig:NavItem label="Usuarios" icon="people" href="{{ is_granted('ROLE_ADMINISTRADOR') ? path('app_user_index') : null }}" active="{{ app.current_route starts with 'app_user_' }}" /></li>
                         <li>
                             <details{% if catalogOpen %} open{% endif %}>

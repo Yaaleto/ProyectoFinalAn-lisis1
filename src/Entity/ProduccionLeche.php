@@ -6,12 +6,13 @@ namespace App\Entity;
 
 use App\Entity\Concerns\Auditable;
 use App\Entity\Concerns\AuditableInterface;
+use App\Repository\ProduccionLecheRepository;
 use DateTimeImmutable;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use DomainException;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: ProduccionLecheRepository::class)]
 #[ORM\Table(name: 'produccion_leche')]
 #[ORM\Index(name: 'idx_produccion_animal_fecha', columns: ['id_animal', 'fecha_hora'])]
 #[ORM\HasLifecycleCallbacks]
@@ -46,10 +47,27 @@ class ProduccionLeche implements AuditableInterface
 
     public function __construct(Animal $animal, Finca $fincaOrdeno, DateTimeImmutable $fechaHora, string $cantidadLitros)
     {
-        if (Animal::SEXO_HEMBRA !== $animal->getSexo() || !$animal->isProductoraLeche()) {
-            throw new DomainException('La producción requiere una hembra productora de leche.');
+        if (Animal::SEXO_HEMBRA !== $animal->getSexo() || !$animal->isProductoraLeche() || !$animal->isActivo()) {
+            throw new DomainException('La producción requiere una hembra activa marcada como productora de leche.');
         }
-        if ($fincaOrdeno->getOrganizacion() !== $animal->getOrganizacion()) {
+        $this->organizacion = $animal->getOrganizacion();
+        $this->animal = $animal;
+        $this->asignar($fincaOrdeno, $fechaHora, $cantidadLitros);
+    }
+
+    /**
+     * La modificación aplica las reglas del alta; la finca del ordeño se conserva salvo que el usuario
+     * la cambie, y nunca se deduce de la finca actual del animal (RN-08, CA-09-D).
+     */
+    public function modificar(Finca $fincaOrdeno, DateTimeImmutable $fechaHora, string $cantidadLitros): static
+    {
+        $this->asignar($fincaOrdeno, $fechaHora, $cantidadLitros);
+        return $this;
+    }
+
+    private function asignar(Finca $fincaOrdeno, DateTimeImmutable $fechaHora, string $cantidadLitros): void
+    {
+        if ($fincaOrdeno->getOrganizacion() !== $this->organizacion) {
             throw new DomainException('La finca del ordeño debe pertenecer a la organización del animal.');
         }
         if (!$fincaOrdeno->isActivo()) {
@@ -58,9 +76,7 @@ class ProduccionLeche implements AuditableInterface
         if (!is_numeric($cantidadLitros) || (float) $cantidadLitros <= 0) {
             throw new DomainException('La cantidad de leche debe ser mayor que cero.');
         }
-        $animal->assertFechaOperativa($fechaHora);
-        $this->organizacion = $animal->getOrganizacion();
-        $this->animal = $animal;
+        $this->animal->assertFechaOperativa($fechaHora);
         $this->fincaOrdeno = $fincaOrdeno;
         $this->fechaHora = $fechaHora;
         $this->cantidadLitros = $cantidadLitros;
