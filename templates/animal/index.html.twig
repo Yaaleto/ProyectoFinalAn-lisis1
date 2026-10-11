@@ -13,8 +13,22 @@
             <a class="inline-flex min-h-11 items-center justify-center rounded-md bg-brand px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-hover" href="{{ path('app_animal_new') }}">Registrar animal</a>
         </div>
 
+        <form method="get" action="{{ path('app_animal_index') }}" class="mb-4 flex flex-col gap-2 sm:flex-row" role="search">
+            <label class="sr-only" for="animal-search">Buscar por arete o nombre</label>
+            <input class="min-h-11 w-full rounded-md border border-surface-muted bg-surface px-3 py-2 text-ink sm:max-w-sm" id="animal-search" type="search" name="q" value="{{ busqueda }}" placeholder="Buscar por arete o nombre" autocomplete="off">
+            <button class="min-h-11 rounded-md border border-surface-muted px-4 py-2 text-sm font-semibold text-ink hover:bg-surface-muted" type="submit">Buscar</button>
+            {% if busqueda %}
+                <a class="inline-flex min-h-11 items-center justify-center px-2 text-sm font-semibold text-brand hover:underline" href="{{ path('app_animal_index') }}">Limpiar</a>
+            {% endif %}
+        </form>
+
         <div class="overflow-hidden rounded-lg border border-surface-muted bg-surface shadow-sm">
-            {% if animales is empty %}
+            {% if animales is empty and busqueda %}
+                <div class="p-6 text-center">
+                    <p class="font-medium">Ningún animal coincide con «{{ busqueda }}».</p>
+                    <p class="mt-2 text-sm text-ink-muted">Revisa el arete o el nombre; solo se buscan animales de tu ámbito.</p>
+                </div>
+            {% elseif animales is empty %}
                 <div class="p-6 text-center">
                     <p class="font-medium">Todavía no hay animales registrados.</p>
                     <p class="mt-2 text-sm text-ink-muted">Registra el primer animal para comenzar.</p>

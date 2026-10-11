@@ -10,8 +10,13 @@ use App\Entity\Raza;
 use App\Entity\Usuario;
 use App\Form\AnimalType;
 use App\Form\SalidaAnimalType;
+use App\Repository\MontaReproductivaRepository;
+use App\Repository\PesajeRepository;
+use App\Repository\ProduccionLecheRepository;
+use App\Repository\VacunacionRepository;
 use App\Security\FincaAccess;
 use App\Service\AnimalHistorial;
+use App\Service\Genealogia;
 use Doctrine\ORM\EntityManagerInterface;
 use DomainException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -25,7 +30,7 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 final class AnimalController extends AbstractController
 {
     #[Route('/animals', name: 'app_animal_index', methods: ['GET'])]
-    public function index(EntityManagerInterface $entityManager): Response
+    public function index(Request $request, EntityManagerInterface $entityManager): Response
     {
         $usuario = $this->getUser();
         \assert($usuario instanceof Usuario);
@@ -58,8 +63,17 @@ final class AnimalController extends AbstractController
                 ->setParameter('fincaActiva', $fincaActiva);
         }
 
+        // Búsqueda por arete o nombre dentro del ámbito ya aplicado (RF-10, CA-10-A).
+        $busqueda = trim($request->query->getString('q'));
+        if ('' !== $busqueda) {
+            $queryBuilder
+                ->andWhere('(animal.arete LIKE :busqueda OR animal.nombre LIKE :busqueda)')
+                ->setParameter('busqueda', '%'.addcslashes($busqueda, '%_\\').'%');
+        }
+
         return $this->render('animal/index.html.twig', [
             'animales' => $queryBuilder->getQuery()->getResult(),
+            'busqueda' => $busqueda,
         ]);
     }
 
@@ -125,8 +139,16 @@ final class AnimalController extends AbstractController
     }
 
     #[Route('/animals/{animal}', name: 'app_animal_show', methods: ['GET'], requirements: ['animal' => '\\d+'])]
-    public function show(Animal $animal, FincaAccess $fincaAccess): Response
-    {
+    /** Ficha integral (RF-10): datos, genealogía y los cuatro historiales dentro del ámbito del usuario. Solo lectura. */
+    public function show(
+        Animal $animal,
+        FincaAccess $fincaAccess,
+        Genealogia $genealogia,
+        PesajeRepository $pesajeRepository,
+        VacunacionRepository $vacunacionRepository,
+        MontaReproductivaRepository $montaRepository,
+        ProduccionLecheRepository $ordenoRepository,
+    ): Response {
         $usuario = $this->getUser();
         \assert($usuario instanceof Usuario);
 
@@ -134,7 +156,15 @@ final class AnimalController extends AbstractController
             throw $this->createAccessDeniedException();
         }
 
-        return $this->render('animal/show.html.twig', ['animal' => $animal]);
+        return $this->render('animal/show.html.twig', [
+            'animal' => $animal,
+            'genealogia' => $genealogia->ascendencia($animal, $usuario),
+            'pesajes' => $pesajeRepository->historialConVariacion($animal),
+            'vacunaciones' => $vacunacionRepository->historial($animal),
+            'montas' => $montaRepository->historial($animal, $usuario),
+            'ordenos' => $ordenoRepository->historial($animal, $usuario),
+            'totalesLeche' => $ordenoRepository->totalesDiarios($animal, $usuario),
+        ]);
     }
 
     #[Route('/animals/{animal}/edit', name: 'app_animal_edit', methods: ['GET', 'POST'], requirements: ['animal' => '\\d+'])]

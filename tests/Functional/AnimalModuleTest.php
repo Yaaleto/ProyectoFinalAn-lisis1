@@ -46,7 +46,8 @@ final class AnimalModuleTest extends WebTestCase
         self::assertStringContainsString((string) $fixture['animal']->getArete(), (string) $client->getResponse()->getContent());
         self::assertStringContainsString($fixture['finca']->getNombre(), (string) $client->getResponse()->getContent());
         self::assertStringNotContainsString($fixture['animal']->getCodigoInterno(), (string) $client->getResponse()->getContent());
-        self::assertCount(2, $crawler->filterXPath('//section[@aria-labelledby="animal-parents-heading"]//dd[normalize-space()="Sin registrar"]'));
+        self::assertCount(2, $crawler->filterXPath('//div[@data-generation="1"]//dd[normalize-space()="Sin registrar"]'));
+        self::assertCount(14, $crawler->filterXPath('//section[@aria-labelledby="animal-parents-heading"]//dd[normalize-space()="Sin registrar"]'));
         self::assertStringContainsString('Sin raza', (string) $client->getResponse()->getContent());
         self::assertCount(1, $crawler->filterXPath('//dt[normalize-space()="Procedencia"]/following-sibling::dd[normalize-space()="Sin registrar"]'));
         self::assertCount(1, $crawler->filterXPath('//dt[normalize-space()="Fecha de nacimiento"]/following-sibling::dd[normalize-space()="Sin registrar"]'));

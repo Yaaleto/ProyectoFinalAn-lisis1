@@ -77,26 +77,184 @@
 
         <section class="mt-4 overflow-hidden rounded-lg border border-surface-muted bg-surface shadow-sm" aria-labelledby="animal-parents-heading">
             <div class="p-5">
-                <h2 class="text-lg font-semibold" id="animal-parents-heading">Progenitores</h2>
-                <p class="mt-1 text-sm text-ink-muted">Padre y madre vinculados al registro del animal.</p>
+                <h2 class="text-lg font-semibold" id="animal-parents-heading">Genealogía</h2>
+                <p class="mt-1 text-sm text-ink-muted">Progenitores y ancestros hasta la tercera generación.</p>
             </div>
-            <dl class="grid sm:grid-cols-2">
-                {% for relation in [{label: 'Padre', parent: animal.padre}, {label: 'Madre', parent: animal.madre}] %}
-                    <div class="border-t border-surface-muted px-5 py-4">
-                        <dt class="text-sm text-ink-muted">{{ relation.label }}</dt>
-                        <dd class="mt-1 break-words text-sm font-semibold text-ink">
-                            {% if relation.parent %}
-                                {{ relation.parent.nombre ?: (relation.parent.arete ? 'Arete ' ~ relation.parent.arete : 'Animal sin identificar') }}
-                                {% if relation.parent.nombre and relation.parent.arete %}
-                                    <span class="mt-1 block font-normal text-ink-muted">Arete {{ relation.parent.arete }}</span>
-                                {% endif %}
-                            {% else %}
-                                <span class="font-normal text-ink-muted">Sin registrar</span>
-                            {% endif %}
-                        </dd>
-                    </div>
-                {% endfor %}
-            </dl>
+            {% for generacion in genealogia %}
+                <div class="border-t border-surface-muted px-5 py-4" data-generation="{{ loop.index }}">
+                    <h3 class="text-sm font-semibold text-ink-muted">{{ ['Progenitores', 'Abuelos', 'Bisabuelos'][loop.index0] }}</h3>
+                    <dl class="mt-2 grid gap-3 {{ loop.index == 1 ? 'sm:grid-cols-2' : (loop.index == 2 ? 'sm:grid-cols-2 lg:grid-cols-4' : 'sm:grid-cols-2 lg:grid-cols-4') }}">
+                        {% for posicion in generacion %}
+                            <div class="rounded-md border border-surface-muted p-3" data-ancestor>
+                                <dt class="text-xs text-ink-muted">{{ posicion.rol }}</dt>
+                                <dd class="mt-1 break-words text-sm font-semibold text-ink">
+                                    {% set ancestro = posicion.animal %}
+                                    {% if ancestro is null %}
+                                        <span class="font-normal text-ink-muted">Sin registrar</span>
+                                    {% else %}
+                                        {% set etiqueta = ancestro.nombre ?: (ancestro.arete ? 'Arete ' ~ ancestro.arete : 'Animal sin identificar') %}
+                                        {% if posicion.accesible %}
+                                            <a class="text-brand hover:underline" href="{{ path('app_animal_show', {animal: ancestro.id}) }}">{{ etiqueta }}</a>
+                                        {% else %}
+                                            {{ etiqueta }}
+                                            <span class="mt-1 block text-xs font-normal text-ink-muted">Otra finca · ficha no disponible</span>
+                                        {% endif %}
+                                        {% if ancestro.nombre and ancestro.arete %}
+                                            <span class="mt-1 block font-normal text-ink-muted">Arete {{ ancestro.arete }}</span>
+                                        {% endif %}
+                                    {% endif %}
+                                </dd>
+                            </div>
+                        {% endfor %}
+                    </dl>
+                </div>
+            {% endfor %}
         </section>
+
+        {% macro encabezado(titulo, id, descripcion, ruta, animal) %}
+            <div class="flex flex-col gap-2 p-5 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                    <h2 class="text-lg font-semibold" id="{{ id }}">{{ titulo }}</h2>
+                    <p class="mt-1 text-sm text-ink-muted">{{ descripcion }}</p>
+                </div>
+                <a class="text-sm font-semibold text-brand hover:underline" href="{{ path(ruta, {animal: animal.id}) }}">Ver historial completo</a>
+            </div>
+        {% endmacro %}
+
+        {% macro vacio(texto) %}
+            <p class="border-t border-surface-muted px-5 py-4 text-sm text-ink-muted" data-empty-section>{{ texto }}</p>
+        {% endmacro %}
+
+        <section class="mt-4 overflow-hidden rounded-lg border border-surface-muted bg-surface shadow-sm" aria-labelledby="profile-weights" data-profile-section="pesajes">
+            {{ _self.encabezado('Pesajes', 'profile-weights', 'En orden cronológico, con la variación respecto al pesaje anterior.', 'app_weight_history', animal) }}
+            {% if pesajes is empty %}
+                {{ _self.vacio('Sin pesajes registrados.') }}
+            {% else %}
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-surface-muted text-ink-muted">
+                            <tr>
+                                <th class="px-4 py-3 font-semibold" scope="col">Fecha</th>
+                                <th class="px-4 py-3 text-right font-semibold" scope="col">Peso</th>
+                                <th class="px-4 py-3 text-right font-semibold" scope="col">Variación</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for fila in pesajes %}
+                                <tr class="border-t border-surface-muted">
+                                    <td class="px-4 py-3">{{ fila.pesaje.fecha|date('d/m/Y') }}</td>
+                                    <td class="px-4 py-3 text-right">{{ fila.pesaje.pesoKg|number_format(2, '.', ',') }} kg</td>
+                                    <td class="px-4 py-3 text-right">{{ fila.variacion is null ? '—' : (fila.variacion > 0 ? '+' : '') ~ fila.variacion|number_format(2, '.', ',') ~ ' kg' }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+        </section>
+
+        <section class="mt-4 overflow-hidden rounded-lg border border-surface-muted bg-surface shadow-sm" aria-labelledby="profile-vaccinations" data-profile-section="vacunaciones">
+            {{ _self.encabezado('Vacunaciones', 'profile-vaccinations', 'Vacunas aplicadas en orden cronológico.', 'app_vaccination_history', animal) }}
+            {% if vacunaciones is empty %}
+                {{ _self.vacio('Sin vacunaciones registradas.') }}
+            {% else %}
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-surface-muted text-ink-muted">
+                            <tr>
+                                <th class="px-4 py-3 font-semibold" scope="col">Fecha</th>
+                                <th class="px-4 py-3 font-semibold" scope="col">Vacuna</th>
+                                <th class="px-4 py-3 font-semibold" scope="col">Dosis</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for vacunacion in vacunaciones %}
+                                <tr class="border-t border-surface-muted">
+                                    <td class="px-4 py-3">{{ vacunacion.fecha|date('d/m/Y') }}</td>
+                                    <td class="px-4 py-3">{{ vacunacion.vacuna.nombre }}{% if not vacunacion.vacuna.activa %} <span class="text-xs text-ink-muted">(inactiva)</span>{% endif %}</td>
+                                    <td class="px-4 py-3 text-ink-muted">{{ vacunacion.dosis }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+        </section>
+
+        <section class="mt-4 overflow-hidden rounded-lg border border-surface-muted bg-surface shadow-sm" aria-labelledby="profile-matings" data-profile-section="montas">
+            {{ _self.encabezado('Reproducción', 'profile-matings', animal.sexo == 'HEMBRA' ? 'Montas de la hembra.' : 'Montas en las que participó como macho.', 'app_mating_history', animal) }}
+            {% if montas is empty %}
+                {{ _self.vacio('Sin montas registradas.') }}
+            {% else %}
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-surface-muted text-ink-muted">
+                            <tr>
+                                <th class="px-4 py-3 font-semibold" scope="col">Fecha</th>
+                                <th class="px-4 py-3 font-semibold" scope="col">Hembra</th>
+                                <th class="px-4 py-3 font-semibold" scope="col">Macho</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for monta in montas %}
+                                <tr class="border-t border-surface-muted">
+                                    <td class="px-4 py-3">{{ monta.fecha|date('d/m/Y') }}</td>
+                                    <td class="px-4 py-3">{{ monta.hembra.arete }}</td>
+                                    <td class="px-4 py-3 text-ink-muted">{{ monta.macho ? monta.macho.arete : 'Sin registrar' }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+        </section>
+
+        {% if animal.sexo == 'HEMBRA' %}
+            <section class="mt-4 overflow-hidden rounded-lg border border-surface-muted bg-surface shadow-sm" aria-labelledby="profile-milk" data-profile-section="leche">
+                {{ _self.encabezado('Producción de leche', 'profile-milk', 'Total diario y ordeños con la finca donde ocurrieron.', 'app_milk_history', animal) }}
+                {% if ordenos is empty %}
+                    {{ _self.vacio('Sin ordeños registrados.') }}
+                {% else %}
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-surface-muted text-ink-muted">
+                                <tr>
+                                    <th class="px-4 py-3 font-semibold" scope="col">Fecha</th>
+                                    <th class="px-4 py-3 text-right font-semibold" scope="col">Ordeños</th>
+                                    <th class="px-4 py-3 text-right font-semibold" scope="col">Total del día</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for total in totalesLeche %}
+                                    <tr class="border-t border-surface-muted">
+                                        <td class="px-4 py-3">{{ total.fecha|date('d/m/Y') }}</td>
+                                        <td class="px-4 py-3 text-right">{{ total.ordenos }}</td>
+                                        <td class="px-4 py-3 text-right font-semibold">{{ total.litros|number_format(2, '.', ',') }} L</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        <table class="w-full border-t border-surface-muted text-left text-sm">
+                            <thead class="bg-surface-muted text-ink-muted">
+                                <tr>
+                                    <th class="px-4 py-3 font-semibold" scope="col">Fecha y hora</th>
+                                    <th class="px-4 py-3 font-semibold" scope="col">Finca del ordeño</th>
+                                    <th class="px-4 py-3 text-right font-semibold" scope="col">Litros</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for ordeno in ordenos %}
+                                    <tr class="border-t border-surface-muted" data-profile-milking>
+                                        <td class="px-4 py-3">{{ ordeno.fechaHora|date('d/m/Y H:i') }}</td>
+                                        <td class="px-4 py-3">{{ ordeno.fincaOrdeno.nombre }}</td>
+                                        <td class="px-4 py-3 text-right">{{ ordeno.cantidadLitros|number_format(2, '.', ',') }} L</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endif %}
+            </section>
+        {% endif %}
     </div>
 {% endblock %}
