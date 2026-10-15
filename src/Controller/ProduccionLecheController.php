@@ -94,14 +94,15 @@ final class ProduccionLecheController extends AbstractController
     #[Route('/animals/{animal}/milk', name: 'app_milk_history', methods: ['GET'], requirements: ['animal' => '\\d+'])]
     public function history(Animal $animal, ProduccionLecheRepository $ordenoRepository, FincaAccess $fincaAccess): Response
     {
-        if (!$fincaAccess->canView($this->usuario(), $animal->getFinca())) {
+        $usuario = $this->usuario();
+        if (!$fincaAccess->canView($usuario, $animal->getFinca())) {
             throw $this->createAccessDeniedException();
         }
 
         return $this->render('milk/history.html.twig', [
             'animal' => $animal,
-            'ordenos' => $ordenoRepository->historial($animal),
-            'totalesDiarios' => $ordenoRepository->totalesDiarios($animal),
+            'ordenos' => $ordenoRepository->historial($animal, $usuario),
+            'totalesDiarios' => $ordenoRepository->totalesDiarios($animal, $usuario),
         ]);
     }
 

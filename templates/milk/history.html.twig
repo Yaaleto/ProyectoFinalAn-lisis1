@@ -60,7 +60,6 @@
                         </thead>
                         <tbody>
                             {% for ordeno in ordenos %}
-                                {% set enAmbito = is_granted('ROLE_ADMINISTRADOR') or ordeno.fincaOrdeno == app.user.fincaActiva %}
                                 <tr class="border-t border-surface-muted" data-milk-row>
                                     <td class="px-4 py-3 font-medium">{{ ordeno.fechaHora|date('d/m/Y H:i') }}</td>
                                     <td class="px-4 py-3">{{ ordeno.fincaOrdeno.nombre }}</td>
@@ -68,7 +67,7 @@
                                     <td class="px-4 py-3 text-right">
                                         {% if not ordeno.fincaOrdeno.activo %}
                                             <span class="text-ink-muted">Solo lectura</span>
-                                        {% elseif enAmbito %}
+                                        {% else %}
                                             <div class="inline-flex items-center gap-3">
                                                 <a class="font-semibold text-brand hover:underline" href="{{ path('app_milk_edit', {ordeno: ordeno.id}) }}">Editar</a>
                                                 {% if is_granted('ROLE_ADMINISTRADOR') %}
@@ -78,8 +77,6 @@
                                                     </form>
                                                 {% endif %}
                                             </div>
-                                        {% else %}
-                                            <span class="text-ink-muted">Otra finca</span>
                                         {% endif %}
                                     </td>
                                 </tr>

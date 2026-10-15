@@ -42,12 +42,15 @@ final class ProduccionLecheRepository extends ServiceEntityRepository
         return $queryBuilder;
     }
 
-    /** @return list<ProduccionLeche> Historial cronológico de ordeños del animal. */
-    public function historial(Animal $animal): array
+    /**
+     * Historial cronológico de ordeños del animal dentro del ámbito del usuario: el Encargado solo ve
+     * los ordeños ocurridos en su finca (RF-10).
+     *
+     * @return list<ProduccionLeche>
+     */
+    public function historial(Animal $animal, Usuario $usuario): array
     {
-        return $this->createQueryBuilder('ordeno')
-            ->addSelect('fincaOrdeno')
-            ->join('ordeno.fincaOrdeno', 'fincaOrdeno')
+        return $this->createAuthorizedQueryBuilder($usuario)
             ->andWhere('ordeno.animal = :animal')
             ->setParameter('animal', $animal)
             ->orderBy('ordeno.fechaHora', SortDirection::Ascending)
@@ -56,22 +59,24 @@ final class ProduccionLecheRepository extends ServiceEntityRepository
     }
 
     /**
-     * Total diario por animal: agrupa por la parte de fecha de fecha_hora (RF-09).
+     * Total diario por animal dentro del ámbito del usuario: agrupa por la parte de fecha de fecha_hora (RF-09).
      *
      * @return list<array{fecha: string, ordenos: int, litros: string}>
      */
-    public function totalesDiarios(Animal $animal): array
+    public function totalesDiarios(Animal $animal, Usuario $usuario): array
     {
+        $sql = 'SELECT DATE(fecha_hora) AS fecha, COUNT(*) AS ordenos, SUM(cantidad_litros) AS litros
+                  FROM produccion_leche
+                 WHERE id_animal = :animal';
+        $parametros = ['animal' => $animal->getId()];
+        if (Usuario::ROL_ADMINISTRADOR !== $usuario->getRol()) {
+            $sql .= ' AND id_finca_ordeno = :finca';
+            $parametros['finca'] = $usuario->getFincaActiva()?->getId();
+        }
+
         return array_map(
             static fn (array $fila): array => ['fecha' => (string) $fila['fecha'], 'ordenos' => (int) $fila['ordenos'], 'litros' => (string) $fila['litros']],
-            $this->getEntityManager()->getConnection()->fetchAllAssociative(
-                'SELECT DATE(fecha_hora) AS fecha, COUNT(*) AS ordenos, SUM(cantidad_litros) AS litros
-                   FROM produccion_leche
-                  WHERE id_animal = :animal
-               GROUP BY DATE(fecha_hora)
-               ORDER BY fecha ASC',
-                ['animal' => $animal->getId()],
-            ),
+            $this->getEntityManager()->getConnection()->fetchAllAssociative($sql.' GROUP BY DATE(fecha_hora) ORDER BY fecha ASC', $parametros),
         );
     }
 
