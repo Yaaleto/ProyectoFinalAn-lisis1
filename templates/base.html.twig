@@ -52,7 +52,7 @@
                 <nav>
                     {% set catalogOpen = app.current_route starts with 'app_breed_' or app.current_route starts with 'app_vaccine_' %}
                     <ul class="space-y-1" role="list">
-                        <li><twig:NavItem label="Dashboard" icon="home" href="{{ path('app_health') }}" active="{{ app.current_route == 'app_health' }}" /></li>
+                        <li><twig:NavItem label="Inicio" icon="home" href="{{ path('app_health') }}" active="{{ app.current_route == 'app_health' }}" /></li>
                         <li><twig:NavItem label="Animales" icon="database" href="{{ path('app_animal_index') }}" active="{{ app.current_route starts with 'app_animal_' }}" /></li>
                         <li><twig:NavItem label="Fincas" icon="building" href="{{ path('app_farm_index') }}" active="{{ app.current_route starts with 'app_farm_' }}" /></li>
                         <li><twig:NavItem label="Pesajes" icon="ruler" href="{{ path('app_weight_index') }}" active="{{ app.current_route starts with 'app_weight_' }}" /></li>
