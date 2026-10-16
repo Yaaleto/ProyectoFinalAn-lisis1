@@ -195,7 +195,15 @@ final class AnimalController extends AbstractController
             \assert(is_array($data));
 
             try {
+                // Se consulta antes de aplicar el formulario, con el sexo que el animal tiene guardado.
+                $sexoConRegistros = $historial->tieneRegistrosQueDependenDelSexo($animal) ? $animal->getSexo() : null;
                 $this->applyFormData($animal, $data);
+
+                if (null !== $sexoConRegistros && $sexoConRegistros !== $animal->getSexo()) {
+                    $form->get('sexo')->addError(new FormError(Animal::SEXO_HEMBRA === $sexoConRegistros
+                        ? 'No puedes cambiar el sexo de una hembra con montas o producción de leche registradas.'
+                        : 'No puedes cambiar el sexo de un macho con montas registradas.'));
+                }
 
                 // RN-11 también al editar: el nacimiento no puede quedar después de registros ya guardados.
                 $primerRegistro = $historial->primeraFechaOperativa($animal);

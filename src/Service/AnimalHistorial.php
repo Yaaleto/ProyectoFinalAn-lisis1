@@ -55,6 +55,24 @@ final class AnimalHistorial
         return null !== $this->ultimaFechaOperativa($animal);
     }
 
+    /**
+     * Registros que dependen del sexo actual del animal: montas como hembra y ordeños si es hembra,
+     * montas como macho si es macho. Mientras existan, su sexo no puede cambiarse.
+     */
+    public function tieneRegistrosQueDependenDelSexo(Animal $animal): bool
+    {
+        if (null === $animal->getId()) {
+            return false;
+        }
+
+        $sql = Animal::SEXO_HEMBRA === $animal->getSexo()
+            ? 'SELECT EXISTS (SELECT 1 FROM monta_reproductiva WHERE id_hembra = :id)
+                   OR EXISTS (SELECT 1 FROM produccion_leche WHERE id_animal = :id)'
+            : 'SELECT EXISTS (SELECT 1 FROM monta_reproductiva WHERE id_macho = :id)';
+
+        return (bool) $this->connection->fetchOne($sql, ['id' => $animal->getId()]);
+    }
+
     public function tieneDescendientes(Animal $animal): bool
     {
         return (bool) $this->connection->fetchOne(
