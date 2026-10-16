@@ -71,7 +71,9 @@ final class MontaReproductivaType extends AbstractType
             ->add('observacion', TextareaType::class, [
                 'label' => 'Observación',
                 'required' => false,
-                'help' => 'Opcional.',
+                'help' => 'Opcional. Hasta 200 caracteres.',
+                'attr' => ['maxlength' => 200],
+                'constraints' => [new Assert\Length(max: 200, maxMessage: 'La observación admite hasta {{ limit }} caracteres.')],
             ]);
     }
 

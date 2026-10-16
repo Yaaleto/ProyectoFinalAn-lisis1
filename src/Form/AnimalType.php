@@ -97,7 +97,10 @@ final class AnimalType extends AbstractType
                 'input' => 'string',
                 'scale' => 2,
                 'required' => false,
-                'constraints' => [new Assert\Positive(message: 'El peso al nacimiento debe ser mayor que cero.')],
+                'constraints' => [
+                    new Assert\Positive(message: 'El peso al nacimiento debe ser mayor que cero.'),
+                    new Assert\LessThanOrEqual(value: 999.99, message: 'El peso al nacimiento admite hasta 999.99 kg.'),
+                ],
             ])
             ->add('productoraLeche', CheckboxType::class, [
                 'label' => 'Productora de leche',

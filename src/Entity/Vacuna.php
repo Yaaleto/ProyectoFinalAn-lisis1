@@ -31,6 +31,7 @@ class Vacuna
     private string $nombre;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Assert\Length(max: 200, maxMessage: 'La descripción admite hasta {{ limit }} caracteres.')]
     private ?string $descripcion = null;
 
     #[ORM\Column(options: ['default' => true])]

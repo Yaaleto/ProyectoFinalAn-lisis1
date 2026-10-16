@@ -26,7 +26,8 @@ final class VacunaType extends AbstractType
             ->add('descripcion', TextareaType::class, [
                 'label' => 'Descripción',
                 'required' => false,
-                'attr' => ['rows' => 4],
+                'help' => 'Opcional. Hasta 200 caracteres.',
+                'attr' => ['rows' => 4, 'maxlength' => 200],
             ]);
     }
 

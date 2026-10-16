@@ -77,11 +77,11 @@ final class ProduccionLecheType extends AbstractType
                 'input' => 'string',
                 'scale' => 2,
                 'html5' => true,
-                'attr' => ['step' => '0.01', 'min' => '0.01'],
+                'attr' => ['step' => '0.01', 'min' => '0.01', 'max' => '999.99'],
                 'constraints' => [
                     new Assert\NotBlank(message: 'Indica la cantidad de leche.'),
                     new Assert\Positive(message: 'La cantidad de leche debe ser mayor que cero.'),
-                    new Assert\LessThan(value: 1000000, message: 'La cantidad no es válida.'),
+                    new Assert\LessThanOrEqual(value: 999.99, message: 'La cantidad admite hasta 999.99 L.'),
                 ],
             ]);
     }
