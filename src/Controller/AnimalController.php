@@ -182,6 +182,9 @@ final class AnimalController extends AbstractController
         if (!$fincaAccess->canView($usuario, $animal->getFinca())) {
             throw $this->createAccessDeniedException();
         }
+        if ($respuesta = $this->rechazarSiFincaInactiva($animal)) {
+            return $respuesta;
+        }
 
         $form = $this->createForm(AnimalType::class, $this->formData($animal), [
             'organization' => $animal->getOrganizacion(),
@@ -250,6 +253,9 @@ final class AnimalController extends AbstractController
         if (!$fincaAccess->canView($usuario, $animal->getFinca())) {
             throw $this->createAccessDeniedException();
         }
+        if ($respuesta = $this->rechazarSiFincaInactiva($animal)) {
+            return $respuesta;
+        }
 
         $form = $this->createForm(SalidaAnimalType::class, [
             'estado' => $animal->getEstado(),
@@ -297,6 +303,9 @@ final class AnimalController extends AbstractController
         if (!$this->isGranted('ROLE_ADMINISTRADOR') || !$fincaAccess->canView($usuario, $animal->getFinca())) {
             throw $this->createAccessDeniedException();
         }
+        if ($respuesta = $this->rechazarSiFincaInactiva($animal)) {
+            return $respuesta;
+        }
         if (!$this->isCsrfTokenValid('delete-animal-'.$animal->getId(), (string) $request->request->get('_token'))) {
             $this->addFlash('warning', 'La solicitud expiró. Intenta eliminar el animal de nuevo.');
 
@@ -319,6 +328,20 @@ final class AnimalController extends AbstractController
         $this->addFlash('success', 'El animal fue eliminado correctamente.');
 
         return $this->redirectToRoute('app_animal_index');
+    }
+
+    /**
+     * RN-17: los animales de una finca inactiva no se modifican ni eliminan; siguen disponibles para consulta.
+     */
+    private function rechazarSiFincaInactiva(Animal $animal): ?Response
+    {
+        if ($animal->getFinca()->isActivo()) {
+            return null;
+        }
+
+        $this->addFlash('warning', 'La finca del animal está inactiva; el animal y su historial son de solo lectura.');
+
+        return $this->redirectToRoute('app_animal_show', ['animal' => $animal->getId()]);
     }
 
     private function generateInternalCode(): string

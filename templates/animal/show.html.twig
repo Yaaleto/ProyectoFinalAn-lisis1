@@ -13,15 +13,17 @@
                 <p class="mt-2 text-sm text-ink-muted">{{ animal.finca.nombre }}</p>
             </div>
             <div class="flex flex-wrap gap-2">
-                <a class="inline-flex min-h-11 items-center justify-center rounded-md bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-hover" href="{{ path('app_animal_edit', {animal: animal.id}) }}">Editar</a>
-                <a class="inline-flex min-h-11 items-center justify-center rounded-md border border-surface-muted px-4 py-2 text-sm font-semibold text-ink hover:bg-surface-muted" href="{{ path('app_animal_status', {animal: animal.id}) }}">Cambiar estado</a>
+                {% if animal.finca.activo %}
+                    <a class="inline-flex min-h-11 items-center justify-center rounded-md bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-hover" href="{{ path('app_animal_edit', {animal: animal.id}) }}">Editar</a>
+                    <a class="inline-flex min-h-11 items-center justify-center rounded-md border border-surface-muted px-4 py-2 text-sm font-semibold text-ink hover:bg-surface-muted" href="{{ path('app_animal_status', {animal: animal.id}) }}">Cambiar estado</a>
+                {% endif %}
                 <a class="inline-flex min-h-11 items-center justify-center rounded-md border border-surface-muted px-4 py-2 text-sm font-semibold text-ink hover:bg-surface-muted" href="{{ path('app_weight_history', {animal: animal.id}) }}">Pesajes</a>
                 <a class="inline-flex min-h-11 items-center justify-center rounded-md border border-surface-muted px-4 py-2 text-sm font-semibold text-ink hover:bg-surface-muted" href="{{ path('app_vaccination_history', {animal: animal.id}) }}">Vacunaciones</a>
                 <a class="inline-flex min-h-11 items-center justify-center rounded-md border border-surface-muted px-4 py-2 text-sm font-semibold text-ink hover:bg-surface-muted" href="{{ path('app_mating_history', {animal: animal.id}) }}">Reproducción</a>
                 {% if animal.sexo == 'HEMBRA' %}
                     <a class="inline-flex min-h-11 items-center justify-center rounded-md border border-surface-muted px-4 py-2 text-sm font-semibold text-ink hover:bg-surface-muted" href="{{ path('app_milk_history', {animal: animal.id}) }}">Leche</a>
                 {% endif %}
-                {% if is_granted('ROLE_ADMINISTRADOR') %}
+                {% if is_granted('ROLE_ADMINISTRADOR') and animal.finca.activo %}
                     <form method="post" action="{{ path('app_animal_delete', {animal: animal.id}) }}" onsubmit="return confirm('¿Eliminar definitivamente este animal? Esta acción no se puede deshacer.');">
                         <input type="hidden" name="_token" value="{{ csrf_token('delete-animal-' ~ animal.id) }}">
                         <button class="inline-flex min-h-11 items-center justify-center rounded-md border border-danger/40 px-4 py-2 text-sm font-semibold text-danger hover:bg-danger/10" type="submit">Eliminar</button>
@@ -29,6 +31,10 @@
                 {% endif %}
             </div>
         </div>
+
+        {% if not animal.finca.activo %}
+            <p class="mt-4 rounded-md border border-surface-muted bg-surface-muted p-3 text-sm text-ink-muted" role="note">La finca está inactiva; el animal y su historial son de solo lectura.</p>
+        {% endif %}
 
         <div class="mt-6 grid gap-4 lg:grid-cols-2">
             {% set identificationDetails = {
