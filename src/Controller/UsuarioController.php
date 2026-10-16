@@ -11,6 +11,7 @@ use App\Security\FincaAccess;
 use App\Security\UsuarioPasswordManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -112,6 +113,16 @@ final class UsuarioController extends AbstractController
 
         if ($form->isSubmitted()) {
             $this->removeFarmFromAdministrator($usuario);
+        }
+
+        // Un Administrador no puede dejarse sin acceso: otro Administrador debe hacer estos cambios.
+        if ($form->isSubmitted() && $usuario->getId() === $administrador->getId()) {
+            if (!$usuario->isActivo()) {
+                $form->get('activo')->addError(new FormError('No puedes desactivar tu propia cuenta.'));
+            }
+            if (Usuario::ROL_ADMINISTRADOR !== $usuario->getRol()) {
+                $form->get('rol')->addError(new FormError('No puedes quitarte el rol de Administrador.'));
+            }
         }
 
         if ($form->isSubmitted() && $form->isValid()) {

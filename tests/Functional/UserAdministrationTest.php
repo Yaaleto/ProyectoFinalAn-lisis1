@@ -222,6 +222,51 @@ final class UserAdministrationTest extends WebTestCase
         self::assertTrue($this->passwordHasher($client)->isPasswordValid($usuario, 'replacement-password'));
     }
 
+    public function testAdministratorCannotDeactivateOrDemoteItself(): void
+    {
+        $client = static::createClient();
+        $fixture = $this->createFixture($client);
+        $client->loginUser($fixture['administrador']);
+        $adminId = $fixture['administrador']->getId();
+
+        foreach ([
+            ['usuario[activo]' => false],
+            ['usuario[rol]' => Usuario::ROL_ENCARGADO, 'usuario[fincaActiva]' => (string) $fixture['finca']->getId()],
+        ] as $cambios) {
+            $crawler = $client->request('GET', sprintf('/users/%d/edit', $adminId));
+            $client->submit($crawler->selectButton('Guardar cambios')->form($cambios));
+            self::assertResponseStatusCodeSame(422);
+        }
+        self::assertStringContainsString('No puedes quitarte el rol de Administrador.', (string) $client->getResponse()->getContent());
+
+        $this->entityManager($client)->clear();
+        $administrador = $this->entityManager($client)->find(Usuario::class, $adminId);
+        self::assertTrue($administrador?->isActivo());
+        self::assertSame(Usuario::ROL_ADMINISTRADOR, $administrador?->getRol());
+
+        $crawler = $client->request('GET', sprintf('/users/%d/edit', $adminId));
+        $client->submit($crawler->selectButton('Guardar cambios')->form(['usuario[nombre]' => 'Nombre corregido']));
+        self::assertResponseRedirects('/users');
+    }
+
+    public function testAnotherAdministratorCanDeactivateAnAdministrator(): void
+    {
+        $client = static::createClient();
+        $fixture = $this->createFixture($client);
+        $otro = (new Usuario('Otro administrador', 'otro-'.strtolower(bin2hex(random_bytes(4))).'@example.com', 'hash', Usuario::ROL_ADMINISTRADOR))
+            ->setOrganizacion($fixture['organizacion']);
+        $this->entityManager($client)->persist($otro);
+        $this->entityManager($client)->flush();
+        $client->loginUser($fixture['administrador']);
+
+        $crawler = $client->request('GET', sprintf('/users/%d/edit', $otro->getId()));
+        $client->submit($crawler->selectButton('Guardar cambios')->form(['usuario[activo]' => false]));
+
+        self::assertResponseRedirects('/users');
+        $this->entityManager($client)->clear();
+        self::assertFalse($this->entityManager($client)->find(Usuario::class, $otro->getId())?->isActivo());
+    }
+
     public function testDuplicateEmailAndShortPasswordAreRejected(): void
     {
         $client = static::createClient();
