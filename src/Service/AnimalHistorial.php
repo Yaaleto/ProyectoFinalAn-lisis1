@@ -21,13 +21,29 @@ final class AnimalHistorial
     /** Fecha del registro operativo más reciente: pesaje, vacunación, monta (como hembra o macho) u ordeño. */
     public function ultimaFechaOperativa(Animal $animal): ?DateTimeImmutable
     {
+        return $this->fechaExtrema($animal, 'MAX');
+    }
+
+    /** Fecha del registro operativo más antiguo; el nacimiento no puede ser posterior a ella (RN-11). */
+    public function primeraFechaOperativa(Animal $animal): ?DateTimeImmutable
+    {
+        return $this->fechaExtrema($animal, 'MIN');
+    }
+
+    /** @param 'MIN'|'MAX' $funcion */
+    private function fechaExtrema(Animal $animal, string $funcion): ?DateTimeImmutable
+    {
+        if (null === $animal->getId()) {
+            return null;
+        }
+
         $fecha = $this->connection->fetchOne(
-            'SELECT MAX(fecha) FROM (
+            sprintf('SELECT %s(fecha) FROM (
                 SELECT fecha_pesaje AS fecha FROM pesaje WHERE id_animal = :id
                 UNION ALL SELECT fecha_vacunacion FROM vacunacion WHERE id_animal = :id
                 UNION ALL SELECT fecha_monta FROM monta_reproductiva WHERE id_hembra = :id OR id_macho = :id
                 UNION ALL SELECT DATE(fecha_hora) FROM produccion_leche WHERE id_animal = :id
-            ) AS registros',
+            ) AS registros', $funcion),
             ['id' => $animal->getId()],
         );
 

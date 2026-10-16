@@ -174,6 +174,7 @@ final class AnimalController extends AbstractController
         EntityManagerInterface $entityManager,
         ValidatorInterface $validator,
         FincaAccess $fincaAccess,
+        AnimalHistorial $historial,
     ): Response {
         $usuario = $this->getUser();
         \assert($usuario instanceof Usuario);
@@ -196,7 +197,17 @@ final class AnimalController extends AbstractController
             try {
                 $this->applyFormData($animal, $data);
 
-                if (!$this->addValidationErrors($form, $animal, $validator)) {
+                // RN-11 también al editar: el nacimiento no puede quedar después de registros ya guardados.
+                $primerRegistro = $historial->primeraFechaOperativa($animal);
+                $nacimiento = $animal->getFechaNacimiento();
+                if (null !== $primerRegistro && null !== $nacimiento && $nacimiento->format('Y-m-d') > $primerRegistro->format('Y-m-d')) {
+                    $form->get('fechaNacimiento')->addError(new FormError(sprintf(
+                        'La fecha de nacimiento no puede ser posterior al primer registro operativo del animal (%s).',
+                        $primerRegistro->format('d/m/Y'),
+                    )));
+                }
+
+                if ($form->isValid() && !$this->addValidationErrors($form, $animal, $validator)) {
                     $entityManager->flush();
                     $this->addFlash('success', 'El animal fue actualizado correctamente.');
 

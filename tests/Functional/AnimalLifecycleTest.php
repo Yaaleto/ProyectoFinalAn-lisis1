@@ -181,6 +181,27 @@ final class AnimalLifecycleTest extends WebTestCase
         self::assertNotNull($this->reload($client, $id));
     }
 
+    public function testBirthDateCannotBeMovedAfterExistingRecords(): void
+    {
+        $client = static::createClient();
+        $fixture = $this->createFixture($client);
+        $client->loginUser($fixture['administrador']);
+        $this->entityManager($client)->persist(new Pesaje($fixture['animal'], new DateTimeImmutable('2026-05-20'), '310.00'));
+        $this->entityManager($client)->flush();
+        $id = $fixture['animal']->getId();
+
+        $crawler = $client->request('GET', sprintf('/animals/%d/edit', $id));
+        $client->submit($crawler->selectButton('Guardar cambios')->form(['animal[fechaNacimiento]' => '2026-05-21']));
+        self::assertResponseStatusCodeSame(422);
+        self::assertStringContainsString('La fecha de nacimiento no puede ser posterior al primer registro operativo del animal (20/05/2026).', (string) $client->getResponse()->getContent());
+        self::assertSame('2026-01-10', $this->reload($client, $id)?->getFechaNacimiento()?->format('Y-m-d'));
+
+        $crawler = $client->request('GET', sprintf('/animals/%d/edit', $id));
+        $client->submit($crawler->selectButton('Guardar cambios')->form(['animal[fechaNacimiento]' => '2026-05-20']));
+        self::assertResponseRedirects('/animals');
+        self::assertSame('2026-05-20', $this->reload($client, $id)?->getFechaNacimiento()?->format('Y-m-d'));
+    }
+
     public function testEarTagIsRequiredWhenRegisteringAnAnimal(): void
     {
         $client = static::createClient();
