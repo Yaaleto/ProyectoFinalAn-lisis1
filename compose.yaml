@@ -70,29 +70,6 @@ services:
       retries: 10
       start_period: 60s
 
-  # Registro de disponibilidad (RNF-P-08): consulta /status cada minuto y anota el resultado en
-  # var/disponibilidad/registro.log con la hora de Guatemala. Se resume con "php bin/console app:disponibilidad".
-  monitor:
-    image: curlimages/curl:8.11.1
-    user: root
-    restart: unless-stopped
-    environment:
-      TZ: "<-06>6"
-    volumes:
-      - bovitrack_var:/registro
-    depends_on:
-      - app
-    entrypoint:
-      - sh
-      - -c
-      - |
-        mkdir -p /registro/disponibilidad
-        while true; do
-          if curl -fsS -m 10 -o /dev/null http://app/status; then estado=ok; else estado=caida; fi
-          echo "$$(date +%Y-%m-%dT%H:%M:%S) $$estado" >> /registro/disponibilidad/registro.log
-          sleep 60
-        done
-
 volumes:
   bovitrack_mysql_data:
   bovitrack_vendor:

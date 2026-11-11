@@ -19,7 +19,6 @@ Qué ocurre en el primer arranque:
 1. `assets` instala los paquetes npm y compila Tailwind CSS en `assets/styles/app.css`.
 2. `database` (MySQL 8.4) inicializa un volumen vacío ejecutando el SQL de `docker/mysql/`. Crea dos bases con el esquema físico V1 completo (diez tablas, claves foráneas, restricciones e índices): `bovitrack`, para usar la aplicación, y `bovitrack_test`, para las pruebas automáticas, que pueden borrar datos sin afectar a la otra. Solo `bovitrack` recibe una organización, una finca y las dos cuentas de prueba; ninguna base trae animales ni registros operativos.
 3. `app` instala las dependencias de Composer y arranca Apache.
-4. `monitor` empieza a registrar la disponibilidad de la aplicación cada minuto (ver [Disponibilidad](#disponibilidad)).
 
 La aplicación queda en <http://127.0.0.1:8080/>. PHP y MySQL usan la hora de Guatemala (UTC−6).
 
@@ -57,8 +56,6 @@ docker compose up --build -d
 | `app` | PHP 8.4, Apache, Composer, Symfony 7.4 | `127.0.0.1:8080` |
 | `assets` | Node.js 24, npm, Tailwind CSS | solo se ejecuta al arrancar |
 | `database` | MySQL 8.4 (`bovitrack-mysql`), zona horaria `-06:00` | `127.0.0.1:3307`; entre contenedores, `database:3306` |
-| `monitor` | curl | sin puerto; consulta `http://app/status` cada minuto |
-
 Los puertos se publican solo en `127.0.0.1`. Usuario de desarrollo: `bovitrack`; las credenciales de prueba están en `compose.yaml` y no son para producción.
 
 ## Comandos habituales
@@ -73,20 +70,6 @@ docker compose run --rm assets npm run watch:css       # recompilar estilos mien
 ```
 
 La base de pruebas (`bovitrack_test`) se crea con el mismo esquema que `bovitrack`. Para dejarla otra vez limpia, recrea el entorno con `docker compose down -v` y `docker compose up --build -d`.
-
-## Disponibilidad
-
-El requisito RNF-P-08 pide una disponibilidad mensual de al menos 98 % entre las 05:00 y las 20:00.
-
-- `GET /status` es público y responde `{"estado":"ok"}` cuando la aplicación y la base de datos están disponibles, o 503 si la base no responde. No expone datos de ninguna organización.
-- El servicio `monitor` consulta `/status` cada minuto y anota la hora de Guatemala y el resultado en `var/disponibilidad/registro.log` (volumen `bovitrack_var`).
-- El informe del mes se obtiene con:
-
-```bash
-docker compose exec app php bin/console app:disponibilidad --mes=2026-10
-```
-
-Cuenta solo los minutos de la jornada desde la primera muestra del monitor. Un minuto sin muestras se considera no disponible, porque si se detiene todo el equipo el monitor tampoco puede escribir. El informe lista los intervalos de indisponibilidad e indica si se alcanza el objetivo.
 
 ## Arquitectura
 
