@@ -25,6 +25,7 @@ final class FormErrorsTest extends WebTestCase
         $client->loginUser($administrador);
         $crawler = $client->request('GET', '/breeds/new');
         self::assertCount(0, $crawler->filterXPath('//*[@aria-invalid]'));
+        self::assertCount(1, $crawler->filterXPath('//form[@name="raza"][@novalidate]'));
 
         $crawler = $client->submit($crawler->selectButton('Crear raza')->form(['raza[nombre]' => '']));
 
