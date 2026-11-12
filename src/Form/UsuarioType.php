@@ -10,6 +10,7 @@ use App\Entity\Usuario;
 use App\Repository\FincaRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\CallbackTransformer;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
@@ -83,6 +84,12 @@ final class UsuarioType extends AbstractType
                 'help' => $options['require_password'] ? 'Debe contener al menos 8 caracteres.' : 'Déjala vacía para conservar la contraseña actual.',
                 'attr' => ['autocomplete' => 'new-password'],
             ]);
+
+        // Un rol vacío llega como cadena vacía para que lo rechace la regla Choice de la entidad.
+        $builder->get('rol')->addModelTransformer(new CallbackTransformer(
+            static fn (?string $rol): ?string => $rol,
+            static fn (?string $rol): string => $rol ?? '',
+        ));
     }
 
     public function configureOptions(OptionsResolver $resolver): void

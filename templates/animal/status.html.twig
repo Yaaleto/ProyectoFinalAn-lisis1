@@ -10,7 +10,9 @@
             {{ animal.nombre ?: 'Arete ' ~ animal.arete }} · estado actual: {{ animal.estado|lower|capitalize }}{% if animal.fechaSalida %}, salida el {{ animal.fechaSalida|date('d/m/Y') }}{% endif %}.
         </p>
 
-        {{ form_start(form, {attr: {class: 'mt-6 space-y-5 rounded-lg border border-surface-muted bg-surface p-6 shadow-sm'}}) }}
+        <p class="mt-6 text-sm text-ink-muted">Los campos marcados con * son obligatorios.</p>
+
+        {{ form_start(form, {attr: {class: 'mt-4 space-y-5 rounded-lg border border-surface-muted bg-surface p-6 shadow-sm'}}) }}
             {{ form_errors(form) }}
 
             {% for field in [form.estado, form.fechaSalida] %}

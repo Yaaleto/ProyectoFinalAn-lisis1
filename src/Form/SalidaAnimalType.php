@@ -31,6 +31,7 @@ final class SalidaAnimalType extends AbstractType
                     'Fallecido' => Animal::ESTADO_FALLECIDO,
                     'Egresado' => Animal::ESTADO_EGRESADO,
                 ],
+                'constraints' => [new Assert\NotBlank(message: 'Selecciona el nuevo estado.')],
             ])
             ->add('fechaSalida', DateType::class, [
                 'label' => 'Fecha de salida',

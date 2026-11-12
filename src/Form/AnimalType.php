@@ -32,14 +32,14 @@ final class AnimalType extends AbstractType
         $builder
             ->add('arete', TextType::class, [
                 'label' => 'Arete',
-                'constraints' => [new Assert\NotBlank(message: 'El arete es obligatorio.'), new Assert\Length(max: 50)],
+                'constraints' => [new Assert\NotBlank(message: 'El arete es obligatorio.'), new Assert\Length(max: 50, maxMessage: 'El arete admite hasta {{ limit }} caracteres.')],
                 'help' => 'Debe ser único dentro de la organización.',
                 'attr' => ['autocomplete' => 'off'],
             ])
             ->add('nombre', TextType::class, [
                 'label' => 'Nombre',
                 'required' => false,
-                'constraints' => [new Assert\Length(max: 120)],
+                'constraints' => [new Assert\Length(max: 120, maxMessage: 'El nombre admite hasta {{ limit }} caracteres.')],
             ])
             ->add('finca', EntityType::class, [
                 'label' => 'Finca',
@@ -59,6 +59,7 @@ final class AnimalType extends AbstractType
                         ->setParameter('fincaActual', $options['animal']->getFinca());
                 },
                 'placeholder' => 'Selecciona una finca',
+                'constraints' => [new Assert\NotNull(message: 'Selecciona una finca.')],
             ])
             ->add('raza', EntityType::class, [
                 'label' => 'Raza',
@@ -81,6 +82,7 @@ final class AnimalType extends AbstractType
             ->add('sexo', ChoiceType::class, [
                 'label' => 'Sexo',
                 'choices' => ['Hembra' => Animal::SEXO_HEMBRA, 'Macho' => Animal::SEXO_MACHO],
+                'constraints' => [new Assert\NotBlank(message: 'Selecciona el sexo.')],
             ])
             ->add('fechaNacimiento', DateType::class, [
                 'label' => 'Fecha de nacimiento',
@@ -115,6 +117,7 @@ final class AnimalType extends AbstractType
                     'Nacido en finca' => Animal::ORIGEN_NACIDO_EN_FINCA,
                     'Externo' => Animal::ORIGEN_EXTERNO,
                 ],
+                'constraints' => [new Assert\NotBlank(message: 'Selecciona el origen.')],
             ]);
         }
 
@@ -123,7 +126,7 @@ final class AnimalType extends AbstractType
                 'label' => 'Procedencia',
                 'required' => false,
                 'help' => 'Opcional. Indica la finca o lugar de procedencia (hasta 200 caracteres).',
-                'constraints' => [new Assert\Length(max: 200)],
+                'constraints' => [new Assert\Length(max: 200, maxMessage: 'La procedencia admite hasta {{ limit }} caracteres.')],
             ]);
         }
 

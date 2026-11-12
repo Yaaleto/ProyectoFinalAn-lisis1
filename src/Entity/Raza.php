@@ -26,8 +26,8 @@ class Raza
     private OrganizacionGanadera $organizacion;
 
     #[ORM\Column(length: 100)]
-    #[Assert\NotBlank]
-    #[Assert\Length(max: 100)]
+    #[Assert\NotBlank(message: 'Ingresa el nombre de la raza.')]
+    #[Assert\Length(max: 100, maxMessage: 'El nombre admite hasta {{ limit }} caracteres.')]
     private string $nombre;
 
     #[ORM\Column(options: ['default' => true])]

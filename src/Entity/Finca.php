@@ -27,17 +27,17 @@ class Finca
     private ?OrganizacionGanadera $organizacion = null;
 
     #[ORM\Column(length: 150)]
-    #[Assert\NotBlank]
-    #[Assert\Length(max: 150)]
+    #[Assert\NotBlank(message: 'Ingresa el nombre de la finca.')]
+    #[Assert\Length(max: 150, maxMessage: 'El nombre admite hasta {{ limit }} caracteres.')]
     private string $nombre;
 
     #[ORM\Column(length: 50)]
-    #[Assert\NotBlank]
-    #[Assert\Length(max: 50)]
+    #[Assert\NotBlank(message: 'Ingresa el código de la finca.')]
+    #[Assert\Length(max: 50, maxMessage: 'El código admite hasta {{ limit }} caracteres.')]
     private string $codigo;
 
     #[ORM\Column(length: 200, nullable: true)]
-    #[Assert\Length(max: 200)]
+    #[Assert\Length(max: 200, maxMessage: 'La ubicación admite hasta {{ limit }} caracteres.')]
     private ?string $ubicacion = null;
 
     #[ORM\Column(options: ['default' => true])]

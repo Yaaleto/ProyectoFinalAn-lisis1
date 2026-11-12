@@ -7,12 +7,17 @@
     {{- parent() -}}
 {%- endblock form_start -%}
 
+{# Los campos obligatorios llevan " *" en su etiqueta; cada formulario lo explica con una nota. #}
+{%- block form_label -%}
+    {%- if required and label is not same as(false) and 'checkbox' not in block_prefixes -%}
+        {%- set label = (label ?: name|humanize) ~ ' *' -%}
+    {%- endif -%}
+    {{- parent() -}}
+{%- endblock form_label -%}
+
 {%- block form_errors -%}
     {%- for error in errors -%}
-        <p id="{{ id ~ '_error' ~ loop.index }}" class="form-error mt-2 flex items-start gap-2 rounded-md border border-danger/30 bg-danger/10 px-3 py-2 text-base font-semibold text-danger" role="alert">
-            <span aria-hidden="true">⚠</span>
-            <span>{{ error.message }}</span>
-        </p>
+        <p id="{{ id ~ '_error' ~ loop.index }}" class="form-error mt-2 rounded-md border border-danger/30 bg-danger/10 px-3 py-2 text-base font-semibold text-danger" role="alert">{{ error.message }}</p>
     {%- endfor -%}
 {%- endblock form_errors -%}
 

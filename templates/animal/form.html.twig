@@ -38,7 +38,7 @@
                             <div class="flex flex-col gap-4 sm:flex-row">
                                 {% for field in row %}
                                     <div class="min-w-0 flex-1">
-                                        {{ form_label(field, field.vars.label ~ (field.vars.required ? ' *' : ''), {label_attr: {class: 'mb-2 block text-sm font-semibold'}}) }}
+                                        {{ form_label(field, null, {label_attr: {class: 'mb-2 block text-sm font-semibold'}}) }}
                                         {{ form_widget(field, {attr: {class: 'min-h-11 w-full rounded-md border border-surface-muted bg-surface px-3 py-2 text-ink'}}) }}
                                         {{ form_help(field, {help_attr: {class: 'mt-1 text-xs text-ink-muted'}}) }}
                                         {{ form_errors(field) }}
@@ -63,7 +63,7 @@
                             <div class="flex flex-col gap-4 sm:flex-row">
                                 {% for field in row %}
                                     <div class="min-w-0 flex-1">
-                                        {{ form_label(field, field.vars.label ~ (field.vars.required ? ' *' : ''), {label_attr: {class: 'mb-2 block text-sm font-semibold'}}) }}
+                                        {{ form_label(field, null, {label_attr: {class: 'mb-2 block text-sm font-semibold'}}) }}
                                         {{ form_widget(field, {attr: {class: 'min-h-11 w-full rounded-md border border-surface-muted bg-surface px-3 py-2 text-ink'}}) }}
                                         {{ form_help(field, {help_attr: {class: 'mt-1 text-xs text-ink-muted'}}) }}
                                         {{ form_errors(field) }}
