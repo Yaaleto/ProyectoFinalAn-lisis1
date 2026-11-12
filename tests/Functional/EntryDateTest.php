@@ -9,6 +9,7 @@ use App\Entity\Finca;
 use App\Entity\OrganizacionGanadera;
 use App\Entity\Pesaje;
 use App\Entity\Usuario;
+use App\Entity\Vacuna;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -104,6 +105,53 @@ final class EntryDateTest extends WebTestCase
         ]));
         self::assertResponseStatusCodeSame(422);
         self::assertStringContainsString('La salida no puede ser anterior al ingreso del animal (01/03/2026).', $this->errorDe($client, 'salida_animal_fechaSalida'));
+    }
+
+    public function testVaccinationsMatingsAndMilkingsBeforeTheEntryDateAreRejected(): void
+    {
+        $client = static::createClient();
+        $fixture = $this->createFixture($client);
+        $client->loginUser($fixture['administrador']);
+        $em = $client->getContainer()->get(EntityManagerInterface::class);
+        $hembra = $em->find(Animal::class, $fixture['animal']->getId())->setProductoraLeche(true);
+        $macho = (new Animal($hembra->getOrganizacion(), $hembra->getFinca(), 'AN-MAC-'.$fixture['sufijo'], Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO, new DateTimeImmutable('2026-03-05')))
+            ->setArete('MAC-'.$fixture['sufijo'])
+            ->setCreadoPor($fixture['administrador']);
+        $vacuna = new Vacuna($hembra->getOrganizacion(), 'Vacuna '.$fixture['sufijo']);
+        $em->persist($macho);
+        $em->persist($vacuna);
+        $em->flush();
+        $mensaje = 'La fecha del registro no puede ser anterior al ingreso del animal (%s).';
+
+        $crawler = $client->request('GET', '/vaccinations/new');
+        $client->submit($crawler->selectButton('Registrar vacunación')->form([
+            'vacunacion[animal]' => (string) $hembra->getId(),
+            'vacunacion[vacuna]' => (string) $vacuna->getId(),
+            'vacunacion[fecha]' => '2026-02-28',
+            'vacunacion[dosis]' => '5 ml',
+        ]));
+        self::assertResponseStatusCodeSame(422);
+        self::assertStringContainsString(sprintf($mensaje, '01/03/2026'), $this->errorDe($client, 'vacunacion_fecha'));
+
+        // La regla aplica a la hembra y al macho indicado (CA-08-K).
+        foreach (['2026-02-28' => '01/03/2026', '2026-03-03' => '05/03/2026'] as $fecha => $ingreso) {
+            $crawler = $client->request('GET', '/matings/new');
+            $client->submit($crawler->selectButton('Registrar monta')->form([
+                'monta_reproductiva[hembra]' => (string) $hembra->getId(),
+                'monta_reproductiva[macho]' => (string) $macho->getId(),
+                'monta_reproductiva[fecha]' => $fecha,
+            ]));
+            self::assertResponseStatusCodeSame(422, $fecha);
+            self::assertStringContainsString(sprintf($mensaje, $ingreso), $this->errorDe($client, 'monta_reproductiva_fecha'));
+        }
+
+        $crawler = $client->request('GET', sprintf('/milk/new?animal=%d', $hembra->getId()));
+        $client->submit($crawler->selectButton('Registrar ordeño')->form([
+            'produccion_leche[fechaHora]' => '2026-02-28T18:00',
+            'produccion_leche[cantidadLitros]' => '10.00',
+        ]));
+        self::assertResponseStatusCodeSame(422);
+        self::assertStringContainsString(sprintf($mensaje, '01/03/2026'), $this->errorDe($client, 'produccion_leche_fechaHora'));
     }
 
     public function testEditingKeepsTheBirthAndEntryDatesConsistent(): void

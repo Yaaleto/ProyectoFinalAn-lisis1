@@ -6,6 +6,7 @@ namespace App\Tests\Unit\Validation;
 
 use App\Entity\Animal;
 use App\Entity\Finca;
+use App\Entity\MontaReproductiva;
 use App\Entity\OrganizacionGanadera;
 use App\Validation\FechaFueraDeRangoException;
 use App\Validation\ValidadorFechas;
@@ -162,6 +163,19 @@ final class ValidadorFechasTest extends TestCase
         $this->expectExceptionMessage('La salida no puede ser anterior al ingreso del animal (01/03/2026).');
 
         $this->animalExterno('2026-03-01')->registrarSalida(Animal::ESTADO_VENDIDO, new DateTimeImmutable('2026-02-28'));
+    }
+
+    public function testAMatingCannotBeAfterTheExitOfTheMale(): void
+    {
+        $hembra = $this->animalExterno('2026-01-01');
+        $macho = (new Animal($hembra->getOrganizacion(), $hembra->getFinca(), 'AN-M-'.bin2hex(random_bytes(3)), Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO, new DateTimeImmutable('2026-01-01')))
+            ->registrarSalida(Animal::ESTADO_VENDIDO, new DateTimeImmutable('2026-06-01'));
+        new MontaReproductiva($hembra, $macho, new DateTimeImmutable('2026-06-01'));
+
+        $this->expectException(FechaFueraDeRangoException::class);
+        $this->expectExceptionMessage('posterior a la salida del animal');
+
+        new MontaReproductiva($hembra, $macho, new DateTimeImmutable('2026-06-02'));
     }
 
     private function animalExterno(string $ingreso): Animal
