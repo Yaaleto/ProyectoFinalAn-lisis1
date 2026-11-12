@@ -11,6 +11,7 @@ use App\Form\PesajeType;
 use App\Repository\AnimalRepository;
 use App\Repository\PesajeRepository;
 use App\Security\FincaAccess;
+use App\Validation\FechaFueraDeRangoException;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use DomainException;
@@ -64,6 +65,8 @@ final class PesajeController extends AbstractController
 
                     return $this->redirectToRoute('app_weight_history', ['animal' => $pesaje->getAnimal()->getId()]);
                 }
+            } catch (FechaFueraDeRangoException $exception) {
+                $form->get('fecha')->addError(new FormError($exception->getMessage()));
             } catch (DomainException $exception) {
                 $form->addError(new FormError($exception->getMessage()));
             }
@@ -125,6 +128,8 @@ final class PesajeController extends AbstractController
 
                     return $this->redirectToRoute('app_weight_history', ['animal' => $pesaje->getAnimal()->getId()]);
                 }
+            } catch (FechaFueraDeRangoException $exception) {
+                $form->get('fecha')->addError(new FormError($exception->getMessage()));
             } catch (DomainException $exception) {
                 $form->addError(new FormError($exception->getMessage()));
             }

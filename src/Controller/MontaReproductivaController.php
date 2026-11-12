@@ -11,6 +11,7 @@ use App\Form\MontaReproductivaType;
 use App\Repository\AnimalRepository;
 use App\Repository\MontaReproductivaRepository;
 use App\Security\FincaAccess;
+use App\Validation\FechaFueraDeRangoException;
 use Doctrine\ORM\EntityManagerInterface;
 use DomainException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -59,6 +60,8 @@ final class MontaReproductivaController extends AbstractController
                 $this->addFlash('success', 'La monta fue registrada correctamente.');
 
                 return $this->redirectToRoute('app_mating_history', ['animal' => $monta->getHembra()->getId()]);
+            } catch (FechaFueraDeRangoException $exception) {
+                $form->get('fecha')->addError(new FormError($exception->getMessage()));
             } catch (DomainException $exception) {
                 $form->addError(new FormError($exception->getMessage()));
             }
@@ -117,6 +120,8 @@ final class MontaReproductivaController extends AbstractController
                 $this->addFlash('success', 'La monta fue actualizada correctamente.');
 
                 return $this->redirectToRoute('app_mating_history', ['animal' => $hembra->getId()]);
+            } catch (FechaFueraDeRangoException $exception) {
+                $form->get('fecha')->addError(new FormError($exception->getMessage()));
             } catch (DomainException $exception) {
                 $form->addError(new FormError($exception->getMessage()));
             }

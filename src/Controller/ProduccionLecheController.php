@@ -12,6 +12,7 @@ use App\Form\ProduccionLecheType;
 use App\Repository\AnimalRepository;
 use App\Repository\ProduccionLecheRepository;
 use App\Security\FincaAccess;
+use App\Validation\FechaFueraDeRangoException;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use DomainException;
@@ -78,6 +79,8 @@ final class ProduccionLecheController extends AbstractController
                 $this->addFlash('success', 'El ordeño fue registrado correctamente.');
 
                 return $this->redirectToRoute('app_milk_history', ['animal' => $ordeno->getAnimal()->getId()]);
+            } catch (FechaFueraDeRangoException $exception) {
+                $form->get('fechaHora')->addError(new FormError($exception->getMessage()));
             } catch (DomainException $exception) {
                 $form->addError(new FormError($exception->getMessage()));
             }
@@ -136,6 +139,8 @@ final class ProduccionLecheController extends AbstractController
                 $this->addFlash('success', 'El ordeño fue actualizado correctamente.');
 
                 return $this->redirectToRoute('app_milk_history', ['animal' => $ordeno->getAnimal()->getId()]);
+            } catch (FechaFueraDeRangoException $exception) {
+                $form->get('fechaHora')->addError(new FormError($exception->getMessage()));
             } catch (DomainException $exception) {
                 $form->addError(new FormError($exception->getMessage()));
             }

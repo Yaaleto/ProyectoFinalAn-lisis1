@@ -7,7 +7,6 @@ namespace App\Validation;
 use App\Entity\Animal;
 use DateTimeImmutable;
 use DateTimeInterface;
-use DomainException;
 
 /**
  * Validador de fechas compartido (DERCAS v1.2, sección 5.2).
@@ -19,7 +18,7 @@ final class ValidadorFechas
     public static function assertNoFutura(DateTimeInterface $fecha, string $descripcion): void
     {
         if (self::dia($fecha) > self::dia(new DateTimeImmutable('today'))) {
-            throw new DomainException(sprintf('%s no puede estar en el futuro.', $descripcion));
+            throw new FechaFueraDeRangoException(sprintf('%s no puede estar en el futuro.', $descripcion));
         }
     }
 
@@ -33,12 +32,12 @@ final class ValidadorFechas
 
         $nacimiento = $animal->getFechaNacimiento();
         if (null !== $nacimiento && self::dia($fecha) < self::dia($nacimiento)) {
-            throw new DomainException('La fecha del registro no puede ser anterior al nacimiento del animal.');
+            throw new FechaFueraDeRangoException('La fecha del registro no puede ser anterior al nacimiento del animal.');
         }
 
         $salida = $animal->getFechaSalida();
         if (null !== $salida && self::dia($fecha) > self::dia($salida)) {
-            throw new DomainException('La fecha del registro no puede ser posterior a la salida del animal.');
+            throw new FechaFueraDeRangoException('La fecha del registro no puede ser posterior a la salida del animal.');
         }
     }
 

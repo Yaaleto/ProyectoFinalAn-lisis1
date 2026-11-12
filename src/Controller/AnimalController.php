@@ -17,6 +17,7 @@ use App\Repository\VacunacionRepository;
 use App\Security\FincaAccess;
 use App\Service\AnimalHistorial;
 use App\Service\Genealogia;
+use App\Validation\FechaFueraDeRangoException;
 use Doctrine\ORM\EntityManagerInterface;
 use DomainException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -124,6 +125,8 @@ final class AnimalController extends AbstractController
 
                     return $this->redirectToRoute('app_animal_index');
                 }
+            } catch (FechaFueraDeRangoException $exception) {
+                $form->get('fechaNacimiento')->addError(new FormError($exception->getMessage()));
             } catch (DomainException $exception) {
                 $form->addError(new FormError($exception->getMessage()));
             }
@@ -224,6 +227,8 @@ final class AnimalController extends AbstractController
 
                     return $this->redirectToRoute('app_animal_index');
                 }
+            } catch (FechaFueraDeRangoException $exception) {
+                $form->get('fechaNacimiento')->addError(new FormError($exception->getMessage()));
             } catch (DomainException $exception) {
                 $form->addError(new FormError($exception->getMessage()));
             }

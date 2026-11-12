@@ -7,6 +7,7 @@ namespace App\Entity;
 use App\Entity\Concerns\Auditable;
 use App\Entity\Concerns\AuditableInterface;
 use App\Repository\AnimalRepository;
+use App\Validation\FechaFueraDeRangoException;
 use App\Validation\ValidadorFechas;
 use DateTimeImmutable;
 use DateTimeInterface;
@@ -236,7 +237,7 @@ class Animal implements AuditableInterface
             ValidadorFechas::assertNoFutura($fecha, 'La fecha de nacimiento');
         }
         if (null !== $fecha && null !== $this->fechaSalida && $fecha > $this->fechaSalida) {
-            throw new DomainException('La fecha de nacimiento no puede ser posterior a la salida.');
+            throw new FechaFueraDeRangoException('La fecha de nacimiento no puede ser posterior a la salida.');
         }
         $this->fechaNacimiento = $fecha;
 
