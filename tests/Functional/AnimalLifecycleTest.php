@@ -6,8 +6,10 @@ namespace App\Tests\Functional;
 
 use App\Entity\Animal;
 use App\Entity\Finca;
+use App\Entity\MontaReproductiva;
 use App\Entity\OrganizacionGanadera;
 use App\Entity\Pesaje;
+use App\Entity\ProduccionLeche;
 use App\Entity\Usuario;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
@@ -179,6 +181,97 @@ final class AnimalLifecycleTest extends WebTestCase
 
         self::assertResponseRedirects(sprintf('/animals/%d', $id));
         self::assertNotNull($this->reload($client, $id));
+    }
+
+    public function testBirthDateCannotBeMovedAfterExistingRecords(): void
+    {
+        $client = static::createClient();
+        $fixture = $this->createFixture($client);
+        $client->loginUser($fixture['administrador']);
+        $this->entityManager($client)->persist(new Pesaje($fixture['animal'], new DateTimeImmutable('2026-05-20'), '310.00'));
+        $this->entityManager($client)->flush();
+        $id = $fixture['animal']->getId();
+
+        $crawler = $client->request('GET', sprintf('/animals/%d/edit', $id));
+        $client->submit($crawler->selectButton('Guardar cambios')->form(['animal[fechaNacimiento]' => '2026-05-21']));
+        self::assertResponseStatusCodeSame(422);
+        self::assertStringContainsString('La fecha de nacimiento no puede ser posterior al primer registro operativo del animal (20/05/2026).', (string) $client->getResponse()->getContent());
+        self::assertSame('2026-01-10', $this->reload($client, $id)?->getFechaNacimiento()?->format('Y-m-d'));
+
+        $crawler = $client->request('GET', sprintf('/animals/%d/edit', $id));
+        $client->submit($crawler->selectButton('Guardar cambios')->form(['animal[fechaNacimiento]' => '2026-05-20']));
+        self::assertResponseRedirects('/animals');
+        self::assertSame('2026-05-20', $this->reload($client, $id)?->getFechaNacimiento()?->format('Y-m-d'));
+    }
+
+    public function testSexCannotChangeWhileRecordsDependOnIt(): void
+    {
+        $client = static::createClient();
+        $fixture = $this->createFixture($client);
+        $client->loginUser($fixture['administrador']);
+        $entityManager = $this->entityManager($client);
+        $macho = $entityManager->find(Animal::class, $fixture['animalOtraFinca']->getId());
+        $entityManager->persist(new MontaReproductiva($fixture['animal'], $macho, new DateTimeImmutable('2026-03-01')));
+        $entityManager->flush();
+
+        foreach ([
+            [$fixture['animal']->getId(), Animal::SEXO_MACHO, 'No puedes cambiar el sexo de una hembra con montas o producción de leche registradas.'],
+            [$macho?->getId(), Animal::SEXO_HEMBRA, 'No puedes cambiar el sexo de un macho con montas registradas.'],
+        ] as [$id, $sexoNuevo, $mensaje]) {
+            $sexoAnterior = $this->reload($client, $id)?->getSexo();
+            $crawler = $client->request('GET', sprintf('/animals/%d/edit', $id));
+            $form = $crawler->selectButton('Guardar cambios')->form(['animal[sexo]' => $sexoNuevo]);
+            if (isset($form['animal[productoraLeche]'])) {
+                $form['animal[productoraLeche]']->untick();
+            }
+            $client->submit($form);
+            self::assertResponseStatusCodeSame(422, $mensaje);
+            self::assertStringContainsString($mensaje, (string) $client->getResponse()->getContent());
+            self::assertSame($sexoAnterior, $this->reload($client, $id)?->getSexo());
+        }
+    }
+
+    public function testAProducingFemaleWithMilkingsKeepsItsSexButCanStopProducing(): void
+    {
+        $client = static::createClient();
+        $fixture = $this->createFixture($client);
+        $client->loginUser($fixture['administrador']);
+        $entityManager = $this->entityManager($client);
+        $vaca = $entityManager->find(Animal::class, $fixture['animal']->getId())?->setProductoraLeche(true);
+        $entityManager->flush();
+        $entityManager->persist(new ProduccionLeche($vaca, $vaca->getFinca(), new DateTimeImmutable('2026-03-01 05:30'), '10.00'));
+        $entityManager->flush();
+        $id = $fixture['animal']->getId();
+
+        $crawler = $client->request('GET', sprintf('/animals/%d/edit', $id));
+        $form = $crawler->selectButton('Guardar cambios')->form(['animal[sexo]' => Animal::SEXO_MACHO]);
+        $form['animal[productoraLeche]']->untick();
+        $client->submit($form);
+        self::assertResponseStatusCodeSame(422);
+        self::assertSame(Animal::SEXO_HEMBRA, $this->reload($client, $id)?->getSexo());
+
+        $crawler = $client->request('GET', sprintf('/animals/%d/edit', $id));
+        $form = $crawler->selectButton('Guardar cambios')->form();
+        $form['animal[productoraLeche]']->untick();
+        $client->submit($form);
+        self::assertResponseRedirects('/animals');
+        self::assertFalse($this->reload($client, $id)?->isProductoraLeche());
+    }
+
+    public function testSexCanChangeWhenOnlyWeightsExist(): void
+    {
+        $client = static::createClient();
+        $fixture = $this->createFixture($client);
+        $client->loginUser($fixture['administrador']);
+        $this->entityManager($client)->persist(new Pesaje($fixture['animal'], new DateTimeImmutable('2026-03-01'), '310.00'));
+        $this->entityManager($client)->flush();
+        $id = $fixture['animal']->getId();
+
+        $crawler = $client->request('GET', sprintf('/animals/%d/edit', $id));
+        $client->submit($crawler->selectButton('Guardar cambios')->form(['animal[sexo]' => Animal::SEXO_MACHO]));
+
+        self::assertResponseRedirects('/animals');
+        self::assertSame(Animal::SEXO_MACHO, $this->reload($client, $id)?->getSexo());
     }
 
     public function testEarTagIsRequiredWhenRegisteringAnAnimal(): void

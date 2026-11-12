@@ -17,6 +17,12 @@
     --color-warning: #986f0b;
 
     --font-sans: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+
+    /* Tamaños mínimos legibles (RNF-P-05): ningún texto queda por debajo de 14 px. */
+    --text-xs: 0.875rem;
+    --text-xs--line-height: calc(1.25 / 0.875);
+    --text-sm: 1rem;
+    --text-sm--line-height: calc(1.5 / 1);
     --radius-sm: 0.25rem;
     --radius-md: 0.5rem;
     --radius-lg: 0.75rem;
@@ -42,4 +48,11 @@
     .app-nav-link[aria-current="page"] {
         @apply bg-brand text-white hover:bg-brand-hover hover:text-white;
     }
+}
+
+/* Fuera de las capas para prevalecer sobre las clases de borde de cada campo:
+   un campo con error se distingue también por su borde, no solo por el mensaje (RNF-P-05). */
+[aria-invalid="true"] {
+    border-width: 2px;
+    border-color: var(--color-danger);
 }

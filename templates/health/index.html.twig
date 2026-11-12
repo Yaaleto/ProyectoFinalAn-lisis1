@@ -1,26 +1,50 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Dashboard · BOVITRACK{% endblock %}
+{% block title %}Inicio · BOVITRACK{% endblock %}
 
 {% block body %}
     <div class="mx-auto max-w-5xl">
         <div class="mb-6">
-            <p class="text-sm font-semibold text-brand">Resumen</p>
+            <p class="text-sm font-semibold text-brand">Inicio</p>
             <h1 class="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">Bienvenido a BOVITRACK</h1>
-            <p class="mt-2 max-w-2xl text-ink-muted">La base de la aplicación está lista para los flujos de gestión ganadera.</p>
+            <p class="mt-2 max-w-2xl text-ink-muted">
+                {% if is_granted('ROLE_ADMINISTRADOR') %}
+                    Gestiona los animales, registros, fincas, usuarios y catálogos de {{ app.user.organizacion.nombre }}.
+                {% else %}
+                    Registra y consulta los animales de {{ app.user.fincaActiva ? app.user.fincaActiva.nombre : 'tu finca' }}.
+                {% endif %}
+            </p>
         </div>
 
-        <section class="rounded-lg border border-surface-muted bg-surface p-5 shadow-surface sm:p-6" aria-labelledby="system-status-title">
-            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                    <h2 id="system-status-title" class="text-lg font-semibold">Estado del sistema</h2>
-                    <p class="mt-1 text-sm text-ink-muted">Symfony y el servicio local de datos están disponibles.</p>
-                </div>
-                <span class="inline-flex w-fit items-center gap-2 rounded-full bg-success/10 px-3 py-1.5 text-sm font-semibold text-success">
-                    <span class="size-2 rounded-full bg-success" aria-hidden="true"></span>
-                    {{ databaseConnected ? 'Conectado' : 'No disponible' }}
-                </span>
-            </div>
+        <form method="get" action="{{ path('app_animal_index') }}" class="mb-6 flex flex-col gap-2 sm:flex-row" role="search">
+            <label class="sr-only" for="home-search">Buscar animal por arete o nombre</label>
+            <input class="min-h-11 w-full rounded-md border border-surface-muted bg-surface px-3 py-2 text-ink sm:max-w-md" id="home-search" type="search" name="q" placeholder="Buscar animal por arete o nombre" autocomplete="off">
+            <button class="min-h-11 rounded-md bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-hover" type="submit">Buscar</button>
+        </form>
+
+        <section aria-labelledby="home-actions-title">
+            <h2 id="home-actions-title" class="mb-3 text-lg font-semibold">Registrar</h2>
+            <ul class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {% for accion in [
+                    {titulo: 'Animal', descripcion: 'Ingreso de un animal externo.', ruta: 'app_animal_new'},
+                    {titulo: 'Nacimiento', descripcion: 'Cría nacida en una finca de la organización.', ruta: 'app_animal_birth'},
+                    {titulo: 'Pesaje', descripcion: 'Peso en kilogramos de un animal.', ruta: 'app_weight_new'},
+                    {titulo: 'Vacunación', descripcion: 'Vacuna aplicada y dosis.', ruta: 'app_vaccination_new'},
+                    {titulo: 'Monta', descripcion: 'Monta reproductiva de una hembra.', ruta: 'app_mating_new'},
+                    {titulo: 'Ordeño', descripcion: 'Litros de leche de una hembra productora.', ruta: 'app_milk_new'}
+                ] %}
+                    <li>
+                        <a class="block h-full rounded-lg border border-surface-muted bg-surface p-4 shadow-sm hover:border-brand" href="{{ path(accion.ruta) }}">
+                            <span class="font-semibold text-brand">{{ accion.titulo }}</span>
+                            <span class="mt-1 block text-sm text-ink-muted">{{ accion.descripcion }}</span>
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
         </section>
+
+        {% if not databaseConnected %}
+            <p class="mt-6 rounded-md border border-danger/30 bg-danger/10 p-3 text-sm text-danger" role="alert">La base de datos no está disponible en este momento. Intenta de nuevo en unos minutos.</p>
+        {% endif %}
     </div>
 {% endblock %}

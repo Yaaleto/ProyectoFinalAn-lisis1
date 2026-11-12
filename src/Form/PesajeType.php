@@ -50,11 +50,11 @@ final class PesajeType extends AbstractType
                 'input' => 'string',
                 'scale' => 2,
                 'html5' => true,
-                'attr' => ['step' => '0.01', 'min' => '0.01'],
+                'attr' => ['step' => '0.01', 'min' => '0.01', 'max' => '9999.99'],
                 'constraints' => [
                     new Assert\NotBlank(message: 'Indica el peso.'),
                     new Assert\Positive(message: 'El peso debe ser mayor que cero.'),
-                    new Assert\LessThan(value: 1000000, message: 'El peso no es válido.'),
+                    new Assert\LessThanOrEqual(value: 9999.99, message: 'El peso admite hasta 9999.99 kg.'),
                 ],
             ]);
     }

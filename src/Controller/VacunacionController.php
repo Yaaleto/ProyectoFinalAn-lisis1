@@ -12,6 +12,7 @@ use App\Form\VacunacionType;
 use App\Repository\AnimalRepository;
 use App\Repository\VacunacionRepository;
 use App\Security\FincaAccess;
+use App\Validation\FechaFueraDeRangoException;
 use Doctrine\ORM\EntityManagerInterface;
 use DomainException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -59,6 +60,8 @@ final class VacunacionController extends AbstractController
                 $this->addFlash('success', 'La vacunación fue registrada correctamente.');
 
                 return $this->redirectToRoute('app_vaccination_history', ['animal' => $vacunacion->getAnimal()->getId()]);
+            } catch (FechaFueraDeRangoException $exception) {
+                $form->get('fecha')->addError(new FormError($exception->getMessage()));
             } catch (DomainException $exception) {
                 $form->addError(new FormError($exception->getMessage()));
             }
@@ -117,6 +120,8 @@ final class VacunacionController extends AbstractController
                 $this->addFlash('success', 'La vacunación fue actualizada correctamente.');
 
                 return $this->redirectToRoute('app_vaccination_history', ['animal' => $animal->getId()]);
+            } catch (FechaFueraDeRangoException $exception) {
+                $form->get('fecha')->addError(new FormError($exception->getMessage()));
             } catch (DomainException $exception) {
                 $form->addError(new FormError($exception->getMessage()));
             }

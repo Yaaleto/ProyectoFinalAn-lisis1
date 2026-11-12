@@ -20,7 +20,7 @@ Qué ocurre en el primer arranque:
 2. `database` (MySQL 8.4) inicializa un volumen vacío ejecutando el SQL de `docker/mysql/`. Crea dos bases con el esquema físico V1 completo (diez tablas, claves foráneas, restricciones e índices): `bovitrack`, para usar la aplicación, y `bovitrack_test`, para las pruebas automáticas, que pueden borrar datos sin afectar a la otra. Solo `bovitrack` recibe una organización, una finca y las dos cuentas de prueba; ninguna base trae animales ni registros operativos.
 3. `app` instala las dependencias de Composer y arranca Apache.
 
-La aplicación queda en <http://127.0.0.1:8080/>.
+La aplicación queda en <http://127.0.0.1:8080/>. PHP y MySQL usan la hora de Guatemala (UTC−6).
 
 Qué **no** ocurre: no se ejecutan migraciones de Doctrine ni `doctrine:schema:update --force`. El esquema vive solo en el SQL inicial; Doctrine ORM se usa únicamente para leer y guardar entidades. Los arranques posteriores no modifican el esquema ni los datos existentes.
 
@@ -55,8 +55,7 @@ docker compose up --build -d
 | --- | --- | --- |
 | `app` | PHP 8.4, Apache, Composer, Symfony 7.4 | `127.0.0.1:8080` |
 | `assets` | Node.js 24, npm, Tailwind CSS | solo se ejecuta al arrancar |
-| `database` | MySQL 8.4 (`bovitrack-mysql`) | `127.0.0.1:3307`; entre contenedores, `database:3306` |
-
+| `database` | MySQL 8.4 (`bovitrack-mysql`), zona horaria `-06:00` | `127.0.0.1:3307`; entre contenedores, `database:3306` |
 Los puertos se publican solo en `127.0.0.1`. Usuario de desarrollo: `bovitrack`; las credenciales de prueba están en `compose.yaml` y no son para producción.
 
 ## Comandos habituales

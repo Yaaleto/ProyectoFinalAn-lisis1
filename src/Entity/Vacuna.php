@@ -26,11 +26,12 @@ class Vacuna
     private OrganizacionGanadera $organizacion;
 
     #[ORM\Column(length: 120)]
-    #[Assert\NotBlank]
-    #[Assert\Length(max: 120)]
+    #[Assert\NotBlank(message: 'Ingresa el nombre de la vacuna.')]
+    #[Assert\Length(max: 120, maxMessage: 'El nombre admite hasta {{ limit }} caracteres.')]
     private string $nombre;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Assert\Length(max: 200, maxMessage: 'La descripción admite hasta {{ limit }} caracteres.')]
     private ?string $descripcion = null;
 
     #[ORM\Column(options: ['default' => true])]

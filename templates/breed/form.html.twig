@@ -8,7 +8,9 @@
         <h1 class="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">{{ page_title }}</h1>
         <p class="mt-2 text-sm text-ink-muted">Los datos quedarán asociados a {{ app.user.organizacion.nombre }}.</p>
 
-        {{ form_start(form, {attr: {class: 'mt-6 space-y-5 rounded-lg border border-surface-muted bg-surface p-6 shadow-sm'}}) }}
+        <p class="mt-6 text-sm text-ink-muted">Los campos marcados con * son obligatorios.</p>
+
+        {{ form_start(form, {attr: {class: 'mt-4 space-y-5 rounded-lg border border-surface-muted bg-surface p-6 shadow-sm'}}) }}
             {{ form_errors(form) }}
             <div>
                 {{ form_label(form.nombre, null, {label_attr: {class: 'mb-2 block text-sm font-semibold'}}) }}

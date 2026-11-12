@@ -81,7 +81,9 @@ final class VacunacionType extends AbstractType
             ->add('observaciones', TextareaType::class, [
                 'label' => 'Observaciones',
                 'required' => false,
-                'help' => 'Opcional.',
+                'help' => 'Opcional. Hasta 200 caracteres.',
+                'attr' => ['maxlength' => 200],
+                'constraints' => [new Assert\Length(max: 200, maxMessage: 'Las observaciones admiten hasta {{ limit }} caracteres.')],
             ]);
     }
 

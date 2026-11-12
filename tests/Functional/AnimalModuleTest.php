@@ -433,23 +433,37 @@ final class AnimalModuleTest extends WebTestCase
         self::assertNotContains((string) $fixture['fincaAlterna']->getId(), $opciones);
     }
 
-    public function testAnimalOnADeactivatedFarmCanStillBeEditedAndKeepsItsFarm(): void
+    public function testAnimalOnADeactivatedFarmIsReadOnly(): void
     {
         $client = static::createClient();
         $fixture = $this->createFixture($client);
-        $fixture['fincaAlterna']->setActivo(false);
         $client->loginUser($fixture['administrador']);
-        $this->entityManager($client)->flush();
         $animalId = $fixture['animalOtraFinca']->getId();
+        $perfil = sprintf('/animals/%d', $animalId);
+        // Token válido obtenido con la finca activa: el rechazo debe venir de RN-17, no del CSRF.
+        $tokenEliminar = $client->request('GET', $perfil)->filterXPath('//form[contains(@action, "/delete")]//input[@name="_token"]')->attr('value');
+        $fixture['fincaAlterna']->setActivo(false);
+        $this->entityManager($client)->flush();
 
-        $crawler = $client->request('GET', sprintf('/animals/%d/edit', $animalId));
-        $client->submit($crawler->selectButton('Guardar cambios')->form(['animal[nombre]' => 'Sigue en su finca']));
+        $crawler = $client->request('GET', $perfil);
+        self::assertResponseIsSuccessful();
+        self::assertStringContainsString('La finca está inactiva; el animal y su historial son de solo lectura.', (string) $client->getResponse()->getContent());
+        self::assertCount(0, $crawler->filterXPath(sprintf('//a[@href="/animals/%d/edit"] | //a[@href="/animals/%d/status"]', $animalId, $animalId)));
+        self::assertCount(0, $crawler->filterXPath('//form[contains(@action, "/delete")]'));
 
-        self::assertResponseRedirects('/animals');
+        foreach (['GET' => [sprintf('/animals/%d/edit', $animalId), sprintf('/animals/%d/status', $animalId)]] as $metodo => $rutas) {
+            foreach ($rutas as $ruta) {
+                $client->request($metodo, $ruta);
+                self::assertResponseRedirects($perfil, null, $ruta);
+            }
+        }
+        $client->request('POST', sprintf('/animals/%d/delete', $animalId), ['_token' => $tokenEliminar]);
+        self::assertResponseRedirects($perfil);
+
         $this->entityManager($client)->clear();
         $animal = $this->entityManager($client)->find(Animal::class, $animalId);
-        self::assertSame('Sigue en su finca', $animal?->getNombre());
-        self::assertSame($fixture['fincaAlterna']->getId(), $animal?->getFinca()->getId());
+        self::assertNotNull($animal);
+        self::assertSame($fixture['fincaAlterna']->getId(), $animal->getFinca()->getId());
     }
 
     public function testAnimalKeepsItsBreedAfterTheBreedIsDeactivated(): void

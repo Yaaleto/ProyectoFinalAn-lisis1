@@ -17,6 +17,7 @@ use App\Repository\VacunacionRepository;
 use App\Security\FincaAccess;
 use App\Service\AnimalHistorial;
 use App\Service\Genealogia;
+use App\Validation\FechaFueraDeRangoException;
 use Doctrine\ORM\EntityManagerInterface;
 use DomainException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -124,6 +125,8 @@ final class AnimalController extends AbstractController
 
                     return $this->redirectToRoute('app_animal_index');
                 }
+            } catch (FechaFueraDeRangoException $exception) {
+                $form->get('fechaNacimiento')->addError(new FormError($exception->getMessage()));
             } catch (DomainException $exception) {
                 $form->addError(new FormError($exception->getMessage()));
             }
@@ -174,12 +177,16 @@ final class AnimalController extends AbstractController
         EntityManagerInterface $entityManager,
         ValidatorInterface $validator,
         FincaAccess $fincaAccess,
+        AnimalHistorial $historial,
     ): Response {
         $usuario = $this->getUser();
         \assert($usuario instanceof Usuario);
 
         if (!$fincaAccess->canView($usuario, $animal->getFinca())) {
             throw $this->createAccessDeniedException();
+        }
+        if ($respuesta = $this->rechazarSiFincaInactiva($animal)) {
+            return $respuesta;
         }
 
         $form = $this->createForm(AnimalType::class, $this->formData($animal), [
@@ -194,14 +201,34 @@ final class AnimalController extends AbstractController
             \assert(is_array($data));
 
             try {
+                // Se consulta antes de aplicar el formulario, con el sexo que el animal tiene guardado.
+                $sexoConRegistros = $historial->tieneRegistrosQueDependenDelSexo($animal) ? $animal->getSexo() : null;
                 $this->applyFormData($animal, $data);
 
-                if (!$this->addValidationErrors($form, $animal, $validator)) {
+                if (null !== $sexoConRegistros && $sexoConRegistros !== $animal->getSexo()) {
+                    $form->get('sexo')->addError(new FormError(Animal::SEXO_HEMBRA === $sexoConRegistros
+                        ? 'No puedes cambiar el sexo de una hembra con montas o producción de leche registradas.'
+                        : 'No puedes cambiar el sexo de un macho con montas registradas.'));
+                }
+
+                // RN-11 también al editar: el nacimiento no puede quedar después de registros ya guardados.
+                $primerRegistro = $historial->primeraFechaOperativa($animal);
+                $nacimiento = $animal->getFechaNacimiento();
+                if (null !== $primerRegistro && null !== $nacimiento && $nacimiento->format('Y-m-d') > $primerRegistro->format('Y-m-d')) {
+                    $form->get('fechaNacimiento')->addError(new FormError(sprintf(
+                        'La fecha de nacimiento no puede ser posterior al primer registro operativo del animal (%s).',
+                        $primerRegistro->format('d/m/Y'),
+                    )));
+                }
+
+                if ($form->isValid() && !$this->addValidationErrors($form, $animal, $validator)) {
                     $entityManager->flush();
                     $this->addFlash('success', 'El animal fue actualizado correctamente.');
 
                     return $this->redirectToRoute('app_animal_index');
                 }
+            } catch (FechaFueraDeRangoException $exception) {
+                $form->get('fechaNacimiento')->addError(new FormError($exception->getMessage()));
             } catch (DomainException $exception) {
                 $form->addError(new FormError($exception->getMessage()));
             }
@@ -230,6 +257,9 @@ final class AnimalController extends AbstractController
 
         if (!$fincaAccess->canView($usuario, $animal->getFinca())) {
             throw $this->createAccessDeniedException();
+        }
+        if ($respuesta = $this->rechazarSiFincaInactiva($animal)) {
+            return $respuesta;
         }
 
         $form = $this->createForm(SalidaAnimalType::class, [
@@ -278,6 +308,9 @@ final class AnimalController extends AbstractController
         if (!$this->isGranted('ROLE_ADMINISTRADOR') || !$fincaAccess->canView($usuario, $animal->getFinca())) {
             throw $this->createAccessDeniedException();
         }
+        if ($respuesta = $this->rechazarSiFincaInactiva($animal)) {
+            return $respuesta;
+        }
         if (!$this->isCsrfTokenValid('delete-animal-'.$animal->getId(), (string) $request->request->get('_token'))) {
             $this->addFlash('warning', 'La solicitud expiró. Intenta eliminar el animal de nuevo.');
 
@@ -300,6 +333,20 @@ final class AnimalController extends AbstractController
         $this->addFlash('success', 'El animal fue eliminado correctamente.');
 
         return $this->redirectToRoute('app_animal_index');
+    }
+
+    /**
+     * RN-17: los animales de una finca inactiva no se modifican ni eliminan; siguen disponibles para consulta.
+     */
+    private function rechazarSiFincaInactiva(Animal $animal): ?Response
+    {
+        if ($animal->getFinca()->isActivo()) {
+            return null;
+        }
+
+        $this->addFlash('warning', 'La finca del animal está inactiva; el animal y su historial son de solo lectura.');
+
+        return $this->redirectToRoute('app_animal_show', ['animal' => $animal->getId()]);
     }
 
     private function generateInternalCode(): string

@@ -36,6 +36,15 @@ final class DatabaseSchemaTest extends KernelTestCase
         parent::tearDown();
     }
 
+    public function testDatabaseAndApplicationShareTheGuatemalaTimeZone(): void
+    {
+        $ahoraMysql = new \DateTimeImmutable((string) $this->entityManager->getConnection()->fetchOne('SELECT NOW()'));
+        $ahoraPhp = new \DateTimeImmutable();
+
+        self::assertSame('America/Guatemala', date_default_timezone_get());
+        self::assertLessThan(120, abs($ahoraPhp->getTimestamp() - $ahoraMysql->getTimestamp()), 'MySQL y PHP deben usar la hora de Guatemala (UTC−6).');
+    }
+
     public function testMvpTablesExistInTheTestDatabase(): void
     {
         $tables = $this->entityManager->getConnection()->createSchemaManager()->listTableNames();

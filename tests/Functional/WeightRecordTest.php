@@ -83,6 +83,11 @@ final class WeightRecordTest extends WebTestCase
             $this->submitNew($client, $fixture['animal'], $fecha, $peso);
             self::assertResponseStatusCodeSame(422, $mensaje);
             self::assertStringContainsString($mensaje, (string) $client->getResponse()->getContent());
+            if (str_contains($mensaje, 'fecha')) {
+                // Los errores de fecha aparecen bajo el campo de fecha, no al inicio del formulario.
+                $id = $client->getCrawler()->filterXPath('//input[contains(@name, "[fecha")]')->attr('id');
+                self::assertStringContainsString($mensaje, $client->getCrawler()->filterXPath(sprintf('//*[starts-with(@id, "%s_error")]', $id))->text(''));
+            }
         }
 
         self::assertCount(0, $this->pesajes($client, $fixture['animal']));

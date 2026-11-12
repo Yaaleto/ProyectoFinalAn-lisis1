@@ -146,6 +146,11 @@ final class MatingRecordTest extends WebTestCase
             $this->submitNew($client, ['hembra' => (string) $fixture['hembra']->getId(), 'fecha' => $fecha]);
             self::assertResponseStatusCodeSame(422, $fecha);
             self::assertStringContainsString($mensaje, (string) $client->getResponse()->getContent());
+            if (str_contains($mensaje, 'fecha')) {
+                // Los errores de fecha aparecen bajo el campo de fecha, no al inicio del formulario.
+                $id = $client->getCrawler()->filterXPath('//input[contains(@name, "[fecha")]')->attr('id');
+                self::assertStringContainsString($mensaje, $client->getCrawler()->filterXPath(sprintf('//*[starts-with(@id, "%s_error")]', $id))->text(''));
+            }
         }
     }
 

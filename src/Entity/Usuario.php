@@ -36,21 +36,21 @@ class Usuario implements UserInterface, PasswordAuthenticatedUserInterface
     private ?Finca $fincaActiva = null;
 
     #[ORM\Column(length: 150)]
-    #[Assert\NotBlank]
-    #[Assert\Length(max: 150)]
+    #[Assert\NotBlank(message: 'Ingresa el nombre completo.')]
+    #[Assert\Length(max: 150, maxMessage: 'El nombre admite hasta {{ limit }} caracteres.')]
     private string $nombre;
 
     #[ORM\Column(name: 'correo', length: 180, unique: true)]
-    #[Assert\NotBlank]
-    #[Assert\Email]
-    #[Assert\Length(max: 180)]
+    #[Assert\NotBlank(message: 'Ingresa el correo electrónico.')]
+    #[Assert\Email(message: 'Ingresa un correo electrónico válido, por ejemplo nombre@dominio.com.')]
+    #[Assert\Length(max: 180, maxMessage: 'El correo admite hasta {{ limit }} caracteres.')]
     private string $email;
 
     #[ORM\Column(name: 'contrasena_hash', length: 255)]
     private string $contrasenaHash;
 
     #[ORM\Column(length: 15)]
-    #[Assert\Choice(choices: [self::ROL_ADMINISTRADOR, self::ROL_ENCARGADO])]
+    #[Assert\Choice(choices: [self::ROL_ADMINISTRADOR, self::ROL_ENCARGADO], message: 'Selecciona un rol.')]
     private string $rol;
 
     #[ORM\Column(options: ['default' => true])]
