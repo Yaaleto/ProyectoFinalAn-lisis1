@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Functional;
 
+use App\Entity\Finca;
 use App\Entity\OrganizacionGanadera;
 use App\Entity\Usuario;
 use App\Security\UsuarioPasswordManager;
@@ -52,6 +53,35 @@ final class AuthenticationTest extends WebTestCase
         self::assertStringContainsString('minlength="8"', (string) $client->getResponse()->getContent());
     }
 
+    public function testLoginPageIsNeverCached(): void
+    {
+        $client = static::createClient();
+
+        $crawler = $client->request('GET', '/login');
+
+        self::assertStringContainsString('no-store', (string) $client->getResponse()->headers->get('Cache-Control'));
+        self::assertGreaterThan(
+            24,
+            \strlen($crawler->filterXPath('//input[@name="_csrf_token"]')->attr('value')),
+            'El formulario de acceso debe usar un token CSRF real asociado a la sesión.',
+        );
+    }
+
+    public function testExpiredLoginFormIsNotReportedAsWrongCredentials(): void
+    {
+        $client = static::createClient();
+
+        $client->request('POST', '/login', [
+            '_username' => 'encargado.demo@bovitrack.local',
+            '_password' => 'BoviTrackDemo2026!',
+            '_csrf_token' => 'expired-token',
+        ]);
+        $client->followRedirect();
+
+        self::assertStringContainsString('La sesión del formulario expiró.', (string) $client->getResponse()->getContent());
+        self::assertStringNotContainsString('El correo o la contraseña no son correctos.', (string) $client->getResponse()->getContent());
+    }
+
     public function testInactiveAccountCannotSignIn(): void
     {
         $client = static::createClient();
@@ -80,12 +110,49 @@ final class AuthenticationTest extends WebTestCase
         self::assertStringContainsString('Iniciar sesión', (string) $client->getResponse()->getContent());
     }
 
+    public function testUserCanSignInAgainAfterLogout(): void
+    {
+        $client = static::createClient();
+        $email = 'relogin-auth@example.com';
+        $this->createUser($client, $email, Usuario::ROL_ADMINISTRADOR);
+        $this->signIn($client, $email);
+        $client->followRedirect();
+
+        $token = $client->getCrawler()->filterXPath('//form[@action="/logout"]//input[@name="_csrf_token"]')->attr('value');
+        $client->request('POST', '/logout', ['_csrf_token' => $token]);
+        $client->followRedirect();
+
+        $this->signIn($client, $email);
+
+        self::assertResponseRedirects('/');
+    }
+
+    public function testDifferentUserCanSignInAfterLogout(): void
+    {
+        $client = static::createClient();
+        $this->createUser($client, 'admin-switch-auth@example.com', Usuario::ROL_ADMINISTRADOR);
+        $this->createUser($client, 'manager-switch-auth@example.com', Usuario::ROL_ENCARGADO);
+        $this->signIn($client, 'admin-switch-auth@example.com');
+        $client->followRedirect();
+
+        $token = $client->getCrawler()->filterXPath('//form[@action="/logout"]//input[@name="_csrf_token"]')->attr('value');
+        $client->request('POST', '/logout', ['_csrf_token' => $token]);
+        $client->followRedirect();
+
+        $this->signIn($client, 'manager-switch-auth@example.com');
+
+        self::assertResponseRedirects('/');
+    }
+
     private function createUser($client, string $email, string $rol, bool $activo = true): void
     {
         $entityManager = $client->getContainer()->get(EntityManagerInterface::class);
         $organizationCode = 'AUTH-'.strtoupper(strtok($email, '@'));
         $entityManager->createQuery('DELETE FROM App\\Entity\\Usuario u WHERE u.email = :email')
             ->setParameter('email', $email)
+            ->execute();
+        $entityManager->createQuery('DELETE FROM App\\Entity\\Finca f WHERE f.codigo = :code')
+            ->setParameter('code', $organizationCode)
             ->execute();
         $entityManager->createQuery('DELETE FROM App\\Entity\\OrganizacionGanadera o WHERE o.codigo = :code')
             ->setParameter('code', $organizationCode)
@@ -95,6 +162,11 @@ final class AuthenticationTest extends WebTestCase
         $user = (new Usuario('Usuario de prueba', $email, '', $rol))
             ->setOrganizacion($organization)
             ->setActivo($activo);
+        if (Usuario::ROL_ENCARGADO === $rol) {
+            $farm = (new Finca('Finca de prueba', $organizationCode))->setOrganizacion($organization);
+            $user->setFincaActiva($farm);
+            $entityManager->persist($farm);
+        }
         $passwordManager = new UsuarioPasswordManager($client->getContainer()->get(UserPasswordHasherInterface::class));
         $passwordManager->setPassword($user, 'correct-password');
 

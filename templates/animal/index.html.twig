@@ -1,0 +1,77 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Animales · BOVITRACK{% endblock %}
+
+{% block body %}
+    <div class="mx-auto max-w-6xl">
+        <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <p class="text-sm font-semibold text-brand">Ganado</p>
+                <h1 class="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">Animales</h1>
+                <p class="mt-2 text-sm text-ink-muted">Animales disponibles según tu organización y finca asignada.</p>
+            </div>
+            <a class="inline-flex min-h-11 items-center justify-center rounded-md bg-brand px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-hover" href="{{ path('app_animal_new') }}">Registrar animal</a>
+        </div>
+
+        <form method="get" action="{{ path('app_animal_index') }}" class="mb-4 flex flex-col gap-2 sm:flex-row" role="search">
+            <label class="sr-only" for="animal-search">Buscar por arete o nombre</label>
+            <input class="min-h-11 w-full rounded-md border border-surface-muted bg-surface px-3 py-2 text-ink sm:max-w-sm" id="animal-search" type="search" name="q" value="{{ busqueda }}" placeholder="Buscar por arete o nombre" autocomplete="off">
+            <button class="min-h-11 rounded-md border border-surface-muted px-4 py-2 text-sm font-semibold text-ink hover:bg-surface-muted" type="submit">Buscar</button>
+            {% if busqueda %}
+                <a class="inline-flex min-h-11 items-center justify-center px-2 text-sm font-semibold text-brand hover:underline" href="{{ path('app_animal_index') }}">Limpiar</a>
+            {% endif %}
+        </form>
+
+        <div class="overflow-hidden rounded-lg border border-surface-muted bg-surface shadow-sm">
+            {% if animales is empty and busqueda %}
+                <div class="p-6 text-center">
+                    <p class="font-medium">Ningún animal coincide con «{{ busqueda }}».</p>
+                    <p class="mt-2 text-sm text-ink-muted">Revisa el arete o el nombre; solo se buscan animales de tu ámbito.</p>
+                </div>
+            {% elseif animales is empty %}
+                <div class="p-6 text-center">
+                    <p class="font-medium">Todavía no hay animales registrados.</p>
+                    <p class="mt-2 text-sm text-ink-muted">Registra el primer animal para comenzar.</p>
+                </div>
+            {% else %}
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-surface-muted text-ink-muted">
+                            <tr>
+                                <th class="px-4 py-3 font-semibold" scope="col">Arete</th>
+                                <th class="px-4 py-3 font-semibold" scope="col">Nombre</th>
+                                <th class="px-4 py-3 font-semibold" scope="col">Finca</th>
+                                <th class="px-4 py-3 font-semibold" scope="col">Raza</th>
+                                <th class="px-4 py-3 font-semibold" scope="col">Sexo</th>
+                                <th class="px-4 py-3 font-semibold" scope="col">Estado</th>
+                                <th class="px-4 py-3 text-right font-semibold" scope="col">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for animal in animales %}
+                                <tr class="border-t border-surface-muted">
+                                    <td class="px-4 py-3 font-medium">{{ animal.arete ?: 'Sin arete' }}</td>
+                                    <td class="px-4 py-3 text-ink-muted">{{ animal.nombre ?: 'Sin nombre' }}</td>
+                                    <td class="px-4 py-3 text-ink-muted">{{ animal.finca.nombre }}</td>
+                                    <td class="px-4 py-3 text-ink-muted">{{ animal.raza ? animal.raza.nombre : 'Sin raza' }}</td>
+                                    <td class="px-4 py-3 text-ink-muted">{{ animal.sexo == 'HEMBRA' ? 'Hembra' : 'Macho' }}</td>
+                                    <td class="px-4 py-3">
+                                        <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold {{ animal.estado == 'ACTIVO' ? 'bg-success/10 text-success' : 'bg-ink-muted/10 text-ink-muted' }}">{{ animal.estado|lower|capitalize }}</span>
+                                    </td>
+                                    <td class="px-4 py-3 text-right">
+                                        <div class="inline-flex gap-3">
+                                            <a class="font-semibold text-brand hover:underline" href="{{ path('app_animal_show', {animal: animal.id}) }}">Ver</a>
+                                            {% if animal.finca.activo %}
+                                                <a class="font-semibold text-brand hover:underline" href="{{ path('app_animal_edit', {animal: animal.id}) }}">Editar</a>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

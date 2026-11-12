@@ -1,0 +1,82 @@
+services:
+  database:
+    image: mysql:8.4
+    container_name: bovitrack-mysql
+    restart: unless-stopped
+    # Zona horaria de Guatemala (UTC−6, sin horario de verano), la misma que usa PHP.
+    command: ["--default-time-zone=-06:00"]
+    environment:
+      MYSQL_DATABASE: bovitrack
+      MYSQL_USER: bovitrack
+      MYSQL_PASSWORD: change-me
+      MYSQL_ROOT_PASSWORD: root-change-me
+    ports:
+      - "127.0.0.1:3307:3306"
+    volumes:
+      - bovitrack_mysql_data:/var/lib/mysql
+      - ./docker/mysql/00-inicializar.sql:/docker-entrypoint-initdb.d/00-inicializar.sql:ro
+      - ./docker/mysql/01-esquema.sql:/docker/mysql-sql/01-esquema.sql:ro
+      - ./docker/mysql/02-usuarios-demo.sql:/docker/mysql-sql/02-usuarios-demo.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+
+  assets:
+    image: node:24-bookworm-slim
+    working_dir: /workspace
+    volumes:
+      - .:/workspace
+      - bovitrack_node_modules:/workspace/node_modules
+      - bovitrack_npm_cache:/root/.npm
+    command: sh -ec "npm ci --no-audit --no-fund && npm run build:css"
+
+  app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    restart: unless-stopped
+    working_dir: /var/www/html
+    environment:
+      # Producción: el usuario ve las páginas de error propias y no el detalle técnico de Symfony.
+      APP_ENV: prod
+      APP_SECRET: bovitrack-compose-dev-only
+      DEFAULT_URI: http://localhost:8080
+      DATABASE_URL: "mysql://bovitrack:change-me@database:3306/bovitrack?serverVersion=8.4.0&charset=utf8mb4"
+      COMPOSER_CACHE_DIR: /tmp/composer-cache
+    ports:
+      - "127.0.0.1:8080:80"
+    volumes:
+      - .:/var/www/html
+      - bovitrack_vendor:/var/www/html/vendor
+      - bovitrack_var:/var/www/html/var
+      - bovitrack_composer_cache:/tmp/composer-cache
+    depends_on:
+      database:
+        condition: service_healthy
+      assets:
+        condition: service_completed_successfully
+    command:
+      - sh
+      - -ec
+      - |
+        composer install --no-interaction --prefer-dist --no-progress
+        php bin/console asset-map:compile
+        chown -R www-data:www-data var
+        exec apache2-foreground
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(@file_get_contents('http://127.0.0.1/') === false ? 1 : 0);"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+
+volumes:
+  bovitrack_mysql_data:
+  bovitrack_vendor:
+  bovitrack_var:
+  bovitrack_composer_cache:
+  bovitrack_node_modules:
+  bovitrack_npm_cache:

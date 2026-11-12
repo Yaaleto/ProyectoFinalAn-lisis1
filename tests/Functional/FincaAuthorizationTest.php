@@ -37,6 +37,24 @@ final class FincaAuthorizationTest extends WebTestCase
         self::assertResponseStatusCodeSame(403);
     }
 
+    public function testFarmManagerCanOpenItsAssignedFarmFromTheFarmNavigation(): void
+    {
+        $client = static::createClient();
+        $fixture = $this->createFixture($client);
+        $client->loginUser($fixture['encargado']);
+
+        $crawler = $client->request('GET', '/');
+        self::assertCount(1, $crawler->filterXPath('//a[@href="/farms"]'));
+
+        $client->request('GET', '/farms');
+        self::assertResponseRedirects(sprintf('/farms/%d', $fixture['fincaAsignada']->getId()));
+        $client->followRedirect();
+        self::assertResponseIsSuccessful();
+        self::assertStringContainsString('Finca Asignada', (string) $client->getResponse()->getContent());
+        self::assertStringNotContainsString('Finca Alterna', (string) $client->getResponse()->getContent());
+        self::assertStringNotContainsString('Editar', (string) $client->getResponse()->getContent());
+    }
+
     public function testUserIsBlockedFromAFarmInAnotherOrganization(): void
     {
         $client = static::createClient();
@@ -100,5 +118,10 @@ final class FincaAuthorizationTest extends WebTestCase
         $entityManager->flush();
 
         return compact('administrador', 'encargado', 'fincaAsignada', 'fincaAlterna', 'fincaAjena');
+    }
+
+    private function entityManager(KernelBrowser $client): EntityManagerInterface
+    {
+        return $client->getContainer()->get(EntityManagerInterface::class);
     }
 }

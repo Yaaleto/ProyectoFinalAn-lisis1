@@ -16,3 +16,6 @@
 
 /node_modules/
 /.phpunit.result.cache
+
+# Archivos locales y generados del proyecto.
+/documentacion/

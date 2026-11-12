@@ -28,7 +28,7 @@
                 <span class="inline-flex size-10 items-center justify-center rounded-full bg-surface-muted text-ink" aria-hidden="true">
                     <twig:Icon name="person" className="size-5" />
                 </span>
-                <form method="post" action="{{ path('app_logout') }}">
+                <form method="post" action="{{ path('app_logout') }}" data-turbo="false">
                     <input type="hidden" name="_csrf_token" value="{{ csrf_token('logout') }}">
                     <button class="rounded-md px-3 py-2 text-sm font-medium text-ink-muted hover:bg-surface-muted hover:text-ink" type="submit">Cerrar sesión</button>
                 </form>
@@ -50,21 +50,52 @@
                     </button>
                 </div>
                 <nav>
+                    {% set catalogOpen = app.current_route starts with 'app_breed_' or app.current_route starts with 'app_vaccine_' %}
                     <ul class="space-y-1" role="list">
-                        <li><twig:NavItem label="Dashboard" icon="home" href="{{ path('app_health') }}" active /></li>
-                        <li><twig:NavItem label="Animales" icon="database" /></li>
-                        <li><twig:NavItem label="Fincas" icon="building" /></li>
-                        <li><twig:NavItem label="Pesajes" icon="ruler" /></li>
-                        <li><twig:NavItem label="Vacunaciones" icon="syringe" /></li>
-                        <li><twig:NavItem label="Reproducción" icon="calendar" /></li>
-                        <li><twig:NavItem label="Leche" icon="drop" /></li>
-                        <li><twig:NavItem label="Usuarios" icon="people" /></li>
-                        <li><twig:NavItem label="Catálogos" icon="settings" /></li>
+                        <li><twig:NavItem label="Inicio" icon="home" href="{{ path('app_health') }}" active="{{ app.current_route == 'app_health' }}" /></li>
+                        <li><twig:NavItem label="Animales" icon="database" href="{{ path('app_animal_index') }}" active="{{ app.current_route starts with 'app_animal_' }}" /></li>
+                        <li><twig:NavItem label="Fincas" icon="building" href="{{ path('app_farm_index') }}" active="{{ app.current_route starts with 'app_farm_' }}" /></li>
+                        <li><twig:NavItem label="Pesajes" icon="ruler" href="{{ path('app_weight_index') }}" active="{{ app.current_route starts with 'app_weight_' }}" /></li>
+                        <li><twig:NavItem label="Vacunaciones" icon="syringe" href="{{ path('app_vaccination_index') }}" active="{{ app.current_route starts with 'app_vaccination_' }}" /></li>
+                        <li><twig:NavItem label="Reproducción" icon="calendar" href="{{ path('app_mating_index') }}" active="{{ app.current_route starts with 'app_mating_' }}" /></li>
+                        <li><twig:NavItem label="Leche" icon="drop" href="{{ path('app_milk_index') }}" active="{{ app.current_route starts with 'app_milk_' }}" /></li>
+                        <li><twig:NavItem label="Usuarios" icon="people" href="{{ is_granted('ROLE_ADMINISTRADOR') ? path('app_user_index') : null }}" active="{{ app.current_route starts with 'app_user_' }}" /></li>
+                        <li>
+                            <details{% if catalogOpen %} open{% endif %}>
+                                <summary class="app-nav-link">
+                                    <twig:Icon name="settings" className="size-5" />
+                                    <span>Catálogos</span>
+                                    <svg class="ml-auto size-4 shrink-0 fill-current" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                        <path d="M5.22 8.97a.75.75 0 0 1 1.06 0L12 14.69l5.72-5.72a.75.75 0 1 1 1.06 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0l-6.25-6.25a.75.75 0 0 1 0-1.06" />
+                                    </svg>
+                                </summary>
+                                <ul class="mt-1 space-y-1" role="list">
+                                    <li>
+                                        <a class="app-nav-link" href="{{ path('app_breed_index') }}"{% if app.current_route starts with 'app_breed_' %} aria-current="page"{% endif %}>
+                                            <span class="size-5 shrink-0" aria-hidden="true"></span>
+                                            <span>Razas</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="app-nav-link" href="{{ path('app_vaccine_index') }}"{% if app.current_route starts with 'app_vaccine_' %} aria-current="page"{% endif %}>
+                                            <span class="size-5 shrink-0" aria-hidden="true"></span>
+                                            <span>Vacunas</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </details>
+                        </li>
                     </ul>
                 </nav>
             </aside>
 
             <main id="main-content" class="min-w-0 flex-1 p-4 sm:p-6 lg:p-8" tabindex="-1">
+                {% for message in app.flashes('success') %}
+                    <div class="mx-auto mb-6 max-w-5xl rounded-md border border-success/30 bg-success/10 p-3 text-sm text-success" role="status">{{ message }}</div>
+                {% endfor %}
+                {% for message in app.flashes('warning') %}
+                    <div class="mx-auto mb-6 max-w-5xl rounded-md border border-warning/30 bg-warning/10 p-3 text-sm text-warning" role="alert">{{ message }}</div>
+                {% endfor %}
                 {% block body %}{% endblock %}
             </main>
         </div>

@@ -1,0 +1,90 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Producción de leche · BOVITRACK{% endblock %}
+
+{% block body %}
+    <div class="mx-auto max-w-5xl">
+        <a class="text-sm font-semibold text-brand hover:underline" href="{{ path('app_animal_show', {animal: animal.id}) }}">← Volver al perfil</a>
+
+        <div class="mt-6 mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <p class="text-sm font-semibold text-brand">Producción de leche</p>
+                <h1 class="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">{{ animal.nombre ?: 'Arete ' ~ animal.arete }}</h1>
+                <p class="mt-2 text-sm text-ink-muted">Arete {{ animal.arete }} · finca actual: {{ animal.finca.nombre }}</p>
+            </div>
+            {% if animal.sexo == 'HEMBRA' and animal.productoraLeche and animal.estado == 'ACTIVO' and animal.finca.activo %}
+                <a class="inline-flex min-h-11 items-center justify-center rounded-md bg-brand px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-hover" href="{{ path('app_milk_new', {animal: animal.id}) }}">Registrar ordeño</a>
+            {% endif %}
+        </div>
+
+        <section class="mb-6 overflow-hidden rounded-lg border border-surface-muted bg-surface shadow-sm" aria-labelledby="milk-daily-totals">
+            <div class="p-5">
+                <h2 class="text-lg font-semibold" id="milk-daily-totals">Total diario</h2>
+                <p class="mt-1 text-sm text-ink-muted">Suma de los ordeños de cada fecha.</p>
+            </div>
+            {% if totalesDiarios is empty %}
+                <p class="border-t border-surface-muted p-5 text-sm text-ink-muted">Este animal todavía no tiene ordeños.</p>
+            {% else %}
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-surface-muted text-ink-muted">
+                        <tr>
+                            <th class="px-4 py-3 font-semibold" scope="col">Fecha</th>
+                            <th class="px-4 py-3 text-right font-semibold" scope="col">Ordeños</th>
+                            <th class="px-4 py-3 text-right font-semibold" scope="col">Litros</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for total in totalesDiarios %}
+                            <tr class="border-t border-surface-muted" data-daily-total>
+                                <td class="px-4 py-3 font-medium">{{ total.fecha|date('d/m/Y') }}</td>
+                                <td class="px-4 py-3 text-right">{{ total.ordenos }}</td>
+                                <td class="px-4 py-3 text-right font-semibold">{{ total.litros|number_format(2, '.', ',') }} L</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
+        </section>
+
+        {% if ordenos is not empty %}
+            <div class="overflow-hidden rounded-lg border border-surface-muted bg-surface shadow-sm">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-surface-muted text-ink-muted">
+                            <tr>
+                                <th class="px-4 py-3 font-semibold" scope="col">Fecha y hora</th>
+                                <th class="px-4 py-3 font-semibold" scope="col">Finca del ordeño</th>
+                                <th class="px-4 py-3 text-right font-semibold" scope="col">Litros</th>
+                                <th class="px-4 py-3 text-right font-semibold" scope="col">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ordeno in ordenos %}
+                                <tr class="border-t border-surface-muted" data-milk-row>
+                                    <td class="px-4 py-3 font-medium">{{ ordeno.fechaHora|date('d/m/Y H:i') }}</td>
+                                    <td class="px-4 py-3">{{ ordeno.fincaOrdeno.nombre }}</td>
+                                    <td class="px-4 py-3 text-right">{{ ordeno.cantidadLitros|number_format(2, '.', ',') }} L</td>
+                                    <td class="px-4 py-3 text-right">
+                                        {% if not ordeno.fincaOrdeno.activo %}
+                                            <span class="text-ink-muted">Solo lectura</span>
+                                        {% else %}
+                                            <div class="inline-flex items-center gap-3">
+                                                <a class="font-semibold text-brand hover:underline" href="{{ path('app_milk_edit', {ordeno: ordeno.id}) }}">Editar</a>
+                                                {% if is_granted('ROLE_ADMINISTRADOR') %}
+                                                    <form method="post" action="{{ path('app_milk_delete', {ordeno: ordeno.id}) }}" onsubmit="return confirm('¿Eliminar este ordeño?');">
+                                                        <input type="hidden" name="_token" value="{{ csrf_token('delete-milk-' ~ ordeno.id) }}">
+                                                        <button class="font-semibold text-danger hover:underline" type="submit">Eliminar</button>
+                                                    </form>
+                                                {% endif %}
+                                            </div>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

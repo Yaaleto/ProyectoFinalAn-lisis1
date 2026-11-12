@@ -1,0 +1,117 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ page_title }} · BOVITRACK{% endblock %}
+
+{% block body %}
+    <div class="mx-auto max-w-5xl">
+        {% if volver_url|default(null) %}
+            <a class="text-sm font-semibold text-brand hover:underline" href="{{ volver_url }}">← Volver a la ficha del animal</a>
+        {% else %}
+            <a class="text-sm font-semibold text-brand hover:underline" href="{{ path('app_animal_index') }}">← Volver a animales</a>
+        {% endif %}
+        <h1 class="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">{{ page_title }}</h1>
+        <p class="mt-2 text-sm text-ink-muted">Los datos quedarán asociados a {{ app.user.organizacion.nombre }}.</p>
+        <p class="mt-6 text-sm text-ink-muted">Los campos marcados con * son obligatorios.</p>
+
+        {% if intake_origin is not null %}
+            <nav class="mt-5" style="text-align: right" aria-labelledby="animal-registration-type-heading">
+                <h2 class="text-sm font-semibold" id="animal-registration-type-heading">Tipo de registro</h2>
+                <div class="mt-2 flex border-b border-surface-muted" style="justify-content: flex-end">
+                    {% for tab in [
+                        {label: 'Nacimiento', route: 'app_animal_birth', origin: 'NACIDO_EN_FINCA'},
+                        {label: 'Ingreso', route: 'app_animal_new', origin: 'EXTERNO'}
+                    ] %}
+                        {% set selected = intake_origin == tab.origin %}
+                        <a class="inline-flex min-h-11 shrink-0 items-center justify-center px-4 py-2 text-sm {{ selected ? 'font-semibold text-brand' : 'font-medium text-ink-muted hover:bg-surface-muted hover:text-ink' }}" style="border-bottom: 2px solid {{ selected ? 'var(--color-brand)' : 'transparent' }}" href="{{ path(tab.route) }}" {% if selected %}aria-current="page"{% endif %}>{{ tab.label }}</a>
+                    {% endfor %}
+                </div>
+            </nav>
+        {% endif %}
+
+        {{ form_start(form, {attr: {class: 'mt-6'}}) }}
+            {{ form_errors(form) }}
+
+            <div class="space-y-5">
+                <section class="rounded-lg border border-surface-muted bg-surface p-5 shadow-sm" aria-labelledby="animal-identification-heading">
+                    <div class="mb-5">
+                        <h2 class="text-lg font-semibold" id="animal-identification-heading">Identificación</h2>
+                        <p class="mt-1 text-sm text-ink-muted">Datos principales y ubicación del animal.</p>
+                    </div>
+                    <div class="space-y-5">
+                        {% for row in [[form.arete, form.nombre], [form.finca, form.raza], [form.sexo]] %}
+                            <div class="flex flex-col gap-4 sm:flex-row">
+                                {% for field in row %}
+                                    <div class="min-w-0 flex-1">
+                                        {{ form_label(field, null, {label_attr: {class: 'mb-2 block text-sm font-semibold'}}) }}
+                                        {{ form_widget(field, {attr: {class: 'min-h-11 w-full rounded-md border border-surface-muted bg-surface px-3 py-2 text-ink'}}) }}
+                                        {{ form_help(field, {help_attr: {class: 'mt-1 text-xs text-ink-muted'}}) }}
+                                        {{ form_errors(field) }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </section>
+
+                <section class="rounded-lg border border-surface-muted bg-surface p-5 shadow-sm" aria-labelledby="animal-origin-heading">
+                    <div class="mb-5">
+                        <h2 class="text-lg font-semibold" id="animal-origin-heading">Nacimiento y origen</h2>
+                        <p class="mt-1 text-sm text-ink-muted">{% if intake_origin == 'NACIDO_EN_FINCA' %}El origen se asignará como nacido en finca. Indica la fecha del nacimiento.{% elseif intake_origin == 'EXTERNO' %}El origen se asignará como externo. La fecha de nacimiento y el peso al nacer pueden agregarse después al editar el animal.{% else %}Registra cuándo y dónde se originó.{% endif %}</p>
+                    </div>
+                    <div class="space-y-5">
+                        {% set birth_fields = [] %}
+                        {% if form.fechaNacimiento is defined %}{% set birth_fields = birth_fields|merge([form.fechaNacimiento, form.pesoNacimientoKg]) %}{% endif %}
+                        {% set origin_fields = [] %}
+                        {% if form.fechaIngreso is defined %}{% set origin_fields = origin_fields|merge([form.fechaIngreso]) %}{% endif %}
+                        {% if form.origen is defined %}{% set origin_fields = origin_fields|merge([form.origen]) %}{% endif %}
+                        {% if form.procedencia is defined %}{% set origin_fields = origin_fields|merge([form.procedencia]) %}{% endif %}
+                        {% for row in [birth_fields, origin_fields] %}
+                            {% if row is not empty %}
+                            <div class="flex flex-col gap-4 sm:flex-row">
+                                {% for field in row %}
+                                    <div class="min-w-0 flex-1">
+                                        {{ form_label(field, null, {label_attr: {class: 'mb-2 block text-sm font-semibold'}}) }}
+                                        {{ form_widget(field, {attr: {class: 'min-h-11 w-full rounded-md border border-surface-muted bg-surface px-3 py-2 text-ink'}}) }}
+                                        {{ form_help(field, {help_attr: {class: 'mt-1 text-xs text-ink-muted'}}) }}
+                                        {{ form_errors(field) }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+
+                    <div class="mt-5 rounded-md border border-surface-muted p-4">
+                        <div class="flex items-center gap-3">
+                            {{ form_widget(form.productoraLeche) }}
+                            {{ form_label(form.productoraLeche, null, {label_attr: {class: 'text-sm font-semibold'}}) }}
+                        </div>
+                        {{ form_help(form.productoraLeche, {help_attr: {class: 'mt-1 text-xs text-ink-muted'}}) }}
+                        {{ form_errors(form.productoraLeche) }}
+                    </div>
+                </section>
+
+                <section class="rounded-lg border border-surface-muted bg-surface p-5 shadow-sm" aria-labelledby="animal-parents-heading">
+                    <div class="mb-5">
+                        <h2 class="text-lg font-semibold" id="animal-parents-heading">Progenitores</h2>
+                        <p class="mt-1 text-sm text-ink-muted">Opcional. Selecciona animales ya registrados para vincular al padre y a la madre.</p>
+                    </div>
+                    <div class="flex flex-col gap-4 sm:flex-row">
+                        {% for field in [form.padre, form.madre] %}
+                            <div class="min-w-0 flex-1">
+                                {{ form_label(field, null, {label_attr: {class: 'mb-2 block text-sm font-semibold'}}) }}
+                                {{ form_widget(field, {attr: {class: 'min-h-11 w-full rounded-md border border-surface-muted bg-surface px-3 py-2 text-ink'}}) }}
+                                {{ form_errors(field) }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </section>
+            </div>
+
+            <div class="mt-5 flex flex-col gap-3 rounded-lg border border-surface-muted bg-surface p-5 shadow-sm sm:flex-row sm:justify-end">
+                <a class="inline-flex min-h-11 items-center justify-center rounded-md px-4 py-2.5 text-sm font-semibold text-ink hover:bg-surface-muted" href="{{ volver_url|default(null) ?: path('app_animal_index') }}">Cancelar</a>
+                <button class="min-h-11 rounded-md bg-brand px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-hover" type="submit">{{ submit_label }}</button>
+            </div>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

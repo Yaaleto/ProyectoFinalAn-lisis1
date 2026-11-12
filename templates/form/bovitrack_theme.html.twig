@@ -1,0 +1,27 @@
+{# Tema de formularios de BOVITRACK: errores visibles y accesibles (RNF-P-05). #}
+{% use 'form_div_layout.html.twig' %}
+
+{# Sin la burbuja nativa del navegador, pequeña y pasajera: los errores los muestra el servidor junto a cada campo. #}
+{%- block form_start -%}
+    {%- set attr = attr|merge({novalidate: 'novalidate'}) -%}
+    {{- parent() -}}
+{%- endblock form_start -%}
+
+{# Los campos obligatorios llevan " *" en su etiqueta; cada formulario lo explica con una nota. #}
+{%- block form_label -%}
+    {%- if required and label is not same as(false) and 'checkbox' not in block_prefixes -%}
+        {%- set label = (label ?: name|humanize) ~ ' *' -%}
+    {%- endif -%}
+    {{- parent() -}}
+{%- endblock form_label -%}
+
+{%- block form_errors -%}
+    {%- for error in errors -%}
+        <p id="{{ id ~ '_error' ~ loop.index }}" class="form-error mt-2 rounded-md border border-danger/30 bg-danger/10 px-3 py-2 text-base font-semibold text-danger" role="alert">{{ error.message }}</p>
+    {%- endfor -%}
+{%- endblock form_errors -%}
+
+{%- block widget_attributes -%}
+    {{- parent() -}}
+    {%- if not valid %} aria-invalid="true"{% if errors|length > 0 %} aria-errormessage="{{ id ~ '_error1' }}"{% endif %}{% endif -%}
+{%- endblock widget_attributes -%}

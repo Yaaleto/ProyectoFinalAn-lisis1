@@ -8,6 +8,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Core\Exception\InvalidCsrfTokenException;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 final class AuthenticationController extends AbstractController
@@ -19,10 +20,16 @@ final class AuthenticationController extends AbstractController
             return $this->redirectToRoute('app_health');
         }
 
-        return $this->render('auth/login.html.twig', [
-            'error' => $authenticationUtils->getLastAuthenticationError(),
+        $error = $authenticationUtils->getLastAuthenticationError();
+        $response = $this->render('auth/login.html.twig', [
+            'error' => $error,
+            'csrfError' => $error instanceof InvalidCsrfTokenException,
             'lastUsername' => $authenticationUtils->getLastUsername(),
         ]);
+        $response->setPrivate();
+        $response->headers->addCacheControlDirective('no-store');
+
+        return $response;
     }
 
     #[Route('/logout', name: 'app_logout', methods: ['POST'])]

@@ -1,0 +1,568 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Tests\Functional;
+
+use App\Entity\Animal;
+use App\Entity\Finca;
+use App\Entity\OrganizacionGanadera;
+use App\Entity\Raza;
+use App\Entity\Usuario;
+use DateTimeImmutable;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
+use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+
+final class AnimalModuleTest extends WebTestCase
+{
+    public function testAdministratorCanOpenAnimalSectionAndOnlySeesItsOrganization(): void
+    {
+        $client = static::createClient();
+        $fixture = $this->createFixture($client);
+        $client->loginUser($fixture['administrador']);
+
+        $crawler = $client->request('GET', '/animals');
+
+        self::assertResponseIsSuccessful();
+        self::assertCount(1, $crawler->filterXPath('//a[@href="/animals" and @aria-current="page"]'));
+        self::assertStringContainsString((string) $fixture['animal']->getArete(), (string) $client->getResponse()->getContent());
+        self::assertStringNotContainsString($fixture['animal']->getCodigoInterno(), (string) $client->getResponse()->getContent());
+        self::assertStringNotContainsString((string) $fixture['animalAjeno']->getArete(), (string) $client->getResponse()->getContent());
+        self::assertCount(1, $crawler->filterXPath(sprintf('//a[@href="/animals/%d" and normalize-space()="Ver"]', $fixture['animal']->getId())));
+        self::assertCount(1, $crawler->filterXPath('//a[@href="/animals/new" and normalize-space()="Registrar animal"]'));
+        self::assertCount(0, $crawler->filterXPath('//a[@href="/animals/new/birth"]'));
+    }
+
+    public function testAdministratorCanOpenAuthorizedAnimalProfile(): void
+    {
+        $client = static::createClient();
+        $fixture = $this->createFixture($client);
+        $client->loginUser($fixture['administrador']);
+
+        $crawler = $client->request('GET', sprintf('/animals/%d', $fixture['animal']->getId()));
+
+        self::assertResponseIsSuccessful();
+        self::assertStringContainsString((string) $fixture['animal']->getArete(), (string) $client->getResponse()->getContent());
+        self::assertStringContainsString($fixture['finca']->getNombre(), (string) $client->getResponse()->getContent());
+        self::assertStringNotContainsString($fixture['animal']->getCodigoInterno(), (string) $client->getResponse()->getContent());
+        self::assertCount(2, $crawler->filterXPath('//div[@data-generation="1"]//dd[normalize-space()="Sin registrar"]'));
+        self::assertCount(14, $crawler->filterXPath('//section[@aria-labelledby="animal-parents-heading"]//dd[normalize-space()="Sin registrar"]'));
+        self::assertStringContainsString('Sin raza', (string) $client->getResponse()->getContent());
+        self::assertCount(1, $crawler->filterXPath('//dt[normalize-space()="Procedencia"]/following-sibling::dd[normalize-space()="Sin registrar"]'));
+        self::assertCount(1, $crawler->filterXPath('//dt[normalize-space()="Fecha de nacimiento"]/following-sibling::dd[normalize-space()="Sin registrar"]'));
+    }
+
+    public function testProfileShowsBasicDataAndBothParents(): void
+    {
+        $client = static::createClient();
+        $fixture = $this->createFixture($client);
+        $entityManager = $this->entityManager($client);
+        $raza = new Raza($fixture['organizacion'], 'Brahman');
+        $madre = (new Animal($fixture['organizacion'], $fixture['finca'], 'INT-MADRE-'.$fixture['suffix'], Animal::SEXO_HEMBRA, Animal::ORIGEN_EXTERNO, new DateTimeImmutable('2025-01-01')))
+            ->setArete('MADRE-'.$fixture['suffix'])
+            ->setNombre('Aurora')
+            ->setCreadoPor($fixture['administrador']);
+        $entityManager->persist($raza);
+        $entityManager->persist($madre);
+        $fixture['machoFinca']->setNombre('Toro');
+        $fixture['animal']->setNombre('Luna')
+            ->setRaza($raza)
+            ->definirFechas(new DateTimeImmutable('2025-01-15'), new DateTimeImmutable('2025-01-15'))
+            ->setProcedencia('Finca de origen')
+            ->setPadre($fixture['machoFinca'])
+            ->setMadre($madre);
+        $client->loginUser($fixture['administrador']);
+        $entityManager->flush();
+
+        $crawler = $client->request('GET', sprintf('/animals/%d', $fixture['animal']->getId()));
+
+        self::assertResponseIsSuccessful();
+        foreach (['Luna', $fixture['animal']->getArete(), $fixture['finca']->getNombre(), 'Brahman', 'Hembra', '15/01/2025', 'Externo', 'Finca de origen'] as $dato) {
+            self::assertStringContainsString((string) $dato, (string) $client->getResponse()->getContent());
+        }
+        self::assertCount(1, $crawler->filterXPath('//span[contains(@class, "bg-success/10") and normalize-space()="Activo"]'));
+        self::assertCount(1, $crawler->filterXPath('//section[@aria-labelledby="animal-parents-heading"]//dt[normalize-space()="Padre"]/following-sibling::dd[contains(., "Toro")]'));
+        self::assertCount(1, $crawler->filterXPath('//section[@aria-labelledby="animal-parents-heading"]//dt[normalize-space()="Madre"]/following-sibling::dd[contains(., "Aurora")]'));
+        self::assertStringContainsString('Arete '.$madre->getArete(), (string) $client->getResponse()->getContent());
+        self::assertStringNotContainsString($fixture['animal']->getCodigoInterno(), (string) $client->getResponse()->getContent());
+        self::assertStringNotContainsString($madre->getCodigoInterno(), (string) $client->getResponse()->getContent());
+    }
+
+    public function testAnimalProfileRequiresAuthentication(): void
+    {
+        $client = static::createClient();
+        $fixture = $this->createFixture($client);
+
+        $client->request('GET', sprintf('/animals/%d', $fixture['animal']->getId()));
+
+        self::assertResponseRedirects('/login');
+    }
+
+    public function testAdministratorCanRegisterFarmBirthFromTheInterface(): void
+    {
+        $client = static::createClient();
+        $fixture = $this->createFixture($client);
+        $client->loginUser($fixture['administrador']);
+        $arete = 'GT-'.strtoupper(bin2hex(random_bytes(3)));
+
+        $crawler = $client->request('GET', '/animals');
+        $crawler = $client->click($crawler->selectLink('Registrar animal')->link());
+        self::assertCount(1, $crawler->filterXPath('//nav[@aria-labelledby="animal-registration-type-heading"]//a[@aria-current="page" and normalize-space()="Ingreso"]'));
+        $crawler = $client->click($crawler->selectLink('Nacimiento')->link());
+        self::assertCount(1, $crawler->filterXPath('//nav[@aria-labelledby="animal-registration-type-heading"]//a[@aria-current="page" and normalize-space()="Nacimiento"]'));
+        self::assertCount(0, $crawler->filterXPath('//input[@name="animal[codigoInterno]"]'));
+        self::assertCount(0, $crawler->filterXPath('//*[@name="animal[origen]" or @name="animal[procedencia]"]'));
+        $client->submit($crawler->selectButton('Registrar nacimiento')->form([
+            'animal[arete]' => $arete,
+            'animal[nombre]' => 'Luna',
+            'animal[finca]' => (string) $fixture['finca']->getId(),
+            'animal[sexo]' => Animal::SEXO_HEMBRA,
+            'animal[fechaNacimiento]' => '2026-01-15',
+            'animal[pesoNacimientoKg]' => '35.50',
+            'animal[productoraLeche]' => '1',
+        ]));
+
+        self::assertResponseRedirects('/animals');
+        $animal = $this->entityManager($client)->getRepository(Animal::class)->findOneBy(['arete' => $arete]);
+        self::assertInstanceOf(Animal::class, $animal);
+        self::assertMatchesRegularExpression('/^AN-[A-F0-9]{12}$/', $animal->getCodigoInterno());
+        self::assertSame($fixture['organizacion']->getId(), $animal->getOrganizacion()->getId());
+        self::assertSame($fixture['finca']->getId(), $animal->getFinca()->getId());
+        self::assertSame(Animal::ORIGEN_NACIDO_EN_FINCA, $animal->getOrigen());
+        self::assertSame('2026-01-15', $animal->getFechaNacimiento()?->format('Y-m-d'));
+        self::assertNull($animal->getProcedencia());
+        self::assertTrue($animal->isProductoraLeche());
+    }
+
+    public function testExternalIntakeKeepsOptionalProvenance(): void
+    {
+        $client = static::createClient();
+        $fixture = $this->createFixture($client);
+        $client->loginUser($fixture['administrador']);
+
+        foreach ([null, 'Finca de procedencia'] as $procedencia) {
+            $arete = 'EXT-'.strtoupper(bin2hex(random_bytes(4)));
+            $crawler = $client->request('GET', '/animals/new');
+            self::assertCount(1, $crawler->filterXPath('//nav[@aria-labelledby="animal-registration-type-heading"]//a[@aria-current="page" and normalize-space()="Ingreso"]'));
+            self::assertCount(0, $crawler->filterXPath('//*[@name="animal[origen]"]'));
+
+            $client->submit($crawler->selectButton('Registrar ingreso')->form([
+                'animal[arete]' => $arete,
+                'animal[finca]' => (string) $fixture['finca']->getId(),
+                'animal[sexo]' => Animal::SEXO_MACHO,
+                'animal[procedencia]' => $procedencia ?? '',
+            ]));
+
+            self::assertResponseRedirects('/animals');
+            $animal = $this->entityManager($client)->getRepository(Animal::class)->findOneBy(['arete' => $arete]);
+            self::assertInstanceOf(Animal::class, $animal);
+            self::assertSame(Animal::ORIGEN_EXTERNO, $animal->getOrigen());
+            self::assertSame($fixture['finca']->getId(), $animal->getFinca()->getId());
+            self::assertSame($procedencia, $animal->getProcedencia());
+        }
+    }
+
+    public function testAdministratorCanRegisterAndEditAnimalParents(): void
+    {
+        $client = static::createClient();
+        $fixture = $this->createFixture($client);
+        $client->loginUser($fixture['administrador']);
+        $arete = 'CRIA-'.$fixture['suffix'];
+
+        $crawler = $client->request('GET', '/animals/new/birth');
+        self::assertCount(1, $crawler->filterXPath(sprintf('//select[@name="animal[padre]"]/option[@value="%d"]', $fixture['animalOtraFinca']->getId())));
+        self::assertCount(1, $crawler->filterXPath(sprintf('//select[@name="animal[madre]"]/option[@value="%d"]', $fixture['animal']->getId())));
+        $client->submit($crawler->selectButton('Registrar nacimiento')->form([
+            'animal[arete]' => $arete,
+            'animal[finca]' => (string) $fixture['finca']->getId(),
+            'animal[sexo]' => Animal::SEXO_HEMBRA,
+            'animal[fechaNacimiento]' => '2026-01-15',
+            'animal[padre]' => (string) $fixture['animalOtraFinca']->getId(),
+            'animal[madre]' => (string) $fixture['animal']->getId(),
+        ]));
+
+        self::assertResponseRedirects('/animals');
+        $entityManager = $this->entityManager($client);
+        $cria = $entityManager->getRepository(Animal::class)->findOneBy(['arete' => $arete]);
+        self::assertInstanceOf(Animal::class, $cria);
+        self::assertSame($fixture['animalOtraFinca']->getId(), $cria->getPadre()?->getId());
+        self::assertSame($fixture['animal']->getId(), $cria->getMadre()?->getId());
+
+        $crawler = $client->request('GET', sprintf('/animals/%d/edit', $cria->getId()));
+        self::assertCount(1, $crawler->filterXPath(sprintf('//select[@name="animal[padre]"]/option[@value="%d" and @selected]', $fixture['animalOtraFinca']->getId())));
+        self::assertCount(1, $crawler->filterXPath(sprintf('//select[@name="animal[madre]"]/option[@value="%d" and @selected]', $fixture['animal']->getId())));
+        $client->submit($crawler->selectButton('Guardar cambios')->form(['animal[padre]' => '']));
+
+        self::assertResponseRedirects('/animals');
+        $entityManager->clear();
+        $cria = $entityManager->getRepository(Animal::class)->findOneBy(['arete' => $arete]);
+        self::assertNull($cria?->getPadre());
+        self::assertSame($fixture['animal']->getId(), $cria?->getMadre()?->getId());
+    }
+
+    public function testParentFormRejectsWrongSexAndForeignOrganization(): void
+    {
+        $client = static::createClient();
+        $fixture = $this->createFixture($client);
+        $client->loginUser($fixture['administrador']);
+
+        foreach ([
+            ['padre', $fixture['animal']],
+            ['madre', $fixture['machoFinca']],
+            ['padre', $fixture['animalAjeno']],
+        ] as $index => [$campo, $progenitor]) {
+            $crawler = $client->request('GET', '/animals/new/birth');
+            self::assertCount(0, $crawler->filterXPath(sprintf('//select[@name="animal[%s]"]/option[@value="%d"]', $campo, $progenitor->getId())));
+            $arete = sprintf('INVALID-%s-%d', $fixture['suffix'], $index);
+            $client->request('POST', '/animals/new/birth', ['animal' => [
+                'arete' => $arete,
+                'finca' => (string) $fixture['finca']->getId(),
+                'sexo' => Animal::SEXO_HEMBRA,
+                'fechaNacimiento' => '2026-01-15',
+                $campo => (string) $progenitor->getId(),
+                '_token' => $crawler->filterXPath('//input[@name="animal[_token]"]')->attr('value'),
+            ]]);
+
+            self::assertResponseStatusCodeSame(422);
+            self::assertNull($this->entityManager($client)->getRepository(Animal::class)->findOneBy(['arete' => $arete]));
+        }
+    }
+
+    public function testBirthRequiresDateAndRejectsSubmittedOrigin(): void
+    {
+        $client = static::createClient();
+        $fixture = $this->createFixture($client);
+        $client->loginUser($fixture['administrador']);
+        $crawler = $client->request('GET', '/animals/new/birth');
+        $token = $crawler->filterXPath('//input[@name="animal[_token]"]')->attr('value');
+
+        $client->request('POST', '/animals/new/birth', ['animal' => [
+            'arete' => 'BIRTH-NODATE-'.$fixture['suffix'],
+            'finca' => (string) $fixture['finca']->getId(),
+            'sexo' => Animal::SEXO_HEMBRA,
+            '_token' => $token,
+        ]]);
+
+        self::assertStringContainsString('Indica la fecha de nacimiento.', (string) $client->getResponse()->getContent());
+        self::assertNull($this->entityManager($client)->getRepository(Animal::class)->findOneBy(['arete' => 'BIRTH-NODATE-'.$fixture['suffix']]));
+
+        $client->request('POST', '/animals/new/birth', ['animal' => [
+            'arete' => 'BIRTH-TAMPER-'.$fixture['suffix'],
+            'finca' => (string) $fixture['finca']->getId(),
+            'sexo' => Animal::SEXO_HEMBRA,
+            'fechaNacimiento' => '2026-01-15',
+            'origen' => Animal::ORIGEN_EXTERNO,
+            '_token' => $token,
+        ]]);
+
+        self::assertResponseStatusCodeSame(422);
+        self::assertNull($this->entityManager($client)->getRepository(Animal::class)->findOneBy(['arete' => 'BIRTH-TAMPER-'.$fixture['suffix']]));
+    }
+
+    public function testIntakeRequiresAuthentication(): void
+    {
+        $client = static::createClient();
+
+        foreach (['/animals/new', '/animals/new/birth'] as $path) {
+            $client->request('GET', $path);
+            self::assertResponseRedirects('/login');
+        }
+    }
+
+    public function testDuplicateEarTagIsRejectedInsideTheOrganization(): void
+    {
+        $client = static::createClient();
+        $fixture = $this->createFixture($client);
+        $client->loginUser($fixture['administrador']);
+
+        $crawler = $client->request('GET', '/animals/new');
+        $client->submit($crawler->selectButton('Registrar ingreso')->form([
+            'animal[arete]' => $fixture['animal']->getArete(),
+            'animal[finca]' => (string) $fixture['finca']->getId(),
+            'animal[sexo]' => Animal::SEXO_MACHO,
+        ]));
+
+        self::assertStringContainsString('El arete ya existe en la organización.', (string) $client->getResponse()->getContent());
+    }
+
+    public function testAdministratorCanEditAnAnimalWithoutChangingItsInternalCode(): void
+    {
+        $client = static::createClient();
+        $fixture = $this->createFixture($client);
+        $client->loginUser($fixture['administrador']);
+        $animalId = $fixture['animal']->getId();
+        $codigoInterno = $fixture['animal']->getCodigoInterno();
+
+        $crawler = $client->request('GET', sprintf('/animals/%d/edit', $animalId));
+        self::assertStringNotContainsString($codigoInterno, (string) $client->getResponse()->getContent());
+        $client->submit($crawler->selectButton('Guardar cambios')->form([
+            'animal[arete]' => 'EDIT-'.$fixture['suffix'],
+            'animal[nombre]' => 'Luna editada',
+            'animal[finca]' => (string) $fixture['finca']->getId(),
+            'animal[sexo]' => Animal::SEXO_HEMBRA,
+            'animal[fechaNacimiento]' => '2025-01-15',
+            'animal[pesoNacimientoKg]' => '42.50',
+            'animal[fechaIngreso]' => '2025-01-15',
+            'animal[origen]' => Animal::ORIGEN_EXTERNO,
+            'animal[procedencia]' => 'Finca de origen',
+            'animal[productoraLeche]' => '1',
+        ]));
+
+        self::assertResponseRedirects('/animals');
+        $this->entityManager($client)->clear();
+        $animal = $this->entityManager($client)->find(Animal::class, $animalId);
+        self::assertSame($codigoInterno, $animal?->getCodigoInterno());
+        self::assertSame('Luna editada', $animal?->getNombre());
+        self::assertSame('42.50', $animal?->getPesoNacimientoKg());
+        self::assertTrue($animal?->isProductoraLeche());
+        self::assertSame($fixture['administrador']->getId(), $animal?->getModificadoPor()?->getId());
+        self::assertNotNull($animal?->getFechaActualizacion());
+    }
+
+    public function testFarmManagerCanEditAssignedAnimalButNotAnotherFarmAnimal(): void
+    {
+        $client = static::createClient();
+        $fixture = $this->createFixture($client);
+        $client->loginUser($fixture['encargado']);
+
+        $crawler = $client->request('GET', sprintf('/animals/%d/edit', $fixture['animal']->getId()));
+        $client->submit($crawler->selectButton('Guardar cambios')->form([
+            'animal[arete]' => $fixture['animal']->getArete(),
+            'animal[nombre]' => 'Editado por encargado',
+            'animal[finca]' => (string) $fixture['finca']->getId(),
+            'animal[sexo]' => Animal::SEXO_HEMBRA,
+            'animal[origen]' => Animal::ORIGEN_EXTERNO,
+        ]));
+
+        self::assertResponseRedirects('/animals');
+        $client->request('GET', sprintf('/animals/%d/edit', $fixture['animalOtraFinca']->getId()));
+        self::assertResponseStatusCodeSame(403);
+    }
+
+    public function testFarmManagerOnlySeesAndOpensAssignedFarmAnimals(): void
+    {
+        $client = static::createClient();
+        $fixture = $this->createFixture($client);
+        $client->loginUser($fixture['encargado']);
+
+        $client->request('GET', '/animals');
+
+        self::assertResponseIsSuccessful();
+        self::assertStringContainsString((string) $fixture['animal']->getArete(), (string) $client->getResponse()->getContent());
+        self::assertStringNotContainsString((string) $fixture['animalOtraFinca']->getArete(), (string) $client->getResponse()->getContent());
+        self::assertStringNotContainsString((string) $fixture['animalAjeno']->getArete(), (string) $client->getResponse()->getContent());
+
+        $client->request('GET', sprintf('/animals/%d', $fixture['animal']->getId()));
+        self::assertResponseIsSuccessful();
+
+        $client->request('GET', sprintf('/animals/%d', $fixture['animalOtraFinca']->getId()));
+        self::assertResponseStatusCodeSame(403);
+    }
+
+    public function testFarmManagerRegistrationOnlyOffersAssignedFarm(): void
+    {
+        $client = static::createClient();
+        $fixture = $this->createFixture($client);
+        $client->loginUser($fixture['encargado']);
+
+        foreach (['/animals/new', '/animals/new/birth'] as $path) {
+            $crawler = $client->request('GET', $path);
+
+            self::assertCount(1, $crawler->filterXPath(sprintf('//select[@name="animal[finca]"]/option[@value="%d"]', $fixture['finca']->getId())));
+            self::assertCount(0, $crawler->filterXPath(sprintf('//select[@name="animal[finca]"]/option[@value="%d"]', $fixture['fincaAlterna']->getId())));
+
+            $client->request('POST', $path, ['animal' => [
+                'arete' => 'UNAUTHORIZED-'.$fixture['suffix'],
+                'finca' => (string) $fixture['fincaAlterna']->getId(),
+                'sexo' => Animal::SEXO_MACHO,
+                'fechaNacimiento' => '2026-01-15',
+                '_token' => $crawler->filterXPath('//input[@name="animal[_token]"]')->attr('value'),
+            ]]);
+
+            self::assertResponseStatusCodeSame(422);
+            self::assertNull($this->entityManager($client)->getRepository(Animal::class)->findOneBy(['arete' => 'UNAUTHORIZED-'.$fixture['suffix']]));
+        }
+    }
+
+    public function testFarmManagerCannotLinkAnotherFarmParentButCanKeepAnExistingLink(): void
+    {
+        $client = static::createClient();
+        $fixture = $this->createFixture($client);
+        $client->loginUser($fixture['encargado']);
+
+        $crawler = $client->request('GET', '/animals/new/birth');
+        self::assertCount(1, $crawler->filterXPath(sprintf('//select[@name="animal[padre]"]/option[@value="%d"]', $fixture['machoFinca']->getId())));
+        self::assertCount(0, $crawler->filterXPath(sprintf('//select[@name="animal[padre]"]/option[@value="%d"]', $fixture['animalOtraFinca']->getId())));
+        $client->request('POST', '/animals/new/birth', ['animal' => [
+            'arete' => 'PARENT-FARM-'.$fixture['suffix'],
+            'finca' => (string) $fixture['finca']->getId(),
+            'sexo' => Animal::SEXO_HEMBRA,
+            'fechaNacimiento' => '2026-01-15',
+            'padre' => (string) $fixture['animalOtraFinca']->getId(),
+            '_token' => $crawler->filterXPath('//input[@name="animal[_token]"]')->attr('value'),
+        ]]);
+        self::assertResponseStatusCodeSame(422);
+
+        $entityManager = $this->entityManager($client);
+        $animal = $entityManager->find(Animal::class, $fixture['animal']->getId());
+        $padre = $entityManager->find(Animal::class, $fixture['animalOtraFinca']->getId());
+        $animal->setPadre($padre);
+        $entityManager->flush();
+        $crawler = $client->request('GET', sprintf('/animals/%d/edit', $fixture['animal']->getId()));
+        self::assertCount(1, $crawler->filterXPath(sprintf('//select[@name="animal[padre]"]/option[@value="%d" and @selected]', $fixture['animalOtraFinca']->getId())));
+        $client->submit($crawler->selectButton('Guardar cambios')->form(['animal[nombre]' => 'Editada sin cambiar progenitores']));
+
+        self::assertResponseRedirects('/animals');
+        $entityManager->clear();
+        $animal = $entityManager->find(Animal::class, $fixture['animal']->getId());
+        self::assertSame($fixture['animalOtraFinca']->getId(), $animal?->getPadre()?->getId());
+    }
+
+    public function testInactiveFarmIsNotOfferedForNewAnimals(): void
+    {
+        $client = static::createClient();
+        $fixture = $this->createFixture($client);
+        $fixture['fincaAlterna']->setActivo(false);
+        $client->loginUser($fixture['administrador']);
+        $this->entityManager($client)->flush();
+
+        $crawler = $client->request('GET', '/animals/new');
+
+        $opciones = $crawler->filterXPath('//select[@name="animal[finca]"]/option')->each(static fn ($option) => $option->attr('value'));
+        self::assertContains((string) $fixture['finca']->getId(), $opciones);
+        self::assertNotContains((string) $fixture['fincaAlterna']->getId(), $opciones);
+    }
+
+    public function testAnimalOnADeactivatedFarmIsReadOnly(): void
+    {
+        $client = static::createClient();
+        $fixture = $this->createFixture($client);
+        $client->loginUser($fixture['administrador']);
+        $animalId = $fixture['animalOtraFinca']->getId();
+        $perfil = sprintf('/animals/%d', $animalId);
+        // Token válido obtenido con la finca activa: el rechazo debe venir de RN-17, no del CSRF.
+        $tokenEliminar = $client->request('GET', $perfil)->filterXPath('//form[contains(@action, "/delete")]//input[@name="_token"]')->attr('value');
+        $fixture['fincaAlterna']->setActivo(false);
+        $this->entityManager($client)->flush();
+
+        $crawler = $client->request('GET', $perfil);
+        self::assertResponseIsSuccessful();
+        self::assertStringContainsString('La finca está inactiva; el animal y su historial son de solo lectura.', (string) $client->getResponse()->getContent());
+        self::assertCount(0, $crawler->filterXPath(sprintf('//a[@href="/animals/%d/edit"] | //a[@href="/animals/%d/status"]', $animalId, $animalId)));
+        self::assertCount(0, $crawler->filterXPath('//form[contains(@action, "/delete")]'));
+
+        foreach (['GET' => [sprintf('/animals/%d/edit', $animalId), sprintf('/animals/%d/status', $animalId)]] as $metodo => $rutas) {
+            foreach ($rutas as $ruta) {
+                $client->request($metodo, $ruta);
+                self::assertResponseRedirects($perfil, null, $ruta);
+            }
+        }
+        $client->request('POST', sprintf('/animals/%d/delete', $animalId), ['_token' => $tokenEliminar]);
+        self::assertResponseRedirects($perfil);
+
+        $this->entityManager($client)->clear();
+        $animal = $this->entityManager($client)->find(Animal::class, $animalId);
+        self::assertNotNull($animal);
+        self::assertSame($fixture['fincaAlterna']->getId(), $animal->getFinca()->getId());
+    }
+
+    public function testAnimalKeepsItsBreedAfterTheBreedIsDeactivated(): void
+    {
+        $client = static::createClient();
+        $fixture = $this->createFixture($client);
+        $entityManager = $this->entityManager($client);
+        $raza = new Raza($fixture['organizacion'], 'Gyr '.$fixture['suffix']);
+        $entityManager->persist($raza);
+        $client->loginUser($fixture['administrador']);
+        $fixture['animal']->setRaza($raza);
+        $entityManager->flush();
+        $raza->setActiva(false);
+        $entityManager->flush();
+        $animalId = $fixture['animal']->getId();
+
+        $crawler = $client->request('GET', '/animals/new');
+        $opciones = $crawler->filterXPath('//select[@name="animal[raza]"]/option')->each(static fn ($option) => $option->attr('value'));
+        self::assertNotContains((string) $raza->getId(), $opciones);
+
+        $crawler = $client->request('GET', sprintf('/animals/%d/edit', $animalId));
+        $client->submit($crawler->selectButton('Guardar cambios')->form(['animal[nombre]' => 'Conserva su raza']));
+
+        self::assertResponseRedirects('/animals');
+        $entityManager->clear();
+        self::assertSame($raza->getId(), $entityManager->find(Animal::class, $animalId)?->getRaza()?->getId());
+    }
+
+    public function testParentSexCannotBeChangedWhileReferencedByAnAnimal(): void
+    {
+        $client = static::createClient();
+        $fixture = $this->createFixture($client);
+        $entityManager = $this->entityManager($client);
+        $fixture['animal']->setPadre($fixture['machoFinca']);
+        $client->loginUser($fixture['administrador']);
+        $entityManager->flush();
+
+        $crawler = $client->request('GET', sprintf('/animals/%d/edit', $fixture['machoFinca']->getId()));
+        $client->submit($crawler->selectButton('Guardar cambios')->form(['animal[sexo]' => Animal::SEXO_HEMBRA]));
+
+        self::assertStringContainsString('No puedes cambiar el sexo de un animal registrado como progenitor.', (string) $client->getResponse()->getContent());
+        $entityManager->clear();
+        $padre = $entityManager->find(Animal::class, $fixture['machoFinca']->getId());
+        self::assertSame(Animal::SEXO_MACHO, $padre?->getSexo());
+    }
+
+    public function testAdministratorCannotAccessAnimalFromAnotherOrganization(): void
+    {
+        $client = static::createClient();
+        $fixture = $this->createFixture($client);
+        $client->loginUser($fixture['administrador']);
+
+        $client->request('GET', sprintf('/animals/%d', $fixture['animalAjeno']->getId()));
+        self::assertResponseStatusCodeSame(403);
+
+        $client->request('GET', sprintf('/animals/%d/edit', $fixture['animalAjeno']->getId()));
+
+        self::assertResponseStatusCodeSame(403);
+    }
+
+    /** @return array{suffix: string, organizacion: OrganizacionGanadera, finca: Finca, fincaAlterna: Finca, administrador: Usuario, encargado: Usuario, animal: Animal, machoFinca: Animal, animalOtraFinca: Animal, animalAjeno: Animal} */
+    private function createFixture(KernelBrowser $client): array
+    {
+        $entityManager = $client->getContainer()->get(EntityManagerInterface::class);
+        $suffix = strtoupper(bin2hex(random_bytes(4)));
+        $organizacion = new OrganizacionGanadera('Organización '.$suffix, 'ORG-'.$suffix);
+        $otraOrganizacion = new OrganizacionGanadera('Otra organización '.$suffix, 'OTRA-'.$suffix);
+        $finca = (new Finca('Finca propia '.$suffix, 'FIN-'.$suffix))->setOrganizacion($organizacion);
+        $fincaAlterna = (new Finca('Finca alterna '.$suffix, 'ALT-'.$suffix))->setOrganizacion($organizacion);
+        $fincaAjena = (new Finca('Finca ajena '.$suffix, 'AJENA-'.$suffix))->setOrganizacion($otraOrganizacion);
+        $administrador = (new Usuario('Administrador', 'admin-'.$suffix.'@example.com', 'hash', Usuario::ROL_ADMINISTRADOR))
+            ->setOrganizacion($organizacion);
+        $encargado = (new Usuario('Encargado', 'manager-'.$suffix.'@example.com', 'hash', Usuario::ROL_ENCARGADO))
+            ->setOrganizacion($organizacion)
+            ->setFincaActiva($finca);
+        $animal = (new Animal($organizacion, $finca, 'AN-'.$suffix, Animal::SEXO_HEMBRA, Animal::ORIGEN_EXTERNO, new DateTimeImmutable('2025-01-01')))
+            ->setArete('GT-'.$suffix)
+            ->setCreadoPor($administrador);
+        $machoFinca = (new Animal($organizacion, $finca, 'MACHO-'.$suffix, Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO, new DateTimeImmutable('2025-01-01')))
+            ->setArete('MACHO-'.$suffix)
+            ->setCreadoPor($administrador);
+        $animalOtraFinca = (new Animal($organizacion, $fincaAlterna, 'ALT-'.$suffix, Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO, new DateTimeImmutable('2025-01-01')))
+            ->setArete('OTRA-'.$suffix)
+            ->setCreadoPor($administrador);
+        $animalAjeno = (new Animal($otraOrganizacion, $fincaAjena, 'AJ-'.$suffix, Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO, new DateTimeImmutable('2025-01-01')))
+            ->setArete('AJENO-'.$suffix)
+            ->setCreadoPor($administrador);
+
+        foreach ([$organizacion, $otraOrganizacion, $finca, $fincaAlterna, $fincaAjena, $administrador, $encargado, $animal, $machoFinca, $animalOtraFinca, $animalAjeno] as $entity) {
+            $entityManager->persist($entity);
+        }
+        $entityManager->flush();
+
+        return compact('suffix', 'organizacion', 'finca', 'fincaAlterna', 'administrador', 'encargado', 'animal', 'machoFinca', 'animalOtraFinca', 'animalAjeno');
+    }
+
+    private function entityManager(KernelBrowser $client): EntityManagerInterface
+    {
+        return $client->getContainer()->get(EntityManagerInterface::class);
+    }
+}

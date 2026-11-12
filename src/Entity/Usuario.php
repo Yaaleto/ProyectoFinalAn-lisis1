@@ -4,56 +4,53 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
-use App\Entity\Concerns\Auditable;
+use App\Repository\UsuarioRepository;
 use DomainException;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: UsuarioRepository::class)]
 #[ORM\Table(name: 'usuario')]
-#[ORM\HasLifecycleCallbacks]
 #[UniqueEntity(fields: ['email'], message: 'El correo electrónico ya está en uso.')]
 class Usuario implements UserInterface, PasswordAuthenticatedUserInterface
 {
-    use Auditable;
-
     public const ROL_ADMINISTRADOR = 'ADMINISTRADOR';
     public const ROL_ENCARGADO = 'ENCARGADO';
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(name: 'id_usuario', options: ['unsigned' => true])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'usuarios')]
-    #[ORM\JoinColumn(nullable: false, onDelete: 'RESTRICT')]
+    #[ORM\JoinColumn(name: 'id_organizacion', referencedColumnName: 'id_organizacion', nullable: false, onDelete: 'RESTRICT')]
     #[Assert\NotNull]
     private ?OrganizacionGanadera $organizacion = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(name: 'finca_activa_id', nullable: true, onDelete: 'SET NULL')]
+    #[ORM\JoinColumn(name: 'finca_activa_id', referencedColumnName: 'id_finca', nullable: true, onDelete: 'RESTRICT')]
     private ?Finca $fincaActiva = null;
 
     #[ORM\Column(length: 150)]
-    #[Assert\NotBlank]
-    #[Assert\Length(max: 150)]
+    #[Assert\NotBlank(message: 'Ingresa el nombre completo.')]
+    #[Assert\Length(max: 150, maxMessage: 'El nombre admite hasta {{ limit }} caracteres.')]
     private string $nombre;
 
-    #[ORM\Column(length: 180, unique: true)]
-    #[Assert\NotBlank]
-    #[Assert\Email]
-    #[Assert\Length(max: 180)]
+    #[ORM\Column(name: 'correo', length: 180, unique: true)]
+    #[Assert\NotBlank(message: 'Ingresa el correo electrónico.')]
+    #[Assert\Email(message: 'Ingresa un correo electrónico válido, por ejemplo nombre@dominio.com.')]
+    #[Assert\Length(max: 180, maxMessage: 'El correo admite hasta {{ limit }} caracteres.')]
     private string $email;
 
-    #[ORM\Column(length: 255)]
-    #[Assert\NotBlank]
+    #[ORM\Column(name: 'contrasena_hash', length: 255)]
     private string $contrasenaHash;
 
-    #[ORM\Column(length: 20)]
-    #[Assert\Choice(choices: [self::ROL_ADMINISTRADOR, self::ROL_ENCARGADO])]
+    #[ORM\Column(length: 15)]
+    #[Assert\Choice(choices: [self::ROL_ADMINISTRADOR, self::ROL_ENCARGADO], message: 'Selecciona un rol.')]
     private string $rol;
 
     #[ORM\Column(options: ['default' => true])]
@@ -182,6 +179,23 @@ class Usuario implements UserInterface, PasswordAuthenticatedUserInterface
         $this->activo = $activo;
 
         return $this;
+    }
+
+    #[Assert\Callback]
+    public function validateActiveFarm(ExecutionContextInterface $context): void
+    {
+        if (self::ROL_ENCARGADO === $this->rol && null === $this->fincaActiva) {
+            $context
+                ->buildViolation('Selecciona una finca activa para el encargado.')
+                ->atPath('fincaActiva')
+                ->addViolation();
+        }
+        if (self::ROL_ENCARGADO === $this->rol && null !== $this->fincaActiva && !$this->fincaActiva->isActivo()) {
+            $context
+                ->buildViolation('La finca asignada debe estar activa.')
+                ->atPath('fincaActiva')
+                ->addViolation();
+        }
     }
 
     #[\Deprecated]
