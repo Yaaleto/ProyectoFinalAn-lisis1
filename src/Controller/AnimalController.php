@@ -193,6 +193,8 @@ final class AnimalController extends AbstractController
             return $respuesta;
         }
 
+        // Si la edición se abrió desde la ficha, al guardar o cancelar se vuelve a la ficha.
+        $volverAFicha = 'ficha' === $request->query->get('volver');
         $form = $this->createForm(AnimalType::class, $this->formData($animal), [
             'organization' => $animal->getOrganizacion(),
             'user' => $usuario,
@@ -236,7 +238,9 @@ final class AnimalController extends AbstractController
                     $entityManager->flush();
                     $this->addFlash('success', 'El animal fue actualizado correctamente.');
 
-                    return $this->redirectToRoute('app_animal_index');
+                    return $volverAFicha
+                        ? $this->redirectToRoute('app_animal_show', ['animal' => $animal->getId()])
+                        : $this->redirectToRoute('app_animal_index');
                 }
             } catch (FechaFueraDeRangoException $exception) {
                 $this->campoDeFecha($form, $exception)->addError(new FormError($exception->getMessage()));
@@ -251,6 +255,7 @@ final class AnimalController extends AbstractController
             'intake_origin' => null,
             'page_title' => 'Editar animal',
             'submit_label' => 'Guardar cambios',
+            'volver_url' => $volverAFicha ? $this->generateUrl('app_animal_show', ['animal' => $animal->getId()]) : null,
         ]);
     }
 

@@ -22,6 +22,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use SortDirection;
 
 /** @extends AbstractType<array<string, mixed>> */
@@ -204,7 +205,19 @@ final class AnimalType extends AbstractType
 
     public function configureOptions(OptionsResolver $resolver): void
     {
-        $resolver->setDefaults(['data_class' => null, 'intake_origin' => null, 'animal' => null]);
+        $resolver->setDefaults([
+            'data_class' => null,
+            'intake_origin' => null,
+            'animal' => null,
+            // RN-09: el error se muestra bajo la casilla de productora, no arriba del formulario.
+            'constraints' => [new Assert\Callback(static function (mixed $datos, ExecutionContextInterface $contexto): void {
+                if (is_array($datos) && !empty($datos['productoraLeche']) && Animal::SEXO_MACHO === ($datos['sexo'] ?? null)) {
+                    $contexto->buildViolation('Solo una hembra puede ser productora de leche.')
+                        ->atPath('[productoraLeche]')
+                        ->addViolation();
+                }
+            })],
+        ]);
         $resolver->setRequired(['organization', 'user']);
         $resolver->setAllowedTypes('organization', OrganizacionGanadera::class);
         $resolver->setAllowedTypes('user', Usuario::class);
