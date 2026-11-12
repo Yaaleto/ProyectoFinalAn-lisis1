@@ -40,7 +40,8 @@ services:
     restart: unless-stopped
     working_dir: /var/www/html
     environment:
-      APP_ENV: dev
+      # Producción: el usuario ve las páginas de error propias y no el detalle técnico de Symfony.
+      APP_ENV: prod
       APP_SECRET: bovitrack-compose-dev-only
       DEFAULT_URI: http://localhost:8080
       DATABASE_URL: "mysql://bovitrack:change-me@database:3306/bovitrack?serverVersion=8.4.0&charset=utf8mb4"
@@ -62,6 +63,8 @@ services:
       - -ec
       - |
         composer install --no-interaction --prefer-dist --no-progress
+        php bin/console asset-map:compile
+        chown -R www-data:www-data var
         exec apache2-foreground
     healthcheck:
       test: ["CMD", "php", "-r", "exit(@file_get_contents('http://127.0.0.1/') === false ? 1 : 0);"]
