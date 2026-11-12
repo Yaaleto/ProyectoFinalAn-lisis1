@@ -300,14 +300,14 @@ final class WeightRecordTest extends WebTestCase
         $encargado = (new Usuario('Encargado', 'peso-manager-'.$suffix.'@example.com', 'hash', Usuario::ROL_ENCARGADO))
             ->setOrganizacion($organizacion)
             ->setFincaActiva($finca);
-        $animal = (new Animal($organizacion, $finca, 'AN-P-'.$suffix, Animal::SEXO_HEMBRA, Animal::ORIGEN_EXTERNO))
+        $animal = (new Animal($organizacion, $finca, 'AN-P-'.$suffix, Animal::SEXO_HEMBRA, Animal::ORIGEN_EXTERNO, new DateTimeImmutable('2025-01-01')))
             ->setArete('PESO-'.$suffix)
-            ->setFechaNacimiento(new DateTimeImmutable('2026-01-10'))
+            ->definirFechas(new DateTimeImmutable('2026-01-10'), new DateTimeImmutable('2026-01-10'))
             ->setCreadoPor($administrador);
-        $animalOtraFinca = (new Animal($organizacion, $fincaAlterna, 'AN-PA-'.$suffix, Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO))
+        $animalOtraFinca = (new Animal($organizacion, $fincaAlterna, 'AN-PA-'.$suffix, Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO, new DateTimeImmutable('2025-01-01')))
             ->setArete('PESO-ALT-'.$suffix)
             ->setCreadoPor($administrador);
-        $animalAjeno = (new Animal($otraOrganizacion, $fincaAjena, 'AN-PJ-'.$suffix, Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO))
+        $animalAjeno = (new Animal($otraOrganizacion, $fincaAjena, 'AN-PJ-'.$suffix, Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO, new DateTimeImmutable('2025-01-01')))
             ->setArete('PESO-AJENO-'.$suffix)
             ->setCreadoPor($administradorAjeno);
 

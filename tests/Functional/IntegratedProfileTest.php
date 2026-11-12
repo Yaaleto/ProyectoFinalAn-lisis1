@@ -199,10 +199,10 @@ final class IntegratedProfileTest extends WebTestCase
         $encargado = (new Usuario('Encargado', 'ficha-manager-'.$sufijo.'@example.com', 'hash', Usuario::ROL_ENCARGADO))
             ->setOrganizacion($organizacion)
             ->setFincaActiva($finca);
-        $nuevo = static fn (OrganizacionGanadera $org, Finca $f, string $clave, string $nombre, string $sexo, Usuario $creador): Animal => (new Animal($org, $f, 'AN-'.$clave.'-'.$sufijo, $sexo, Animal::ORIGEN_EXTERNO))
+        $nuevo = static fn (OrganizacionGanadera $org, Finca $f, string $clave, string $nombre, string $sexo, Usuario $creador): Animal => (new Animal($org, $f, 'AN-'.$clave.'-'.$sufijo, $sexo, Animal::ORIGEN_EXTERNO, new DateTimeImmutable('2025-01-01')))
             ->setArete($clave.'-'.$sufijo)
             ->setNombre($nombre)
-            ->setFechaNacimiento(new DateTimeImmutable('2020-01-10'))
+            ->definirFechas(new DateTimeImmutable('2020-01-10'), new DateTimeImmutable('2020-01-10'))
             ->setCreadoPor($creador);
 
         $tatarabuelo = $nuevo($organizacion, $finca, 'TATARABUELO', 'Tatarabuelo '.$sufijo, Animal::SEXO_MACHO, $administrador);

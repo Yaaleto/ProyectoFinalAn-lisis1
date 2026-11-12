@@ -107,9 +107,9 @@ final class FieldLimitsTest extends WebTestCase
         $finca = (new Finca('Finca '.$sufijo, 'LIM-'.$sufijo))->setOrganizacion($organizacion);
         $administrador = (new Usuario('Administrador', 'lim-'.$sufijo.'@example.com', 'hash', Usuario::ROL_ADMINISTRADOR))->setOrganizacion($organizacion);
         $vacuna = new Vacuna($organizacion, 'Aftosa '.$sufijo);
-        $vaca = (new Animal($organizacion, $finca, 'AN-LIM-'.$sufijo, Animal::SEXO_HEMBRA, Animal::ORIGEN_EXTERNO))
+        $vaca = (new Animal($organizacion, $finca, 'AN-LIM-'.$sufijo, Animal::SEXO_HEMBRA, Animal::ORIGEN_EXTERNO, new DateTimeImmutable('2025-01-01')))
             ->setArete('LIM-'.$sufijo)
-            ->setFechaNacimiento(new DateTimeImmutable('2025-01-01'))
+            ->definirFechas(new DateTimeImmutable('2025-01-01'), new DateTimeImmutable('2025-01-01'))
             ->setProductoraLeche(true)
             ->setCreadoPor($administrador);
         foreach ([$organizacion, $finca, $administrador, $vacuna, $vaca] as $entidad) {

@@ -106,6 +106,7 @@ CREATE TABLE animal (
     sexo                VARCHAR(6)    NOT NULL,
     raza_id             INT UNSIGNED  NULL,
     fecha_nacimiento    DATE          NULL,
+    fecha_ingreso       DATE          NOT NULL,                                  -- RN-19
     peso_nacimiento_kg  DECIMAL(8,2)  NULL,
     origen              VARCHAR(15)   NOT NULL,
     procedencia         VARCHAR(200)  NULL,
@@ -147,7 +148,9 @@ CREATE TABLE animal (
     CONSTRAINT ck_animal_estado CHECK (estado IN ('ACTIVO', 'VENDIDO', 'FALLECIDO', 'EGRESADO')),
     CONSTRAINT ck_animal_productora_hembra CHECK (es_productora = 0 OR sexo = 'HEMBRA'),   -- RN-09
     CONSTRAINT ck_animal_salida_por_estado CHECK ((estado = 'ACTIVO') = (fecha_salida IS NULL)), -- CA-04-C
-    CONSTRAINT ck_animal_peso_nacimiento CHECK (peso_nacimiento_kg IS NULL OR peso_nacimiento_kg > 0)
+    CONSTRAINT ck_animal_peso_nacimiento CHECK (peso_nacimiento_kg IS NULL OR peso_nacimiento_kg > 0),
+    CONSTRAINT ck_animal_nacimiento_ingreso CHECK (fecha_nacimiento IS NULL OR fecha_nacimiento <= fecha_ingreso), -- RN-19
+    CONSTRAINT ck_animal_salida_ingreso CHECK (fecha_salida IS NULL OR fecha_salida >= fecha_ingreso)             -- RN-19
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------------------------------------------------------------------------

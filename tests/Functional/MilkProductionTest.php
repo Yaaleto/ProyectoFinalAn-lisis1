@@ -260,9 +260,9 @@ final class MilkProductionTest extends WebTestCase
         $encargado = (new Usuario('Encargado', 'lec-manager-'.$suffix.'@example.com', 'hash', Usuario::ROL_ENCARGADO))
             ->setOrganizacion($organizacion)
             ->setFincaActiva($finca);
-        $nuevo = static fn (Finca $f, string $clave, string $sexo): Animal => (new Animal($organizacion, $f, 'AN-'.$clave.'-'.$suffix, $sexo, Animal::ORIGEN_EXTERNO))
+        $nuevo = static fn (Finca $f, string $clave, string $sexo): Animal => (new Animal($organizacion, $f, 'AN-'.$clave.'-'.$suffix, $sexo, Animal::ORIGEN_EXTERNO, new DateTimeImmutable('2025-01-01')))
             ->setArete($clave.'-'.$suffix)
-            ->setFechaNacimiento(new DateTimeImmutable('2026-01-10'))
+            ->definirFechas(new DateTimeImmutable('2026-01-10'), new DateTimeImmutable('2026-01-10'))
             ->setCreadoPor($administrador);
         $vaca = $nuevo($finca, 'VACA', Animal::SEXO_HEMBRA)->setProductoraLeche(true);
         $vacaOtraFinca = $nuevo($fincaAlterna, 'VACAALT', Animal::SEXO_HEMBRA)->setProductoraLeche(true);

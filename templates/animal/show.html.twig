@@ -14,7 +14,7 @@
             </div>
             <div class="flex flex-wrap gap-2">
                 {% if animal.finca.activo %}
-                    <a class="inline-flex min-h-11 items-center justify-center rounded-md bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-hover" href="{{ path('app_animal_edit', {animal: animal.id}) }}">Editar</a>
+                    <a class="inline-flex min-h-11 items-center justify-center rounded-md bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-hover" href="{{ path('app_animal_edit', {animal: animal.id, volver: 'ficha'}) }}">Editar</a>
                     <a class="inline-flex min-h-11 items-center justify-center rounded-md border border-surface-muted px-4 py-2 text-sm font-semibold text-ink hover:bg-surface-muted" href="{{ path('app_animal_status', {animal: animal.id}) }}">Cambiar estado</a>
                 {% endif %}
                 <a class="inline-flex min-h-11 items-center justify-center rounded-md border border-surface-muted px-4 py-2 text-sm font-semibold text-ink hover:bg-surface-muted" href="{{ path('app_weight_history', {animal: animal.id}) }}">Pesajes</a>
@@ -49,6 +49,7 @@
             {% set originDetails = {
                 'Fecha de nacimiento': animal.fechaNacimiento ? animal.fechaNacimiento|date('d/m/Y') : 'Sin registrar',
                 'Peso al nacimiento': animal.pesoNacimientoKg ? animal.pesoNacimientoKg ~ ' kg' : 'Sin registrar',
+                'Fecha de ingreso': animal.fechaIngreso|date('d/m/Y'),
                 'Origen': animal.origen == 'NACIDO_EN_FINCA' ? 'Nacido en finca' : 'Externo',
                 'Procedencia': animal.procedencia ?: 'Sin registrar',
                 'Productora de leche': animal.productoraLeche ? 'Sí' : 'No'

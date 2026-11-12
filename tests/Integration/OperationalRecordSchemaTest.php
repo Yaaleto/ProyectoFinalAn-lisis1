@@ -13,6 +13,7 @@ use App\Entity\ProduccionLeche;
 use App\Entity\Usuario;
 use App\Entity\Vacuna;
 use App\Entity\Vacunacion;
+use DateTimeImmutable;
 use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
 use Doctrine\DBAL\Exception\NotNullConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
@@ -42,11 +43,11 @@ final class OperationalRecordSchemaTest extends KernelTestCase
     public function testRecordsSavedThroughEntitiesTakeTheAnimalOrganization(): void
     {
         $propia = $this->persistTenant('PROPIA');
-        $pesaje = (new Pesaje($propia['hembra'], new \DateTimeImmutable('2026-09-17'), '120.00'))
+        $pesaje = (new Pesaje($propia['hembra'], new DateTimeImmutable('2026-09-17'), '120.00'))
             ->setCreadoPor($propia['creador']);
-        $vacunacion = (new Vacunacion($propia['hembra'], $propia['vacuna'], new \DateTimeImmutable('2026-09-17'), '5 ml'))
+        $vacunacion = (new Vacunacion($propia['hembra'], $propia['vacuna'], new DateTimeImmutable('2026-09-17'), '5 ml'))
             ->setCreadoPor($propia['creador']);
-        $monta = (new MontaReproductiva($propia['hembra'], $propia['macho'], new \DateTimeImmutable('2026-09-17')))
+        $monta = (new MontaReproductiva($propia['hembra'], $propia['macho'], new DateTimeImmutable('2026-09-17')))
             ->setCreadoPor($propia['creador']);
         foreach ([$pesaje, $vacunacion, $monta] as $registro) {
             $this->entityManager->persist($registro);
@@ -189,11 +190,11 @@ final class OperationalRecordSchemaTest extends KernelTestCase
         $finca = (new Finca('Finca '.$suffix, 'FIN-'.$suffix))->setOrganizacion($organizacion);
         $creador = (new Usuario('Administrador '.$suffix, 'admin-'.$suffix.'@example.com', 'hash', Usuario::ROL_ADMINISTRADOR))
             ->setOrganizacion($organizacion);
-        $hembra = (new Animal($organizacion, $finca, $prefix.'-H-'.$suffix, Animal::SEXO_HEMBRA, Animal::ORIGEN_EXTERNO))
+        $hembra = (new Animal($organizacion, $finca, $prefix.'-H-'.$suffix, Animal::SEXO_HEMBRA, Animal::ORIGEN_EXTERNO, new DateTimeImmutable('2025-01-01')))
             ->setArete('H-'.$suffix)
             ->setProductoraLeche(true)
             ->setCreadoPor($creador);
-        $macho = (new Animal($organizacion, $finca, $prefix.'-M-'.$suffix, Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO))
+        $macho = (new Animal($organizacion, $finca, $prefix.'-M-'.$suffix, Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO, new DateTimeImmutable('2025-01-01')))
             ->setArete('M-'.$suffix)
             ->setCreadoPor($creador);
         $vacuna = new Vacuna($organizacion, 'Vacuna '.$suffix);
@@ -213,7 +214,7 @@ final class OperationalRecordSchemaTest extends KernelTestCase
 
     private function ordeno(array $tenant, Finca $finca, string $fechaHora, string $litros): ProduccionLeche
     {
-        return (new ProduccionLeche($tenant['hembra'], $finca, new \DateTimeImmutable($fechaHora), $litros))
+        return (new ProduccionLeche($tenant['hembra'], $finca, new DateTimeImmutable($fechaHora), $litros))
             ->setCreadoPor($tenant['creador']);
     }
 

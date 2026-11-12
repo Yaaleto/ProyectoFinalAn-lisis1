@@ -4,7 +4,11 @@
 
 {% block body %}
     <div class="mx-auto max-w-5xl">
-        <a class="text-sm font-semibold text-brand hover:underline" href="{{ path('app_animal_index') }}">← Volver a animales</a>
+        {% if volver_url|default(null) %}
+            <a class="text-sm font-semibold text-brand hover:underline" href="{{ volver_url }}">← Volver a la ficha del animal</a>
+        {% else %}
+            <a class="text-sm font-semibold text-brand hover:underline" href="{{ path('app_animal_index') }}">← Volver a animales</a>
+        {% endif %}
         <h1 class="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">{{ page_title }}</h1>
         <p class="mt-2 text-sm text-ink-muted">Los datos quedarán asociados a {{ app.user.organizacion.nombre }}.</p>
         <p class="mt-6 text-sm text-ink-muted">Los campos marcados con * son obligatorios.</p>
@@ -52,13 +56,16 @@
                 <section class="rounded-lg border border-surface-muted bg-surface p-5 shadow-sm" aria-labelledby="animal-origin-heading">
                     <div class="mb-5">
                         <h2 class="text-lg font-semibold" id="animal-origin-heading">Nacimiento y origen</h2>
-                        <p class="mt-1 text-sm text-ink-muted">{% if intake_origin == 'NACIDO_EN_FINCA' %}El origen se asignará como nacido en finca. Indica la fecha del nacimiento.{% elseif intake_origin == 'EXTERNO' %}El origen se asignará como externo. La procedencia es opcional.{% else %}Registra cuándo y dónde se originó.{% endif %}</p>
+                        <p class="mt-1 text-sm text-ink-muted">{% if intake_origin == 'NACIDO_EN_FINCA' %}El origen se asignará como nacido en finca. Indica la fecha del nacimiento.{% elseif intake_origin == 'EXTERNO' %}El origen se asignará como externo. La fecha de nacimiento y el peso al nacer pueden agregarse después al editar el animal.{% else %}Registra cuándo y dónde se originó.{% endif %}</p>
                     </div>
                     <div class="space-y-5">
+                        {% set birth_fields = [] %}
+                        {% if form.fechaNacimiento is defined %}{% set birth_fields = birth_fields|merge([form.fechaNacimiento, form.pesoNacimientoKg]) %}{% endif %}
                         {% set origin_fields = [] %}
+                        {% if form.fechaIngreso is defined %}{% set origin_fields = origin_fields|merge([form.fechaIngreso]) %}{% endif %}
                         {% if form.origen is defined %}{% set origin_fields = origin_fields|merge([form.origen]) %}{% endif %}
                         {% if form.procedencia is defined %}{% set origin_fields = origin_fields|merge([form.procedencia]) %}{% endif %}
-                        {% for row in [[form.fechaNacimiento, form.pesoNacimientoKg], origin_fields] %}
+                        {% for row in [birth_fields, origin_fields] %}
                             {% if row is not empty %}
                             <div class="flex flex-col gap-4 sm:flex-row">
                                 {% for field in row %}
@@ -102,7 +109,7 @@
             </div>
 
             <div class="mt-5 flex flex-col gap-3 rounded-lg border border-surface-muted bg-surface p-5 shadow-sm sm:flex-row sm:justify-end">
-                <a class="inline-flex min-h-11 items-center justify-center rounded-md px-4 py-2.5 text-sm font-semibold text-ink hover:bg-surface-muted" href="{{ path('app_animal_index') }}">Cancelar</a>
+                <a class="inline-flex min-h-11 items-center justify-center rounded-md px-4 py-2.5 text-sm font-semibold text-ink hover:bg-surface-muted" href="{{ volver_url|default(null) ?: path('app_animal_index') }}">Cancelar</a>
                 <button class="min-h-11 rounded-md bg-brand px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-hover" type="submit">{{ submit_label }}</button>
             </div>
         {{ form_end(form) }}

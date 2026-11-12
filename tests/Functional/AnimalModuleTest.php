@@ -59,7 +59,7 @@ final class AnimalModuleTest extends WebTestCase
         $fixture = $this->createFixture($client);
         $entityManager = $this->entityManager($client);
         $raza = new Raza($fixture['organizacion'], 'Brahman');
-        $madre = (new Animal($fixture['organizacion'], $fixture['finca'], 'INT-MADRE-'.$fixture['suffix'], Animal::SEXO_HEMBRA, Animal::ORIGEN_EXTERNO))
+        $madre = (new Animal($fixture['organizacion'], $fixture['finca'], 'INT-MADRE-'.$fixture['suffix'], Animal::SEXO_HEMBRA, Animal::ORIGEN_EXTERNO, new DateTimeImmutable('2025-01-01')))
             ->setArete('MADRE-'.$fixture['suffix'])
             ->setNombre('Aurora')
             ->setCreadoPor($fixture['administrador']);
@@ -68,7 +68,7 @@ final class AnimalModuleTest extends WebTestCase
         $fixture['machoFinca']->setNombre('Toro');
         $fixture['animal']->setNombre('Luna')
             ->setRaza($raza)
-            ->setFechaNacimiento(new DateTimeImmutable('2025-01-15'))
+            ->definirFechas(new DateTimeImmutable('2025-01-15'), new DateTimeImmutable('2025-01-15'))
             ->setProcedencia('Finca de origen')
             ->setPadre($fixture['machoFinca'])
             ->setMadre($madre);
@@ -303,6 +303,7 @@ final class AnimalModuleTest extends WebTestCase
             'animal[sexo]' => Animal::SEXO_HEMBRA,
             'animal[fechaNacimiento]' => '2025-01-15',
             'animal[pesoNacimientoKg]' => '42.50',
+            'animal[fechaIngreso]' => '2025-01-15',
             'animal[origen]' => Animal::ORIGEN_EXTERNO,
             'animal[procedencia]' => 'Finca de origen',
             'animal[productoraLeche]' => '1',
@@ -539,16 +540,16 @@ final class AnimalModuleTest extends WebTestCase
         $encargado = (new Usuario('Encargado', 'manager-'.$suffix.'@example.com', 'hash', Usuario::ROL_ENCARGADO))
             ->setOrganizacion($organizacion)
             ->setFincaActiva($finca);
-        $animal = (new Animal($organizacion, $finca, 'AN-'.$suffix, Animal::SEXO_HEMBRA, Animal::ORIGEN_EXTERNO))
+        $animal = (new Animal($organizacion, $finca, 'AN-'.$suffix, Animal::SEXO_HEMBRA, Animal::ORIGEN_EXTERNO, new DateTimeImmutable('2025-01-01')))
             ->setArete('GT-'.$suffix)
             ->setCreadoPor($administrador);
-        $machoFinca = (new Animal($organizacion, $finca, 'MACHO-'.$suffix, Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO))
+        $machoFinca = (new Animal($organizacion, $finca, 'MACHO-'.$suffix, Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO, new DateTimeImmutable('2025-01-01')))
             ->setArete('MACHO-'.$suffix)
             ->setCreadoPor($administrador);
-        $animalOtraFinca = (new Animal($organizacion, $fincaAlterna, 'ALT-'.$suffix, Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO))
+        $animalOtraFinca = (new Animal($organizacion, $fincaAlterna, 'ALT-'.$suffix, Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO, new DateTimeImmutable('2025-01-01')))
             ->setArete('OTRA-'.$suffix)
             ->setCreadoPor($administrador);
-        $animalAjeno = (new Animal($otraOrganizacion, $fincaAjena, 'AJ-'.$suffix, Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO))
+        $animalAjeno = (new Animal($otraOrganizacion, $fincaAjena, 'AJ-'.$suffix, Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO, new DateTimeImmutable('2025-01-01')))
             ->setArete('AJENO-'.$suffix)
             ->setCreadoPor($administrador);
 
