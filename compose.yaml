@@ -3,7 +3,7 @@ services:
     image: mysql:8.4
     container_name: bovitrack-mysql
     restart: unless-stopped
-    # Zona horaria de Guatemala (UTC−6, sin horario de verano), la misma que usa PHP (DERCAS §2.7.2).
+    # Zona horaria de Guatemala (UTC−6, sin horario de verano), la misma que usa PHP.
     command: ["--default-time-zone=-06:00"]
     environment:
       MYSQL_DATABASE: bovitrack
