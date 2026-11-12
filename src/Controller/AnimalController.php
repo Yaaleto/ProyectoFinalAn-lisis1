@@ -18,6 +18,7 @@ use App\Security\FincaAccess;
 use App\Service\AnimalHistorial;
 use App\Service\Genealogia;
 use App\Validation\FechaFueraDeRangoException;
+use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use DomainException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -95,7 +96,10 @@ final class AnimalController extends AbstractController
             return $this->redirectToRoute('app_health');
         }
 
-        $form = $this->createForm(AnimalType::class, null, [
+        // La fecha principal del formulario propone hoy y el usuario puede cambiarla.
+        $hoy = new DateTimeImmutable('today');
+        $datosIniciales = Animal::ORIGEN_NACIDO_EN_FINCA === $intakeOrigin ? ['fechaNacimiento' => $hoy] : ['fechaIngreso' => $hoy];
+        $form = $this->createForm(AnimalType::class, $datosIniciales, [
             'organization' => $organizacion,
             'user' => $usuario,
             'intake_origin' => $intakeOrigin,
@@ -126,7 +130,7 @@ final class AnimalController extends AbstractController
                     return $this->redirectToRoute('app_animal_index');
                 }
             } catch (FechaFueraDeRangoException $exception) {
-                $form->get('fechaNacimiento')->addError(new FormError($exception->getMessage()));
+                $this->campoDeFecha($form, $exception)->addError(new FormError($exception->getMessage()));
             } catch (DomainException $exception) {
                 $form->addError(new FormError($exception->getMessage()));
             }
@@ -220,6 +224,13 @@ final class AnimalController extends AbstractController
                         $primerRegistro->format('d/m/Y'),
                     )));
                 }
+                // RN-19 al editar: el ingreso tampoco puede quedar después de registros ya guardados.
+                if (null !== $primerRegistro && $form->has('fechaIngreso') && $animal->getFechaIngreso()->format('Y-m-d') > $primerRegistro->format('Y-m-d')) {
+                    $form->get('fechaIngreso')->addError(new FormError(sprintf(
+                        'La fecha de ingreso no puede ser posterior al primer registro operativo del animal (%s).',
+                        $primerRegistro->format('d/m/Y'),
+                    )));
+                }
 
                 if ($form->isValid() && !$this->addValidationErrors($form, $animal, $validator)) {
                     $entityManager->flush();
@@ -228,7 +239,7 @@ final class AnimalController extends AbstractController
                     return $this->redirectToRoute('app_animal_index');
                 }
             } catch (FechaFueraDeRangoException $exception) {
-                $form->get('fechaNacimiento')->addError(new FormError($exception->getMessage()));
+                $this->campoDeFecha($form, $exception)->addError(new FormError($exception->getMessage()));
             } catch (DomainException $exception) {
                 $form->addError(new FormError($exception->getMessage()));
             }
@@ -374,10 +385,22 @@ final class AnimalController extends AbstractController
             ->setArete($this->optionalString($data['arete']))
             ->setNombre($this->optionalString($data['nombre']))
             ->setRaza($data['raza'])
-            ->setFechaNacimiento($data['fechaNacimiento'])
-            ->setPesoNacimientoKg($data['pesoNacimientoKg'])
-            ->setProcedencia(Animal::ORIGEN_EXTERNO === $origin ? $this->optionalString($data['procedencia']) : null)
+            // Los campos que el formulario no muestra conservan el valor guardado (RN-19).
+            ->definirFechas(
+                array_key_exists('fechaNacimiento', $data) ? $data['fechaNacimiento'] : $animal->getFechaNacimiento(),
+                array_key_exists('fechaIngreso', $data) ? $data['fechaIngreso'] : $animal->getFechaIngreso(),
+            )
+            ->setPesoNacimientoKg(array_key_exists('pesoNacimientoKg', $data) ? $data['pesoNacimientoKg'] : $animal->getPesoNacimientoKg())
+            ->setProcedencia(Animal::ORIGEN_EXTERNO === $origin ? $this->optionalString($data['procedencia'] ?? null) : null)
             ->setProductoraLeche((bool) $data['productoraLeche']);
+    }
+
+    /** Campo de fecha bajo el que se muestra el error; si el formulario no lo tiene, el error va arriba. */
+    private function campoDeFecha(FormInterface $form, FechaFueraDeRangoException $exception): FormInterface
+    {
+        $campo = $exception->campo ?? 'fechaNacimiento';
+
+        return $form->has($campo) ? $form->get($campo) : $form;
     }
 
     /** @return array<string, mixed> */
@@ -392,6 +415,7 @@ final class AnimalController extends AbstractController
             'madre' => $animal->getMadre(),
             'sexo' => $animal->getSexo(),
             'fechaNacimiento' => $animal->getFechaNacimiento(),
+            'fechaIngreso' => $animal->getFechaIngreso(),
             'pesoNacimientoKg' => $animal->getPesoNacimientoKg(),
             'origen' => $animal->getOrigen(),
             'procedencia' => $animal->getProcedencia(),

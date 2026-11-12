@@ -8,6 +8,7 @@ use App\Entity\Animal;
 use App\Entity\Finca;
 use App\Entity\OrganizacionGanadera;
 use App\Entity\Usuario;
+use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
@@ -26,7 +27,7 @@ final class EmptyFieldsTest extends WebTestCase
         $finca = (new Finca('Finca '.$sufijo, 'VAC-'.$sufijo))->setOrganizacion($organizacion);
         $administrador = (new Usuario('Administrador', 'vac-admin-'.$sufijo.'@example.com', 'hash', Usuario::ROL_ADMINISTRADOR))->setOrganizacion($organizacion);
         $encargado = (new Usuario('Encargado', 'vac-enc-'.$sufijo.'@example.com', 'hash', Usuario::ROL_ENCARGADO))->setOrganizacion($organizacion)->setFincaActiva($finca);
-        $animal = (new Animal($organizacion, $finca, 'AN-'.$sufijo, Animal::SEXO_HEMBRA, Animal::ORIGEN_EXTERNO))
+        $animal = (new Animal($organizacion, $finca, 'AN-'.$sufijo, Animal::SEXO_HEMBRA, Animal::ORIGEN_EXTERNO, new DateTimeImmutable('2025-01-01')))
             ->setArete('VAC-'.$sufijo)
             ->setCreadoPor($administrador);
         foreach ([$organizacion, $finca, $administrador, $encargado, $animal] as $entidad) {

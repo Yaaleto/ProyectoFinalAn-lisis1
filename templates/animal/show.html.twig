@@ -49,6 +49,7 @@
             {% set originDetails = {
                 'Fecha de nacimiento': animal.fechaNacimiento ? animal.fechaNacimiento|date('d/m/Y') : 'Sin registrar',
                 'Peso al nacimiento': animal.pesoNacimientoKg ? animal.pesoNacimientoKg ~ ' kg' : 'Sin registrar',
+                'Fecha de ingreso': animal.fechaIngreso|date('d/m/Y'),
                 'Origen': animal.origen == 'NACIDO_EN_FINCA' ? 'Nacido en finca' : 'Externo',
                 'Procedencia': animal.procedencia ?: 'Sin registrar',
                 'Productora de leche': animal.productoraLeche ? 'Sí' : 'No'

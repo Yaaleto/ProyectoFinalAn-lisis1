@@ -140,7 +140,7 @@ final class AnimalLifecycleTest extends WebTestCase
         $client = static::createClient();
         $fixture = $this->createFixture($client);
         $client->loginUser($fixture['administrador']);
-        $cria = (new Animal($fixture['organizacion'], $fixture['finca'], 'AN-CRIA-'.$fixture['suffix'], Animal::SEXO_MACHO, Animal::ORIGEN_NACIDO_EN_FINCA))
+        $cria = (new Animal($fixture['organizacion'], $fixture['finca'], 'AN-CRIA-'.$fixture['suffix'], Animal::SEXO_MACHO, Animal::ORIGEN_NACIDO_EN_FINCA, new DateTimeImmutable('2025-01-01')))
             ->setArete('CRIA-'.$fixture['suffix'])
             ->setMadre($fixture['animal']);
         $this->entityManager($client)->persist($cria);
@@ -193,13 +193,13 @@ final class AnimalLifecycleTest extends WebTestCase
         $id = $fixture['animal']->getId();
 
         $crawler = $client->request('GET', sprintf('/animals/%d/edit', $id));
-        $client->submit($crawler->selectButton('Guardar cambios')->form(['animal[fechaNacimiento]' => '2026-05-21']));
+        $client->submit($crawler->selectButton('Guardar cambios')->form(['animal[fechaNacimiento]' => '2026-05-21', 'animal[fechaIngreso]' => '2026-05-21']));
         self::assertResponseStatusCodeSame(422);
         self::assertStringContainsString('La fecha de nacimiento no puede ser posterior al primer registro operativo del animal (20/05/2026).', (string) $client->getResponse()->getContent());
         self::assertSame('2026-01-10', $this->reload($client, $id)?->getFechaNacimiento()?->format('Y-m-d'));
 
         $crawler = $client->request('GET', sprintf('/animals/%d/edit', $id));
-        $client->submit($crawler->selectButton('Guardar cambios')->form(['animal[fechaNacimiento]' => '2026-05-20']));
+        $client->submit($crawler->selectButton('Guardar cambios')->form(['animal[fechaNacimiento]' => '2026-05-20', 'animal[fechaIngreso]' => '2026-05-20']));
         self::assertResponseRedirects('/animals');
         self::assertSame('2026-05-20', $this->reload($client, $id)?->getFechaNacimiento()?->format('Y-m-d'));
     }
@@ -326,11 +326,11 @@ final class AnimalLifecycleTest extends WebTestCase
         $encargado = (new Usuario('Encargado', 'ciclo-manager-'.$suffix.'@example.com', 'hash', Usuario::ROL_ENCARGADO))
             ->setOrganizacion($organizacion)
             ->setFincaActiva($finca);
-        $animal = (new Animal($organizacion, $finca, 'AN-'.$suffix, Animal::SEXO_HEMBRA, Animal::ORIGEN_EXTERNO))
+        $animal = (new Animal($organizacion, $finca, 'AN-'.$suffix, Animal::SEXO_HEMBRA, Animal::ORIGEN_EXTERNO, new DateTimeImmutable('2025-01-01')))
             ->setArete('CICLO-'.$suffix)
-            ->setFechaNacimiento(new DateTimeImmutable('2026-01-10'))
+            ->definirFechas(new DateTimeImmutable('2026-01-10'), new DateTimeImmutable('2026-01-10'))
             ->setCreadoPor($administrador);
-        $animalOtraFinca = (new Animal($organizacion, $fincaAlterna, 'AN-ALT-'.$suffix, Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO))
+        $animalOtraFinca = (new Animal($organizacion, $fincaAlterna, 'AN-ALT-'.$suffix, Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO, new DateTimeImmutable('2025-01-01')))
             ->setArete('CICLO-ALT-'.$suffix)
             ->setCreadoPor($administrador);
 

@@ -296,9 +296,9 @@ final class MatingRecordTest extends WebTestCase
         $encargado = (new Usuario('Encargado', 'mon-manager-'.$suffix.'@example.com', 'hash', Usuario::ROL_ENCARGADO))
             ->setOrganizacion($organizacion)
             ->setFincaActiva($finca);
-        $nuevo = static fn (OrganizacionGanadera $org, Finca $f, string $clave, string $sexo, Usuario $creador): Animal => (new Animal($org, $f, 'AN-'.$clave.'-'.$suffix, $sexo, Animal::ORIGEN_EXTERNO))
+        $nuevo = static fn (OrganizacionGanadera $org, Finca $f, string $clave, string $sexo, Usuario $creador): Animal => (new Animal($org, $f, 'AN-'.$clave.'-'.$suffix, $sexo, Animal::ORIGEN_EXTERNO, new DateTimeImmutable('2025-01-01')))
             ->setArete($clave.'-'.$suffix)
-            ->setFechaNacimiento(new DateTimeImmutable('2026-01-10'))
+            ->definirFechas(new DateTimeImmutable('2026-01-10'), new DateTimeImmutable('2026-01-10'))
             ->setCreadoPor($creador);
         $hembra = $nuevo($organizacion, $finca, 'HEMBRA', Animal::SEXO_HEMBRA, $administrador);
         $otraHembra = $nuevo($organizacion, $finca, 'HEMBRA2', Animal::SEXO_HEMBRA, $administrador);

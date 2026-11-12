@@ -83,27 +83,48 @@ final class AnimalType extends AbstractType
                 'label' => 'Sexo',
                 'choices' => ['Hembra' => Animal::SEXO_HEMBRA, 'Macho' => Animal::SEXO_MACHO],
                 'constraints' => [new Assert\NotBlank(message: 'Selecciona el sexo.')],
-            ])
-            ->add('fechaNacimiento', DateType::class, [
-                'label' => 'Fecha de nacimiento',
+            ]);
+
+        // El ingreso de un animal externo no pide nacimiento ni peso al nacer; se agregan al editarlo.
+        if (Animal::ORIGEN_EXTERNO !== $options['intake_origin']) {
+            $builder
+                ->add('fechaNacimiento', DateType::class, [
+                    'label' => 'Fecha de nacimiento',
+                    'widget' => 'single_text',
+                    'input' => 'datetime_immutable',
+                    'required' => Animal::ORIGEN_NACIDO_EN_FINCA === $options['intake_origin'],
+                    'constraints' => array_filter([
+                        Animal::ORIGEN_NACIDO_EN_FINCA === $options['intake_origin'] ? new Assert\NotBlank(message: 'Indica la fecha de nacimiento.') : null,
+                        new Assert\LessThanOrEqual('today', message: 'La fecha de nacimiento no puede estar en el futuro.'),
+                    ]),
+                ])
+                ->add('pesoNacimientoKg', NumberType::class, [
+                    'label' => 'Peso al nacimiento (kg)',
+                    'input' => 'string',
+                    'scale' => 2,
+                    'required' => false,
+                    'constraints' => [
+                        new Assert\Positive(message: 'El peso al nacimiento debe ser mayor que cero.'),
+                        new Assert\LessThanOrEqual(value: 999.99, message: 'El peso al nacimiento admite hasta 999.99 kg.'),
+                    ],
+                ]);
+        }
+
+        // RN-19: en un nacido en finca la fecha de ingreso es la de nacimiento, por eso no se pide.
+        if (Animal::ORIGEN_EXTERNO === ($options['intake_origin'] ?? $options['animal']?->getOrigen())) {
+            $builder->add('fechaIngreso', DateType::class, [
+                'label' => 'Fecha de ingreso',
                 'widget' => 'single_text',
                 'input' => 'datetime_immutable',
-                'required' => Animal::ORIGEN_NACIDO_EN_FINCA === $options['intake_origin'],
-                'constraints' => array_filter([
-                    Animal::ORIGEN_NACIDO_EN_FINCA === $options['intake_origin'] ? new Assert\NotBlank(message: 'Indica la fecha de nacimiento.') : null,
-                    new Assert\LessThanOrEqual('today', message: 'La fecha de nacimiento no puede estar en el futuro.'),
-                ]),
-            ])
-            ->add('pesoNacimientoKg', NumberType::class, [
-                'label' => 'Peso al nacimiento (kg)',
-                'input' => 'string',
-                'scale' => 2,
-                'required' => false,
+                'help' => 'Día en que el animal llegó a la finca. No se aceptan registros anteriores a esta fecha.',
                 'constraints' => [
-                    new Assert\Positive(message: 'El peso al nacimiento debe ser mayor que cero.'),
-                    new Assert\LessThanOrEqual(value: 999.99, message: 'El peso al nacimiento admite hasta 999.99 kg.'),
+                    new Assert\NotBlank(message: 'Indica la fecha de ingreso.'),
+                    new Assert\LessThanOrEqual('today', message: 'La fecha de ingreso no puede estar en el futuro.'),
                 ],
-            ])
+            ]);
+        }
+
+        $builder
             ->add('productoraLeche', CheckboxType::class, [
                 'label' => 'Productora de leche',
                 'required' => false,

@@ -292,11 +292,11 @@ final class VaccinationRecordTest extends WebTestCase
         $vacuna = new Vacuna($organizacion, 'Aftosa '.$suffix);
         $vacunaInactiva = (new Vacuna($organizacion, 'Retirada '.$suffix))->setActiva(false);
         $vacunaAjena = new Vacuna($otraOrganizacion, 'Ajena '.$suffix);
-        $animal = (new Animal($organizacion, $finca, 'AN-V-'.$suffix, Animal::SEXO_HEMBRA, Animal::ORIGEN_EXTERNO))
+        $animal = (new Animal($organizacion, $finca, 'AN-V-'.$suffix, Animal::SEXO_HEMBRA, Animal::ORIGEN_EXTERNO, new DateTimeImmutable('2025-01-01')))
             ->setArete('VAC-'.$suffix)
-            ->setFechaNacimiento(new DateTimeImmutable('2026-01-10'))
+            ->definirFechas(new DateTimeImmutable('2026-01-10'), new DateTimeImmutable('2026-01-10'))
             ->setCreadoPor($administrador);
-        $animalOtraFinca = (new Animal($organizacion, $fincaAlterna, 'AN-VA-'.$suffix, Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO))
+        $animalOtraFinca = (new Animal($organizacion, $fincaAlterna, 'AN-VA-'.$suffix, Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO, new DateTimeImmutable('2025-01-01')))
             ->setArete('VAC-ALT-'.$suffix)
             ->setCreadoPor($administrador);
 

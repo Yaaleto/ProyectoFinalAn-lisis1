@@ -95,6 +95,10 @@ class Animal implements AuditableInterface
     #[ORM\Column(type: Types::DATE_IMMUTABLE, nullable: true)]
     private ?DateTimeImmutable $fechaNacimiento = null;
 
+    /** RN-19: límite inferior de los registros operativos; en los nacidos en finca es la fecha de nacimiento. */
+    #[ORM\Column(name: 'fecha_ingreso', type: Types::DATE_IMMUTABLE)]
+    private DateTimeImmutable $fechaIngreso;
+
     #[ORM\Column(type: Types::DECIMAL, precision: 8, scale: 2, nullable: true)]
     private ?string $pesoNacimientoKg = null;
 
@@ -116,7 +120,7 @@ class Animal implements AuditableInterface
     #[ORM\Column(type: Types::DATE_IMMUTABLE, nullable: true)]
     private ?DateTimeImmutable $fechaSalida = null;
 
-    public function __construct(OrganizacionGanadera $organizacion, Finca $finca, string $codigoInterno, string $sexo, string $origen)
+    public function __construct(OrganizacionGanadera $organizacion, Finca $finca, string $codigoInterno, string $sexo, string $origen, ?DateTimeImmutable $fechaIngreso = null)
     {
         $codigoInterno = trim($codigoInterno);
         if ('' === $codigoInterno || strlen($codigoInterno) > 36) {
@@ -140,6 +144,8 @@ class Animal implements AuditableInterface
         $this->codigoInterno = $codigoInterno;
         $this->sexo = $sexo;
         $this->origen = $origen;
+        $this->fechaIngreso = $fechaIngreso ?? new DateTimeImmutable('today');
+        ValidadorFechas::assertNoFutura($this->fechaIngreso, 'La fecha de ingreso');
         $this->hijosComoPadre = new ArrayCollection();
         $this->hijosComoMadre = new ArrayCollection();
     }
@@ -155,6 +161,7 @@ class Animal implements AuditableInterface
     public function getNombre(): ?string { return $this->nombre; }
     public function getSexo(): string { return $this->sexo; }
     public function getFechaNacimiento(): ?DateTimeImmutable { return $this->fechaNacimiento; }
+    public function getFechaIngreso(): DateTimeImmutable { return $this->fechaIngreso; }
     public function getPesoNacimientoKg(): ?string { return $this->pesoNacimientoKg; }
     public function getOrigen(): string { return $this->origen; }
     public function getProcedencia(): ?string { return $this->procedencia; }
@@ -233,13 +240,50 @@ class Animal implements AuditableInterface
 
     public function setFechaNacimiento(?DateTimeImmutable $fecha): static
     {
-        if (null !== $fecha) {
-            ValidadorFechas::assertNoFutura($fecha, 'La fecha de nacimiento');
+        return $this->definirFechas($fecha, $this->fechaIngreso);
+    }
+
+    public function setFechaIngreso(DateTimeImmutable $fecha): static
+    {
+        return $this->definirFechas($this->fechaNacimiento, $fecha);
+    }
+
+    /**
+     * Fija juntas las fechas de nacimiento e ingreso (RN-19): ninguna es futura, el nacimiento no es
+     * posterior al ingreso y ninguna es posterior a la salida. En un nacido en finca, el ingreso es el nacimiento.
+     */
+    public function definirFechas(?DateTimeImmutable $nacimiento, ?DateTimeImmutable $ingreso): static
+    {
+        if (self::ORIGEN_NACIDO_EN_FINCA === $this->origen && null !== $nacimiento) {
+            $ingreso = $nacimiento;
         }
-        if (null !== $fecha && null !== $this->fechaSalida && $fecha > $this->fechaSalida) {
-            throw new FechaFueraDeRangoException('La fecha de nacimiento no puede ser posterior a la salida.');
+        if (null === $ingreso) {
+            throw new FechaFueraDeRangoException('Indica la fecha de ingreso.', 'fechaIngreso');
         }
-        $this->fechaNacimiento = $fecha;
+        if (null !== $nacimiento) {
+            ValidadorFechas::assertNoFutura($nacimiento, 'La fecha de nacimiento');
+            if ($nacimiento->format('Y-m-d') > $ingreso->format('Y-m-d')) {
+                throw new FechaFueraDeRangoException(sprintf(
+                    'La fecha de nacimiento no puede ser posterior a la fecha de ingreso (%s).',
+                    $ingreso->format('d/m/Y'),
+                ));
+            }
+        }
+        try {
+            ValidadorFechas::assertNoFutura($ingreso, 'La fecha de ingreso');
+        } catch (FechaFueraDeRangoException $exception) {
+            throw new FechaFueraDeRangoException($exception->getMessage(), 'fechaIngreso');
+        }
+        if (null !== $this->fechaSalida) {
+            if (null !== $nacimiento && $nacimiento > $this->fechaSalida) {
+                throw new FechaFueraDeRangoException('La fecha de nacimiento no puede ser posterior a la salida.');
+            }
+            if ($ingreso > $this->fechaSalida) {
+                throw new FechaFueraDeRangoException('La fecha de ingreso no puede ser posterior a la salida.', 'fechaIngreso');
+            }
+        }
+        $this->fechaNacimiento = $nacimiento;
+        $this->fechaIngreso = $ingreso;
 
         return $this;
     }
@@ -261,6 +305,9 @@ class Animal implements AuditableInterface
             throw new DomainException('El origen del animal no es válido.');
         }
         $this->origen = $origen;
+        if (self::ORIGEN_NACIDO_EN_FINCA === $origen && null !== $this->fechaNacimiento) {
+            $this->fechaIngreso = $this->fechaNacimiento;
+        }
 
         return $this;
     }
@@ -276,7 +323,7 @@ class Animal implements AuditableInterface
 
     /**
      * Cambia el estado a VENDIDO, FALLECIDO o EGRESADO con su fecha de salida (CA-04-C, RN-12).
-     * La salida no puede ser futura, anterior al nacimiento ni anterior al último registro operativo.
+     * La salida no puede ser futura, anterior al nacimiento, anterior al ingreso (RN-19) ni anterior al último registro operativo.
      */
     public function registrarSalida(string $estado, DateTimeImmutable $fecha, ?DateTimeImmutable $ultimoRegistro = null): static
     {
@@ -286,6 +333,9 @@ class Animal implements AuditableInterface
         ValidadorFechas::assertNoFutura($fecha, 'La fecha de salida');
         if (null !== $this->fechaNacimiento && $fecha < $this->fechaNacimiento) {
             throw new DomainException('La salida no puede preceder al nacimiento.');
+        }
+        if ($fecha->format('Y-m-d') < $this->fechaIngreso->format('Y-m-d')) {
+            throw new DomainException(sprintf('La salida no puede ser anterior al ingreso del animal (%s).', $this->fechaIngreso->format('d/m/Y')));
         }
         if (null !== $ultimoRegistro && $fecha->format('Y-m-d') < $ultimoRegistro->format('Y-m-d')) {
             throw new DomainException(sprintf(

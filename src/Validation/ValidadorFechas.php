@@ -23,8 +23,8 @@ final class ValidadorFechas
     }
 
     /**
-     * Un registro operativo no puede ser anterior al nacimiento (RN-11), posterior a la salida (RN-12)
-     * ni posterior a la fecha actual (RN-15).
+     * Un registro operativo no puede ser anterior al nacimiento (RN-11) ni al ingreso (RN-19),
+     * posterior a la salida (RN-12) ni posterior a la fecha actual (RN-15).
      */
     public static function assertFechaOperativa(Animal $animal, DateTimeInterface $fecha): void
     {
@@ -33,6 +33,14 @@ final class ValidadorFechas
         $nacimiento = $animal->getFechaNacimiento();
         if (null !== $nacimiento && self::dia($fecha) < self::dia($nacimiento)) {
             throw new FechaFueraDeRangoException('La fecha del registro no puede ser anterior al nacimiento del animal.');
+        }
+
+        $ingreso = $animal->getFechaIngreso();
+        if (self::dia($fecha) < self::dia($ingreso)) {
+            throw new FechaFueraDeRangoException(sprintf(
+                'La fecha del registro no puede ser anterior al ingreso del animal (%s).',
+                $ingreso->format('d/m/Y'),
+            ));
         }
 
         $salida = $animal->getFechaSalida();

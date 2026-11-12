@@ -52,13 +52,16 @@
                 <section class="rounded-lg border border-surface-muted bg-surface p-5 shadow-sm" aria-labelledby="animal-origin-heading">
                     <div class="mb-5">
                         <h2 class="text-lg font-semibold" id="animal-origin-heading">Nacimiento y origen</h2>
-                        <p class="mt-1 text-sm text-ink-muted">{% if intake_origin == 'NACIDO_EN_FINCA' %}El origen se asignará como nacido en finca. Indica la fecha del nacimiento.{% elseif intake_origin == 'EXTERNO' %}El origen se asignará como externo. La procedencia es opcional.{% else %}Registra cuándo y dónde se originó.{% endif %}</p>
+                        <p class="mt-1 text-sm text-ink-muted">{% if intake_origin == 'NACIDO_EN_FINCA' %}El origen se asignará como nacido en finca. Indica la fecha del nacimiento.{% elseif intake_origin == 'EXTERNO' %}El origen se asignará como externo. La fecha de nacimiento y el peso al nacer pueden agregarse después al editar el animal.{% else %}Registra cuándo y dónde se originó.{% endif %}</p>
                     </div>
                     <div class="space-y-5">
+                        {% set birth_fields = [] %}
+                        {% if form.fechaNacimiento is defined %}{% set birth_fields = birth_fields|merge([form.fechaNacimiento, form.pesoNacimientoKg]) %}{% endif %}
                         {% set origin_fields = [] %}
+                        {% if form.fechaIngreso is defined %}{% set origin_fields = origin_fields|merge([form.fechaIngreso]) %}{% endif %}
                         {% if form.origen is defined %}{% set origin_fields = origin_fields|merge([form.origen]) %}{% endif %}
                         {% if form.procedencia is defined %}{% set origin_fields = origin_fields|merge([form.procedencia]) %}{% endif %}
-                        {% for row in [[form.fechaNacimiento, form.pesoNacimientoKg], origin_fields] %}
+                        {% for row in [birth_fields, origin_fields] %}
                             {% if row is not empty %}
                             <div class="flex flex-col gap-4 sm:flex-row">
                                 {% for field in row %}

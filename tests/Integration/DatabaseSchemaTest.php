@@ -10,6 +10,7 @@ use App\Entity\OrganizacionGanadera;
 use App\Entity\Pesaje;
 use App\Entity\Raza;
 use App\Entity\Usuario;
+use DateTimeImmutable;
 use Doctrine\DBAL\Exception\DriverException;
 use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
@@ -38,8 +39,8 @@ final class DatabaseSchemaTest extends KernelTestCase
 
     public function testDatabaseAndApplicationShareTheGuatemalaTimeZone(): void
     {
-        $ahoraMysql = new \DateTimeImmutable((string) $this->entityManager->getConnection()->fetchOne('SELECT NOW()'));
-        $ahoraPhp = new \DateTimeImmutable();
+        $ahoraMysql = new DateTimeImmutable((string) $this->entityManager->getConnection()->fetchOne('SELECT NOW()'));
+        $ahoraPhp = new DateTimeImmutable();
 
         self::assertSame('America/Guatemala', date_default_timezone_get());
         self::assertLessThan(120, abs($ahoraPhp->getTimestamp() - $ahoraMysql->getTimestamp()), 'MySQL y PHP deben usar la hora de Guatemala (UTC−6).');
@@ -117,7 +118,7 @@ final class DatabaseSchemaTest extends KernelTestCase
     {
         [, $organizacion, $finca, $creador] = $this->persistAnimal('BASE');
         $codigo = 'AN-'.strtoupper(bin2hex(random_bytes(6)));
-        $animal = (new Animal($organizacion, $finca, $codigo, Animal::SEXO_HEMBRA, Animal::ORIGEN_NACIDO_EN_FINCA))
+        $animal = (new Animal($organizacion, $finca, $codigo, Animal::SEXO_HEMBRA, Animal::ORIGEN_NACIDO_EN_FINCA, new DateTimeImmutable('2025-01-01')))
             ->setArete('GT-V1')
             ->setCreadoPor($creador);
         $this->entityManager->persist($animal);
@@ -153,7 +154,7 @@ final class DatabaseSchemaTest extends KernelTestCase
         $suffix = strtoupper(bin2hex(random_bytes(4)));
         $organizacion = new OrganizacionGanadera('Otra organización '.$suffix, 'OTRA-'.$suffix);
         $finca = (new Finca('Otra finca '.$suffix, 'OTRA-FIN-'.$suffix))->setOrganizacion($organizacion);
-        $segundo = (new Animal($organizacion, $finca, $primero->getCodigoInterno(), Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO))
+        $segundo = (new Animal($organizacion, $finca, $primero->getCodigoInterno(), Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO, new DateTimeImmutable('2025-01-01')))
             ->setArete('GT-'.$suffix)
             ->setCreadoPor($creador);
         foreach ([$organizacion, $finca, $segundo] as $entity) {
@@ -167,7 +168,7 @@ final class DatabaseSchemaTest extends KernelTestCase
     public function testDatabaseRejectsDuplicateEarringInsideOneOrganization(): void
     {
         [, $organizacion, $finca, $creador] = $this->persistAnimal('ARETE-DUP', 'GT-101');
-        $segundo = (new Animal($organizacion, $finca, 'B-'.bin2hex(random_bytes(4)), Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO))
+        $segundo = (new Animal($organizacion, $finca, 'B-'.bin2hex(random_bytes(4)), Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO, new DateTimeImmutable('2025-01-01')))
             ->setArete('GT-101')
             ->setCreadoPor($creador);
         $this->entityManager->persist($segundo);
@@ -236,6 +237,8 @@ final class DatabaseSchemaTest extends KernelTestCase
         yield 'activo con salida' => [['fecha_salida' => '2026-09-17'], 'ck_animal_salida_por_estado'];
         yield 'vendido sin salida' => [['estado' => Animal::ESTADO_VENDIDO], 'ck_animal_salida_por_estado'];
         yield 'peso de nacimiento cero' => [['peso_nacimiento_kg' => '0.00'], 'ck_animal_peso_nacimiento'];
+        yield 'nacimiento posterior al ingreso' => [['fecha_nacimiento' => '2025-02-01'], 'ck_animal_nacimiento_ingreso'];
+        yield 'salida anterior al ingreso' => [['estado' => Animal::ESTADO_VENDIDO, 'fecha_salida' => '2024-12-31'], 'ck_animal_salida_ingreso'];
     }
 
     /** @dataProvider invalidAnimalRows */
@@ -329,7 +332,7 @@ final class DatabaseSchemaTest extends KernelTestCase
 
     private function pesaje(Animal $animal, string $fecha, string $peso, Usuario $creador): Pesaje
     {
-        return (new Pesaje($animal, new \DateTimeImmutable($fecha), $peso))->setCreadoPor($creador);
+        return (new Pesaje($animal, new DateTimeImmutable($fecha), $peso))->setCreadoPor($creador);
     }
 
     /** @return array{Animal, OrganizacionGanadera, Finca, Usuario} */
@@ -340,7 +343,7 @@ final class DatabaseSchemaTest extends KernelTestCase
         $finca = (new Finca('Finca '.$suffix, 'FIN-'.$suffix))->setOrganizacion($organizacion);
         $creador = (new Usuario('Administrador '.$suffix, 'admin-'.$suffix.'@example.com', 'hash', Usuario::ROL_ADMINISTRADOR))
             ->setOrganizacion($organizacion);
-        $animal = (new Animal($organizacion, $finca, $prefix.'-'.$suffix, Animal::SEXO_HEMBRA, Animal::ORIGEN_EXTERNO))
+        $animal = (new Animal($organizacion, $finca, $prefix.'-'.$suffix, Animal::SEXO_HEMBRA, Animal::ORIGEN_EXTERNO, new DateTimeImmutable('2025-01-01')))
             ->setArete($arete ?? 'GT-'.$suffix)
             ->setCreadoPor($creador);
         foreach ([$organizacion, $finca, $creador, $animal] as $entity) {
@@ -360,6 +363,7 @@ final class DatabaseSchemaTest extends KernelTestCase
             'numero_arete' => 'SQL-'.strtoupper(bin2hex(random_bytes(4))),
             'sexo' => Animal::SEXO_HEMBRA,
             'origen' => Animal::ORIGEN_EXTERNO,
+            'fecha_ingreso' => '2025-01-01',
             'creado_por' => $creador->getId(),
         ], $cambios));
     }

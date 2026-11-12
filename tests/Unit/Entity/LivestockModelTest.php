@@ -24,7 +24,7 @@ final class LivestockModelTest extends TestCase
         [$organizacion, $finca] = $this->tenant();
         $this->expectException(DomainException::class);
 
-        new Animal($organizacion, $finca, '  ', Animal::SEXO_HEMBRA, Animal::ORIGEN_EXTERNO);
+        new Animal($organizacion, $finca, '  ', Animal::SEXO_HEMBRA, Animal::ORIGEN_EXTERNO, new DateTimeImmutable('2025-01-01'));
     }
 
     public function testAnimalRejectsInternalCodeLongerThanStorageLimit(): void
@@ -32,7 +32,7 @@ final class LivestockModelTest extends TestCase
         [$organizacion, $finca] = $this->tenant();
         $this->expectException(DomainException::class);
 
-        new Animal($organizacion, $finca, str_repeat('A', 37), Animal::SEXO_HEMBRA, Animal::ORIGEN_EXTERNO);
+        new Animal($organizacion, $finca, str_repeat('A', 37), Animal::SEXO_HEMBRA, Animal::ORIGEN_EXTERNO, new DateTimeImmutable('2025-01-01'));
     }
 
     /** @dataProvider invalidClassifications */
@@ -76,7 +76,7 @@ final class LivestockModelTest extends TestCase
 
         $this->expectException(DomainException::class);
 
-        new Animal($organizacion, $fincaAjena, 'AN-1', Animal::SEXO_HEMBRA, Animal::ORIGEN_EXTERNO);
+        new Animal($organizacion, $fincaAjena, 'AN-1', Animal::SEXO_HEMBRA, Animal::ORIGEN_EXTERNO, new DateTimeImmutable('2025-01-01'));
     }
 
     public function testAnimalCannotBeItsOwnParent(): void
@@ -90,8 +90,8 @@ final class LivestockModelTest extends TestCase
     public function testFatherMustBeMale(): void
     {
         [$organizacion, $finca] = $this->tenant();
-        $animal = new Animal($organizacion, $finca, 'CRIA', Animal::SEXO_HEMBRA, Animal::ORIGEN_NACIDO_EN_FINCA);
-        $hembra = new Animal($organizacion, $finca, 'HEMBRA', Animal::SEXO_HEMBRA, Animal::ORIGEN_EXTERNO);
+        $animal = new Animal($organizacion, $finca, 'CRIA', Animal::SEXO_HEMBRA, Animal::ORIGEN_NACIDO_EN_FINCA, new DateTimeImmutable('2025-01-01'));
+        $hembra = new Animal($organizacion, $finca, 'HEMBRA', Animal::SEXO_HEMBRA, Animal::ORIGEN_EXTERNO, new DateTimeImmutable('2025-01-01'));
         $this->expectException(DomainException::class);
 
         $animal->setPadre($hembra);
@@ -100,8 +100,8 @@ final class LivestockModelTest extends TestCase
     public function testMotherMustBeFemale(): void
     {
         [$organizacion, $finca] = $this->tenant();
-        $cria = new Animal($organizacion, $finca, 'CRIA', Animal::SEXO_HEMBRA, Animal::ORIGEN_NACIDO_EN_FINCA);
-        $macho = new Animal($organizacion, $finca, 'MACHO', Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO);
+        $cria = new Animal($organizacion, $finca, 'CRIA', Animal::SEXO_HEMBRA, Animal::ORIGEN_NACIDO_EN_FINCA, new DateTimeImmutable('2025-01-01'));
+        $macho = new Animal($organizacion, $finca, 'MACHO', Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO, new DateTimeImmutable('2025-01-01'));
 
         $this->expectException(DomainException::class);
         $cria->setMadre($macho);
@@ -110,9 +110,9 @@ final class LivestockModelTest extends TestCase
     public function testParentRelationshipCannotCreateAnAncestryCycle(): void
     {
         [$organizacion, $finca] = $this->tenant();
-        $abuelo = new Animal($organizacion, $finca, 'ABUELO', Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO);
-        $padre = (new Animal($organizacion, $finca, 'PADRE', Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO))->setPadre($abuelo);
-        $cria = (new Animal($organizacion, $finca, 'CRIA', Animal::SEXO_MACHO, Animal::ORIGEN_NACIDO_EN_FINCA))->setPadre($padre);
+        $abuelo = new Animal($organizacion, $finca, 'ABUELO', Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO, new DateTimeImmutable('2025-01-01'));
+        $padre = (new Animal($organizacion, $finca, 'PADRE', Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO, new DateTimeImmutable('2025-01-01')))->setPadre($abuelo);
+        $cria = (new Animal($organizacion, $finca, 'CRIA', Animal::SEXO_MACHO, Animal::ORIGEN_NACIDO_EN_FINCA, new DateTimeImmutable('2025-01-01')))->setPadre($padre);
 
         $this->expectException(DomainException::class);
         $abuelo->setPadre($cria);
@@ -121,8 +121,8 @@ final class LivestockModelTest extends TestCase
     public function testFatherCannotChangeSexUntilParentLinkIsRemoved(): void
     {
         [$organizacion, $finca] = $this->tenant();
-        $padre = new Animal($organizacion, $finca, 'PADRE', Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO);
-        $cria = (new Animal($organizacion, $finca, 'CRIA', Animal::SEXO_HEMBRA, Animal::ORIGEN_EXTERNO))->setPadre($padre);
+        $padre = new Animal($organizacion, $finca, 'PADRE', Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO, new DateTimeImmutable('2025-01-01'));
+        $cria = (new Animal($organizacion, $finca, 'CRIA', Animal::SEXO_HEMBRA, Animal::ORIGEN_EXTERNO, new DateTimeImmutable('2025-01-01')))->setPadre($padre);
 
         try {
             $padre->setSexo(Animal::SEXO_HEMBRA);
@@ -139,8 +139,8 @@ final class LivestockModelTest extends TestCase
     public function testMotherCannotChangeSexWhileReferenced(): void
     {
         [$organizacion, $finca] = $this->tenant();
-        $madre = new Animal($organizacion, $finca, 'MADRE', Animal::SEXO_HEMBRA, Animal::ORIGEN_EXTERNO);
-        (new Animal($organizacion, $finca, 'CRIA', Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO))->setMadre($madre);
+        $madre = new Animal($organizacion, $finca, 'MADRE', Animal::SEXO_HEMBRA, Animal::ORIGEN_EXTERNO, new DateTimeImmutable('2025-01-01'));
+        (new Animal($organizacion, $finca, 'CRIA', Animal::SEXO_MACHO, Animal::ORIGEN_EXTERNO, new DateTimeImmutable('2025-01-01')))->setMadre($madre);
 
         $this->expectException(DomainException::class);
         $madre->setSexo(Animal::SEXO_MACHO);
@@ -156,7 +156,7 @@ final class LivestockModelTest extends TestCase
 
     public function testWeightRejectsADateBeforeBirth(): void
     {
-        $animal = $this->animal()->setFechaNacimiento(new DateTimeImmutable('2026-01-10'));
+        $animal = $this->animal()->definirFechas(new DateTimeImmutable('2026-01-10'), new DateTimeImmutable('2026-01-10'));
         $this->expectException(DomainException::class);
 
         new Pesaje($animal, new DateTimeImmutable('2026-01-09'), '35.50');
@@ -172,7 +172,7 @@ final class LivestockModelTest extends TestCase
 
     public function testOperationalRecordAllowsBirthAndExitDates(): void
     {
-        $animal = $this->animal()->setFechaNacimiento(new DateTimeImmutable('2026-01-10'));
+        $animal = $this->animal()->definirFechas(new DateTimeImmutable('2026-01-10'), new DateTimeImmutable('2026-01-10'));
         $onBirth = new Pesaje($animal, new DateTimeImmutable('2026-01-10'), '35.50');
         $animal->registrarSalida(Animal::ESTADO_VENDIDO, new DateTimeImmutable('2026-06-01'));
         $onExit = new Pesaje($animal, new DateTimeImmutable('2026-06-01'), '300.00');
@@ -206,7 +206,7 @@ final class LivestockModelTest extends TestCase
     public function testParentMustBelongToTheSameOrganization(): void
     {
         [$organizacion, $finca] = $this->tenant();
-        $cria = new Animal($organizacion, $finca, 'CRIA', Animal::SEXO_HEMBRA, Animal::ORIGEN_NACIDO_EN_FINCA);
+        $cria = new Animal($organizacion, $finca, 'CRIA', Animal::SEXO_HEMBRA, Animal::ORIGEN_NACIDO_EN_FINCA, new DateTimeImmutable('2025-01-01'));
         $otraOrganizacion = new OrganizacionGanadera('Otra organización', 'OTRA');
         $padreAjeno = new Animal(
             $otraOrganizacion,
@@ -322,7 +322,7 @@ final class LivestockModelTest extends TestCase
         $finca->setActivo(false);
         $this->expectException(DomainException::class);
 
-        new Animal($organizacion, $finca, 'AN-INACTIVA', Animal::SEXO_HEMBRA, Animal::ORIGEN_EXTERNO);
+        new Animal($organizacion, $finca, 'AN-INACTIVA', Animal::SEXO_HEMBRA, Animal::ORIGEN_EXTERNO, new DateTimeImmutable('2025-01-01'));
     }
 
     public function testAnimalCannotBeMovedToAnInactiveFarm(): void
@@ -388,7 +388,7 @@ final class LivestockModelTest extends TestCase
     {
         [$organizacion, $finca] = $this->tenant();
 
-        return new Animal($organizacion, $finca, bin2hex(random_bytes(6)), $sexo, Animal::ORIGEN_EXTERNO);
+        return new Animal($organizacion, $finca, bin2hex(random_bytes(6)), $sexo, Animal::ORIGEN_EXTERNO, new DateTimeImmutable('2025-01-01'));
     }
 
     /** @return array{OrganizacionGanadera, Finca} */

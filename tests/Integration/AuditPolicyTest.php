@@ -9,6 +9,7 @@ use App\Entity\Finca;
 use App\Entity\OrganizacionGanadera;
 use App\Entity\Pesaje;
 use App\Entity\Usuario;
+use DateTimeImmutable;
 use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use LogicException;
@@ -41,7 +42,7 @@ final class AuditPolicyTest extends KernelTestCase
         $this->autenticar($tenant['administrador']);
 
         $animal = $this->nuevoAnimal($tenant);
-        $pesaje = new Pesaje($animal, new \DateTimeImmutable('2026-09-17'), '120.00');
+        $pesaje = new Pesaje($animal, new DateTimeImmutable('2026-09-17'), '120.00');
         $this->entityManager->persist($animal);
         $this->entityManager->persist($pesaje);
         $this->entityManager->flush();
@@ -98,7 +99,7 @@ final class AuditPolicyTest extends KernelTestCase
     {
         $tenant = $this->persistTenant();
         $this->autenticar($tenant['administrador']);
-        $pesaje = new Pesaje($this->persistAnimal($tenant), new \DateTimeImmutable('2026-09-17'), '120.00');
+        $pesaje = new Pesaje($this->persistAnimal($tenant), new DateTimeImmutable('2026-09-17'), '120.00');
         $this->entityManager->persist($pesaje);
         $this->entityManager->flush();
 
@@ -199,7 +200,7 @@ final class AuditPolicyTest extends KernelTestCase
     {
         $codigo = strtoupper(bin2hex(random_bytes(6)));
 
-        return (new Animal($tenant['organizacion'], $tenant['finca'], 'AN-'.$codigo, Animal::SEXO_HEMBRA, Animal::ORIGEN_EXTERNO))
+        return (new Animal($tenant['organizacion'], $tenant['finca'], 'AN-'.$codigo, Animal::SEXO_HEMBRA, Animal::ORIGEN_EXTERNO, new DateTimeImmutable('2025-01-01')))
             ->setArete('GT-'.$codigo);
     }
 

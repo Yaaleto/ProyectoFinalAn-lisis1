@@ -79,7 +79,7 @@ final class TransactionIntegrityTest extends KernelTestCase
         $organizacion = new OrganizacionGanadera('Transacción '.$sufijo, 'TX-'.$sufijo);
         $finca = (new Finca('Finca '.$sufijo, 'TX-'.$sufijo))->setOrganizacion($organizacion);
         $creador = (new Usuario('Administrador', 'tx-'.$sufijo.'@example.com', 'hash', Usuario::ROL_ADMINISTRADOR))->setOrganizacion($organizacion);
-        $animal = (new Animal($organizacion, $finca, 'AN-TX-'.$sufijo, Animal::SEXO_HEMBRA, Animal::ORIGEN_EXTERNO))
+        $animal = (new Animal($organizacion, $finca, 'AN-TX-'.$sufijo, Animal::SEXO_HEMBRA, Animal::ORIGEN_EXTERNO, new DateTimeImmutable('2025-01-01')))
             ->setArete('TX-'.$sufijo)
             ->setCreadoPor($creador);
         foreach ([$organizacion, $finca, $creador, $animal] as $entidad) {
